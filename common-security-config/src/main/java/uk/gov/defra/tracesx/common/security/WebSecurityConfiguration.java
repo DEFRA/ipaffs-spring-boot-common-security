@@ -23,8 +23,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
-    http.addFilterAfter(new XAuthBasicFilter(authenticationManager()), SecurityContextPersistenceFilter.class)
-        .authorizeRequests()
+    http.authorizeRequests()
         .antMatchers("/base/*")
         .authenticated()
         .and()
