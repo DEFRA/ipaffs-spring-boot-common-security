@@ -1,6 +1,5 @@
 package uk.gov.defra.tracesx.common.security;
 
-import static java.lang.Boolean.TRUE;
 import static java.util.Collections.EMPTY_LIST;
 import static java.util.Collections.singletonList;
 import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
@@ -24,7 +23,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.defra.tracesx.common.service.PermissionsService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -32,20 +30,23 @@ public class PermissionsFilterTest {
 
   private static final String READ = "read";
   private static final String PERMISSIONS_ARE_EMPTY = "Permissions are empty";
-  private static final String SECURITY_TOKEN_FEATURE_SWITCH = "securityTokenFeatureSwitch";
-  private static final String ECONOMIC_OPERATOR_READ = "economicoperator.read";
+  private static final String ECONOMIC_OPERATOR_READ = "myservice.read";
 
   @Mock
   private HttpServletRequest request;
+
   @Mock
   private HttpServletResponse response;
+
   @Mock
   private FilterChain filterChain;
+
   @Mock
   private Authentication authentication;
 
   @Mock
   private UserDetails userDetails;
+
   @Mock
   private PermissionsService permissionsService;
 
@@ -56,15 +57,12 @@ public class PermissionsFilterTest {
   private PermissionsFilter permissionsFilter;
 
   private List<String> perms = singletonList(READ);
-  private  List<GrantedAuthority> grantedAuthoritiesList = new ArrayList<>();
-  private  Collection grantedAuthorities = singletonList(new SimpleGrantedAuthority(READ));
+  private List<GrantedAuthority> grantedAuthoritiesList = new ArrayList<>();
+  private Collection grantedAuthorities = singletonList(new SimpleGrantedAuthority(READ));
 
   @Before
   public void setup() {
-    ReflectionTestUtils.setField(permissionsFilter, SECURITY_TOKEN_FEATURE_SWITCH, TRUE);
-
     grantedAuthoritiesList.add(new SimpleGrantedAuthority(ECONOMIC_OPERATOR_READ));
-
     when(permissionsService.permissionsList(any(), any())).thenReturn(perms);
     when(authenticationFacade.getAuthentication()).thenReturn(authentication);
     when(authentication.getPrincipal()).thenReturn(userDetails);
@@ -73,9 +71,8 @@ public class PermissionsFilterTest {
 
   @Test
   public void filterAddsAuthoritiesToCurrentSecurityContext() throws Exception {
+    when(permissionsService.permissionsList(any(), any())).thenReturn(singletonList(ECONOMIC_OPERATOR_READ));
 
-    when(permissionsService.permissionsList(any(), any())).thenReturn(singletonList(
-        ECONOMIC_OPERATOR_READ));
     permissionsFilter.doFilterInternal(request, response, filterChain);
 
     verify(authenticationFacade).replaceAuthorities(grantedAuthoritiesList);
@@ -83,7 +80,6 @@ public class PermissionsFilterTest {
 
   @Test
   public void filterReturnsUnauthorisedResponseWhenUserHasNoPermissions() throws Exception {
-
     when(permissionsService.permissionsList(any(), any())).thenReturn(EMPTY_LIST);
 
     permissionsFilter.doFilterInternal(request, response, filterChain);
