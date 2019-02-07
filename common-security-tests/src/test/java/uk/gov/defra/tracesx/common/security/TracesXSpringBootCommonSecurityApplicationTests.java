@@ -1,4 +1,4 @@
-package uk.gov.defra.tracesx.TracesXSpringBootCommonSecurity;
+package uk.gov.defra.tracesx.common.security;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

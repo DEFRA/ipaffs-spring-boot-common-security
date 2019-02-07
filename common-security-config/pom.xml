@@ -3,12 +3,12 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.0.4.RELEASE</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<groupId>uk.gov.defra.tracesx</groupId>
+		<artifactId>spring-boot-parent</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+		<!--<relativePath/> &lt;!&ndash; lookup parent from repository &ndash;&gt;-->
 	</parent>
-	<groupId>uk.gov.defra.tracesx</groupId>
+
 	<artifactId>TracesX-SpringBoot-CommonSecurity-Config</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>TracesX-SpringBoot-CommonSecurity-Config</name>
@@ -16,34 +16,43 @@
 
 	<properties>
 		<java.version>1.8</java.version>
-	</properties>
+    <jjwt.version>0.10.5</jjwt.version>
+    <spring.security.jwt.version>1.0.9.RELEASE</spring.security.jwt.version>
+    <jwks.rsa.version>0.3.0</jwks.rsa.version>
+  </properties>
 
 	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-test</artifactId>
-			<scope>test</scope>
-		</dependency>
+    <!-- used to decode and validate jwt tokens -->
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-jwt</artifactId>
+      <version>${spring.security.jwt.version}</version>
+    </dependency>
+    <!-- used to fetch public signing keys from jwks urls -->
+    <dependency>
+      <groupId>com.auth0</groupId>
+      <artifactId>jwks-rsa</artifactId>
+      <version>${jwks.rsa.version}</version>
+    </dependency>
+    <!-- jjwt is only needed in the test scope to creating tokens used by unit tests -->
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-api</artifactId>
+      <version>${jjwt.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-impl</artifactId>
+      <version>${jjwt.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-jackson</artifactId>
+      <version>${jjwt.version}</version>
+      <scope>test</scope>
+    </dependency>
 	</dependencies>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
 
 </project>
