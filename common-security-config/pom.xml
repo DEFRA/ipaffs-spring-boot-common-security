@@ -2,24 +2,23 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>uk.gov.defra.tracesx</groupId>
-		<artifactId>spring-boot-parent</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
-		<!--<relativePath/> &lt;!&ndash; lookup parent from repository &ndash;&gt;-->
-	</parent>
-
 	<artifactId>TracesX-SpringBoot-CommonSecurity-Config</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>TracesX-SpringBoot-CommonSecurity-Config</name>
 	<description>Shared Spring Boot Web Security configuration</description>
 
-	<properties>
+    <parent>
+        <groupId>uk.gov.defra.tracesx</groupId>
+        <artifactId>TracesX-SpringBoot-CommonSecurity</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <properties>
 		<java.version>1.8</java.version>
-    <jjwt.version>0.10.5</jjwt.version>
-    <spring.security.jwt.version>1.0.9.RELEASE</spring.security.jwt.version>
-    <jwks.rsa.version>0.3.0</jwks.rsa.version>
-  </properties>
+        <jjwt.version>0.10.5</jjwt.version>
+        <spring.security.jwt.version>1.0.9.RELEASE</spring.security.jwt.version>
+        <jwks.rsa.version>0.3.0</jwks.rsa.version>
+    </properties>
 
 	<dependencies>
     <!-- used to decode and validate jwt tokens -->

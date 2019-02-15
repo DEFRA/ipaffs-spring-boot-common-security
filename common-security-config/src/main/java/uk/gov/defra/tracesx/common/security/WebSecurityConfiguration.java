@@ -30,7 +30,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         .addFilterAfter(jwtTokenFilter, SecurityContextPersistenceFilter.class)
         .exceptionHandling().authenticationEntryPoint(unauthorizedEntryPoint())
         .and()
-        .csrf().disable();
+        .csrf()
+        .disable();
     http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
   }
 
