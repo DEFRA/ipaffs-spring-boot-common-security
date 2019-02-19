@@ -14,67 +14,75 @@
         <spring.security.jwt.version>1.0.9.RELEASE</spring.security.jwt.version>
         <jwks.rsa.version>0.3.0</jwks.rsa.version>
         <org.projectlombok.version>1.16.20</org.projectlombok.version>
+        <javax.servlet.api.version>4.0.1</javax.servlet.api.version>
+        <spring.boot.version>2.0.5.RELEASE</spring.boot.version>
+        <spring.boot.framework.version>5.1.4.RELEASE</spring.boot.framework.version>
+        <apache.commons.version>3.8.1</apache.commons.version>
+        <mockito.version>2.24.0</mockito.version>
+        <assertj.version>3.11.1</assertj.version>
+        <junit.version>4.12</junit.version>
+        <spring.test.version>5.1.5.RELEASE</spring.test.version>
     </properties>
 
 	<dependencies>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-            <version>4.0.1</version>
+            <version>${javax.servlet.api.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
-            <version>2.0.5.RELEASE</version>
+            <version>${spring.boot.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-core</artifactId>
-            <version>5.1.4.RELEASE</version>
+            <version>${spring.boot.framework.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-web</artifactId>
-            <version>5.1.4.RELEASE</version>
+            <version>${spring.boot.framework.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
-            <version>5.1.5.RELEASE</version>
+            <version>${spring.boot.framework.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.8.1</version>
+            <version>${apache.commons.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-config</artifactId>
-            <version>5.1.4.RELEASE</version>
+            <version>${spring.boot.framework.version}</version>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>2.24.0</version>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.11.1</version>
+            <version>${assertj.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>5.1.5.RELEASE</version>
+            <version>${spring.test.version}</version>
             <scope>test</scope>
         </dependency>
 
