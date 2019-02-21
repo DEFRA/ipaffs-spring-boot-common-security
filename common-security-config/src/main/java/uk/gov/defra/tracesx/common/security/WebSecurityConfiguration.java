@@ -1,7 +1,10 @@
 package uk.gov.defra.tracesx.common.security;
 
+import static java.util.Arrays.asList;
+
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -38,6 +41,20 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
   @Bean
   public AuthenticationEntryPoint unauthorizedEntryPoint() {
     return (request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+  }
+
+
+  @Autowired
+  private PermissionsFilter permissionsFilter;
+
+  @Bean
+  public FilterRegistrationBean countriesAuthFilterRegistration() {
+    FilterRegistrationBean result = new FilterRegistrationBean();
+    result.setFilter(permissionsFilter);
+    result.setUrlPatterns(asList(COUNTRIES_URL_MATCHER, BASE_URL_MATCHER));
+    result.setName(COUNTRIES_AUTH_FILTER);
+    result.setOrder(COUNTRIES_ORDER);
+    return result;
   }
 
 }
