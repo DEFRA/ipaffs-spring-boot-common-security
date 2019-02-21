@@ -21,6 +21,9 @@ import uk.gov.defra.tracesx.common.security.jwt.JwtTokenFilter;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
+  private final int PERMISSIONS_ORDER = 1;
+  private final String PERMISSIONS_AUTH_FILTER = "authFilter";
+
   @Autowired
   private JwtTokenFilter jwtTokenFilter;
 
@@ -52,8 +55,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     FilterRegistrationBean result = new FilterRegistrationBean();
     result.setFilter(permissionsFilter);
     result.setUrlPatterns(asList(COUNTRIES_URL_MATCHER, BASE_URL_MATCHER));
-    result.setName(COUNTRIES_AUTH_FILTER);
-    result.setOrder(COUNTRIES_ORDER);
+    result.setName(PERMISSIONS_AUTH_FILTER);
+    result.setOrder(PERMISSIONS_ORDER);
     return result;
   }
 
