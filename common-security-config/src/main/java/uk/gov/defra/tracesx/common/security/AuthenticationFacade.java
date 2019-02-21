@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class AuthenticationFacade {
 
-  Authentication getAuthentication() {
+  public Authentication getAuthentication() {
     return SecurityContextHolder.getContext().getAuthentication();
   }
 
-  void replaceAuthorities(List<GrantedAuthority> permissions) {
+  public void replaceAuthorities(List<GrantedAuthority> permissions) {
     IdTokenAuthentication originalAuthentication = (IdTokenAuthentication) getAuthentication();
     IdTokenUserDetails originalUserDetails = (IdTokenUserDetails) originalAuthentication.getDetails();
 
