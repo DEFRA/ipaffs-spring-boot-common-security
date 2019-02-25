@@ -2,11 +2,13 @@ package uk.gov.defra.tracesx.common.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,6 +46,11 @@ public class JwtTokenFilterTest {
     SecurityContextHolder.clearContext();
   }
 
+  @After
+  public void after() {
+    verifyNoMoreInteractions(jwtTokenValidator, response, chain);
+  }
+
   @Test
   public void doFilter_withCorrectHeader_setsAuthenticationOnContext() throws Exception {
     when(request.getHeader("Authorization")).thenReturn("Bearer " + TOKEN);
@@ -55,19 +62,29 @@ public class JwtTokenFilterTest {
   }
 
   @Test
-  public void doFilter_withIncorrectAuthorizationType_doesNotSetAuthenticationOnContext() throws Exception {
-    when(request.getHeader("Authorization")).thenReturn("Basic " + TOKEN);
+  public void doFilter_withLowercaseAuthorizationType_setsAuthenticationOnContext() throws Exception {
+    when(request.getHeader("Authorization")).thenReturn("bearer " + TOKEN);
+    when(jwtTokenValidator.validateToken(TOKEN)).thenReturn(userDetails);
     filter.doFilter(request, response, chain);
-    assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+    assertThat(SecurityContextHolder.getContext().getAuthentication().getDetails()).isEqualTo(userDetails);
+    verify(jwtTokenValidator).validateToken(TOKEN);
     verify(chain).doFilter(request, response);
   }
 
   @Test
-  public void doFilter_withNoAuthorizationHeader_doesNotSetAuthenticationOnContext() throws Exception {
+  public void doFilter_withIncorrectAuthorizationType_respondsWith401Error() throws Exception {
+    when(request.getHeader("Authorization")).thenReturn("Basic " + TOKEN);
+    filter.doFilter(request, response, chain);
+    assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+    verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing credentials");
+  }
+
+  @Test
+  public void doFilter_withNoAuthorizationHeader_respondsWith401Error() throws Exception {
     when(request.getHeader("Authorization")).thenReturn(null);
     filter.doFilter(request, response, chain);
     assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
-    verify(chain).doFilter(request, response);
+    verify(response).sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing credentials");
   }
 
 }

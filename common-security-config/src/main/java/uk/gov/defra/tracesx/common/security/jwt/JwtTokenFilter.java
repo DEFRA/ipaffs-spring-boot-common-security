@@ -30,8 +30,10 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         IdTokenUserDetails userDetails = jwtTokenValidator.validateToken(token);
         IdTokenAuthentication authentication = new IdTokenAuthentication(userDetails);
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        filterChain.doFilter(req, res);
+      } else {
+        res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Missing credentials");
       }
-      filterChain.doFilter(req, res);
     } catch (UnauthorizedException e) {
       res.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
     }
@@ -39,7 +41,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
   private String resolveToken(HttpServletRequest req) {
     String bearerToken = req.getHeader("Authorization");
-    if (bearerToken != null && bearerToken.startsWith("Bearer ")) { // TODO: case-insensitive
+    if (bearerToken != null && bearerToken.toLowerCase().startsWith("bearer ")) {
       return bearerToken.substring(7);
     }
     return null;
