@@ -1,7 +1,5 @@
 package uk.gov.defra.tracesx.common.security;
 
-import static java.util.Arrays.asList;
-
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -21,8 +19,10 @@ import uk.gov.defra.tracesx.common.security.jwt.JwtTokenFilter;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-  private final int PERMISSIONS_ORDER = 1;
-  private final String PERMISSIONS_AUTH_FILTER = "authFilter";
+  private static final int PERMISSIONS_ORDER = 2;
+  public static final String JWT_TOKEN_FILTER_NAME = "jwtTokenFilter";
+  public static final int JWT_TOKEN_FILTER_ORDER = 1;
+  private final String PERMISSIONS_FILTER_NAME = "permissionsFilter";
 
   @Autowired
   private JwtTokenFilter jwtTokenFilter;
@@ -33,7 +33,6 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         .antMatchers("/base/*")
         .authenticated()
         .and()
-        .addFilterAfter(jwtTokenFilter, SecurityContextPersistenceFilter.class)
         .exceptionHandling().authenticationEntryPoint(unauthorizedEntryPoint())
         .and()
         .csrf()
@@ -46,20 +45,30 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     return (request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
   }
 
-
   @Autowired
   private PermissionsFilter permissionsFilter;
 
   @Autowired
-  private PermissionsUrlFilter urlFilter;
+  private ServiceUrlPatterns serviceUrlPatterns;
 
   @Bean
-  public FilterRegistrationBean countriesAuthFilterRegistration() {
-    FilterRegistrationBean result = new FilterRegistrationBean();
-    result.setFilter(permissionsFilter);
-    result.setUrlPatterns(asList(urlFilter.getUrlMatcher(), urlFilter.getBaseUrlMatcher()));
-    result.setName(PERMISSIONS_AUTH_FILTER);
-    result.setOrder(PERMISSIONS_ORDER);
-    return result;
+  public FilterRegistrationBean jwtTokenFilterRegistration() {
+    FilterRegistrationBean registration = new FilterRegistrationBean();
+    registration.setFilter(jwtTokenFilter);
+    registration.setUrlPatterns(serviceUrlPatterns.getPatterns());
+    registration.setName(JWT_TOKEN_FILTER_NAME);
+    registration.setOrder(JWT_TOKEN_FILTER_ORDER);
+    return registration;
   }
+
+  @Bean
+  public FilterRegistrationBean permissionsFilterRegistration() {
+    FilterRegistrationBean registration = new FilterRegistrationBean();
+    registration.setFilter(permissionsFilter);
+    registration.setUrlPatterns(serviceUrlPatterns.getPatterns());
+    registration.setName(PERMISSIONS_FILTER_NAME);
+    registration.setOrder(PERMISSIONS_ORDER);
+    return registration;
+  }
+
 }
