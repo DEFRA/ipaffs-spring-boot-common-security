@@ -42,7 +42,7 @@ public class PermissionsFilter extends OncePerRequestFilter {
       throws IOException, ServletException {
     List<String> roles = EMPTY_LIST;
     final Authentication authentication = authenticationFacade.getAuthentication();
-    final UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+    final UserDetails userDetails = (UserDetails) authentication.getDetails();
     if (userDetails != null) {
       roles =
           userDetails

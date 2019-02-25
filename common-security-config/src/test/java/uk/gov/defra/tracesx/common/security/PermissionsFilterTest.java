@@ -65,7 +65,7 @@ public class PermissionsFilterTest {
     grantedAuthoritiesList.add(new SimpleGrantedAuthority(ECONOMIC_OPERATOR_READ));
     when(permissionsService.permissionsList(any(), any())).thenReturn(perms);
     when(authenticationFacade.getAuthentication()).thenReturn(authentication);
-    when(authentication.getPrincipal()).thenReturn(userDetails);
+    when(authentication.getDetails()).thenReturn(userDetails);
     when(userDetails.getAuthorities()).thenReturn(grantedAuthorities);
   }
 
