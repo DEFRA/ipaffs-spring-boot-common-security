@@ -50,14 +50,16 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
   @Autowired
   private PermissionsFilter permissionsFilter;
 
+  @Autowired
+  private PermissionsUrlFilter urlFilter;
+
   @Bean
   public FilterRegistrationBean countriesAuthFilterRegistration() {
     FilterRegistrationBean result = new FilterRegistrationBean();
     result.setFilter(permissionsFilter);
-    result.setUrlPatterns(asList(COUNTRIES_URL_MATCHER, BASE_URL_MATCHER));
+    result.setUrlPatterns(asList(urlFilter.getUrlMatcher(), urlFilter.getBaseUrlMatcher()));
     result.setName(PERMISSIONS_AUTH_FILTER);
     result.setOrder(PERMISSIONS_ORDER);
     return result;
   }
-
 }
