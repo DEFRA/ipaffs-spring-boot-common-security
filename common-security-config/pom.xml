@@ -1,93 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<artifactId>TracesX-SpringBoot-CommonSecurity-Config</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>TracesX-SpringBoot-CommonSecurity-Config</name>
-	<description>Shared Spring Boot Web Security configuration</description>
-    <groupId>uk.gov.defra.tracesx</groupId>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>TracesX-SpringBoot-CommonSecurity-Config</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>TracesX-SpringBoot-CommonSecurity-Config</name>
+  <description>Shared Spring Boot Web Security configuration</description>
+  <groupId>uk.gov.defra.tracesx</groupId>
 
-    <properties>
-		<java.version>1.8</java.version>
-        <jjwt.version>0.10.5</jjwt.version>
-        <spring.security.jwt.version>1.0.9.RELEASE</spring.security.jwt.version>
-        <jwks.rsa.version>0.3.0</jwks.rsa.version>
-        <org.projectlombok.version>1.16.20</org.projectlombok.version>
-        <javax.servlet.api.version>4.0.1</javax.servlet.api.version>
-        <spring.boot.version>2.0.5.RELEASE</spring.boot.version>
-        <spring.boot.framework.version>5.1.4.RELEASE</spring.boot.framework.version>
-        <apache.commons.version>3.8.1</apache.commons.version>
-        <mockito.version>2.24.0</mockito.version>
-        <assertj.version>3.11.1</assertj.version>
-        <junit.version>4.12</junit.version>
-        <spring.test.version>5.1.5.RELEASE</spring.test.version>
-    </properties>
+  <properties>
+    <java.version>1.8</java.version>
+    <jjwt.version>0.10.5</jjwt.version>
+    <spring.security.jwt.version>1.0.9.RELEASE</spring.security.jwt.version>
+    <jwks.rsa.version>0.3.0</jwks.rsa.version>
+    <lombok.version>1.16.20</lombok.version>
+    <javax.servlet.api.version>4.0.1</javax.servlet.api.version>
+    <spring.boot.version>2.0.5.RELEASE</spring.boot.version>
+    <spring.boot.framework.version>5.1.4.RELEASE</spring.boot.framework.version>
+    <commons.lang3.version>3.8.1</commons.lang3.version>
+    <mockito.version>2.24.0</mockito.version>
+    <assertj.version>3.11.1</assertj.version>
+    <junit.version>4.12</junit.version>
+    <spring.test.version>5.1.5.RELEASE</spring.test.version>
+    <jackson.databind.version>2.9.7</jackson.databind.version>
+    <restassured.version>3.3.0</restassured.version>
+  </properties>
 
-	<dependencies>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>${javax.servlet.api.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-            <version>${spring.boot.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-core</artifactId>
-            <version>${spring.boot.framework.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-web</artifactId>
-            <version>${spring.boot.framework.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-            <version>${spring.boot.framework.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>${apache.commons.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-config</artifactId>
-            <version>${spring.boot.framework.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>${mockito.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <version>${assertj.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <version>${spring.test.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-
-        <!-- used to decode and validate jwt tokens -->
+  <dependencies>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <version>${javax.servlet.api.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter</artifactId>
+      <version>${spring.boot.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+      <version>${spring.boot.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-security</artifactId>
+      <version>${spring.boot.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson.databind.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${commons.lang3.version}</version>
+    </dependency>
+    <!-- used to decode and validate jwt tokens -->
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-jwt</artifactId>
@@ -99,7 +76,33 @@
       <artifactId>jwks-rsa</artifactId>
       <version>${jwks.rsa.version}</version>
     </dependency>
-    <!-- jjwt is only needed in the test scope to creating tokens used by unit tests -->
+
+    <!-- TEST Dependencies -->
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>${mockito.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>${assertj.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.rest-assured</groupId>
+      <artifactId>rest-assured</artifactId>
+      <version>${restassured.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- jjwt is needed in the test scope to create the tokens used by unit tests -->
     <dependency>
       <groupId>io.jsonwebtoken</groupId>
       <artifactId>jjwt-api</artifactId>
@@ -118,26 +121,21 @@
       <version>${jjwt.version}</version>
       <scope>test</scope>
     </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${org.projectlombok.version}</version>
-            <type>jar</type>
-        </dependency>
-	</dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.7.0</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.7.0</version>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>

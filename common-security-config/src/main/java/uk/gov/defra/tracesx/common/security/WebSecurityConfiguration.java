@@ -11,7 +11,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 import uk.gov.defra.tracesx.common.security.jwt.JwtTokenFilter;
 
 @Configuration
