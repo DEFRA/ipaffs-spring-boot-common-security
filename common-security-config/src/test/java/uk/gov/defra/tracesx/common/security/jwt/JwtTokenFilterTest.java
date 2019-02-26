@@ -1,4 +1,4 @@
-package uk.gov.defra.tracesx.common.security;
+package uk.gov.defra.tracesx.common.security.jwt;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -15,6 +15,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.core.context.SecurityContextHolder;
+import uk.gov.defra.tracesx.common.security.IdTokenUserDetails;
 import uk.gov.defra.tracesx.common.security.jwt.JwtTokenFilter;
 import uk.gov.defra.tracesx.common.security.jwt.JwtTokenValidator;
 

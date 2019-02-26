@@ -1,4 +1,4 @@
-package uk.gov.defra.tracesx.common.security;
+package uk.gov.defra.tracesx.common.security.jwt;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -18,6 +18,8 @@ import org.junit.runner.RunWith;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import uk.gov.defra.tracesx.common.exceptions.InsSecurityException;
+import uk.gov.defra.tracesx.common.security.IdTokenUserDetails;
+import uk.gov.defra.tracesx.common.security.RoleToAuthorityMapper;
 import uk.gov.defra.tracesx.common.security.jwt.JwtUserMapper;
 
 @RunWith(Theories.class)
