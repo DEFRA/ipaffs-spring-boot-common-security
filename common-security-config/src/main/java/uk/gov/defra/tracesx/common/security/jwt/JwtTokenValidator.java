@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.defra.tracesx.common.exceptions.UnauthorizedException;
 import uk.gov.defra.tracesx.common.security.IdTokenUserDetails;
 import uk.gov.defra.tracesx.common.security.jwks.JwksCache;
-import uk.gov.defra.tracesx.common.security.jwks.JwksCache.KeyAndClaims;
+import uk.gov.defra.tracesx.common.security.jwks.KeyAndClaims;
 
 @Component
 public class JwtTokenValidator {

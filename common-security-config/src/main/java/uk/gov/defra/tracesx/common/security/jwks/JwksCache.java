@@ -2,17 +2,12 @@ package uk.gov.defra.tracesx.common.security.jwks;
 
 import com.auth0.jwk.Jwk;
 import com.auth0.jwk.JwkException;
-import java.security.Key;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -83,16 +78,6 @@ public class JwksCache {
       throw new InsSecurityException("Invalid security configuration");
     }
     return claimsAwareJwkProviders;
-  }
-
-  @Data
-  @Builder
-  @Getter
-  @EqualsAndHashCode
-  public static class KeyAndClaims {
-    private String iss;
-    private String aud;
-    private Key key;
   }
 
 }

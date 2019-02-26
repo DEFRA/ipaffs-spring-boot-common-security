@@ -1,4 +1,4 @@
-package uk.gov.defra.tracesx.common.security;
+package uk.gov.defra.tracesx.common.security.jwks;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -25,8 +25,8 @@ import uk.gov.defra.tracesx.common.exceptions.InsSecurityException;
 import uk.gov.defra.tracesx.common.security.jwks.ClaimsAwareJwkProvider;
 import uk.gov.defra.tracesx.common.security.jwks.JwkProviderFactory;
 import uk.gov.defra.tracesx.common.security.jwks.JwksCache;
-import uk.gov.defra.tracesx.common.security.jwks.JwksCache.KeyAndClaims;
 import uk.gov.defra.tracesx.common.security.jwks.JwksConfiguration;
+import uk.gov.defra.tracesx.common.security.jwks.KeyAndClaims;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JwksCacheTest {

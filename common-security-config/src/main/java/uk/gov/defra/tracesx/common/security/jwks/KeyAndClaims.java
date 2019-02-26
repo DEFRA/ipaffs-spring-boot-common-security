@@ -1,16 +1,15 @@
 package uk.gov.defra.tracesx.common.security.jwks;
 
-import java.net.URL;
+import java.security.Key;
 import lombok.Builder;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
-@Getter
 @Builder
+@Getter
 @EqualsAndHashCode
-public class JwksConfiguration {
-  private URL jwksUrl;
-  private String audience;
-  private String issuer;
+public class KeyAndClaims {
+  private String iss;
+  private String aud;
+  private Key key;
 }

@@ -27,7 +27,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.defra.tracesx.common.exceptions.UnauthorizedException;
 import uk.gov.defra.tracesx.common.security.jwks.JwksCache;
-import uk.gov.defra.tracesx.common.security.jwks.JwksCache.KeyAndClaims;
+import uk.gov.defra.tracesx.common.security.jwks.KeyAndClaims;
 import uk.gov.defra.tracesx.common.security.jwt.JwtTokenValidator;
 import uk.gov.defra.tracesx.common.security.jwt.JwtUserMapper;
 
