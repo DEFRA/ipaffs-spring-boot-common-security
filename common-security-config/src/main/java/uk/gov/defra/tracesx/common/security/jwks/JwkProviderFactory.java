@@ -11,7 +11,7 @@ public class JwkProviderFactory {
   @Value("${spring.security.jwt.maxKeys ?: 5}")
   private int maxCachedKeysPerProvider;
 
-  @Value("${spring.security.jwt.keyExpiryMinutes ?: 60")
+  @Value("${spring.security.jwt.keyExpiryMinutes ?: 60}")
   private int keyExpiryMinutes;
 
   public ClaimsAwareJwkProvider newInstance(JwksConfiguration config) {
@@ -24,5 +24,4 @@ public class JwkProviderFactory {
         config.getIssuer(),
         config.getAudience());
   }
-
 }
