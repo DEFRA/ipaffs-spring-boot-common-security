@@ -21,8 +21,7 @@
   </properties>
 
   <scm>
-    <connection>scm:git:git@giteux.azure.defra.cloud:imports/spring-boot-common-security.git</connection>
-    <tag>HEAD</tag>
+    <connection>${parent.scm.connection}</connection>
   </scm>
 
 	<dependencies>
