@@ -21,6 +21,10 @@
     <jackson.databind.version>2.9.7</jackson.databind.version>
   </properties>
 
+  <scm>
+    <connection>scm:git:git@giteux.azure.defra.cloud:imports/spring-boot-common-security.git</connection>
+  </scm>
+
 	<dependencies>
     <dependency>
       <groupId>junit</groupId>

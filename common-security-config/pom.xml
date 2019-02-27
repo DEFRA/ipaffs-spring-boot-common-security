@@ -27,6 +27,10 @@
     <restassured.version>3.3.0</restassured.version>
   </properties>
 
+  <scm>
+    <connection>scm:git:git@giteux.azure.defra.cloud:imports/spring-boot-common-security.git</connection>
+  </scm>
+
   <dependencies>
     <dependency>
       <groupId>javax.servlet</groupId>
