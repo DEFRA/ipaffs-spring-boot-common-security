@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>TracesX-SpringBoot-CommonSecurity</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>TracesX-SpringBoot-CommonSecurity</name>
+  <name>common-security-parent</name>
   <description>Shared Spring Boot Web Security: Parent</description>
   <packaging>pom</packaging>
   <groupId>uk.gov.defra.tracesx</groupId>
