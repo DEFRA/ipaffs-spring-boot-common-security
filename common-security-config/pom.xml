@@ -30,6 +30,19 @@
     <tag>HEAD</tag>
   </scm>
 
+  <distributionManagement>
+    <repository> <!-- FIXME: change to actual release repo -->
+      <id>release</id>
+      <name>Local repository</name>
+      <url>file://${user.home}/.m2/repository</url>
+    </repository>
+    <snapshotRepository>
+      <id>snapshots</id>
+      <name>maven-snapshots-local</name>
+      <url>https://artifactory.azure.defra.cloud/artifactory/maven-snapshots-local/</url>
+    </snapshotRepository>
+  </distributionManagement>
+
   <dependencies>
     <dependency>
       <groupId>javax.servlet</groupId>
