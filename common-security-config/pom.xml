@@ -25,6 +25,14 @@
     <restassured.version>3.3.0</restassured.version>
   </properties>
 
+  <distributionManagement>
+    <repository>
+      <id>release</id>
+      <name>Releases</name>
+      <url>${repo.releases.url}</url>
+    </repository>
+  </distributionManagement>
+
   <scm>
     <connection>${parent.scm.connection}</connection>
     <tag>HEAD</tag>

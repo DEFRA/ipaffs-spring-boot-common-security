@@ -20,6 +20,14 @@
     <jackson.databind.version>2.9.7</jackson.databind.version>
   </properties>
 
+  <distributionManagement>
+    <repository>
+      <id>release</id>
+      <name>Releases</name>
+      <url>${repo.releases.url}</url>
+    </repository>
+  </distributionManagement>
+
   <scm>
     <connection>${parent.scm.connection}</connection>
     <tag>HEAD</tag>
