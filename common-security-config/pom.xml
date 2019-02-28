@@ -132,6 +132,12 @@
       <version>${jjwt.version}</version>
       <scope>test</scope>
     </dependency>
+    <!-- nimbus is needed to create the jwks used for component testing -->
+    <dependency>
+      <groupId>com.nimbusds</groupId>
+      <artifactId>nimbus-jose-jwt</artifactId>
+      <version>6.8</version>
+    </dependency>
 
   </dependencies>
 

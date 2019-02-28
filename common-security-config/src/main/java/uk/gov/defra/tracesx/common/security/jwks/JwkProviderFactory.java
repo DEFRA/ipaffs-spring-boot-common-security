@@ -1,6 +1,8 @@
 package uk.gov.defra.tracesx.common.security.jwks;
 
+import com.auth0.jwk.JwkProvider;
 import com.auth0.jwk.UrlJwkProvider;
+import java.net.URL;
 import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -14,14 +16,21 @@ public class JwkProviderFactory {
   @Value("${spring.security.jwt.keyExpiryMinutes ?: 60}")
   private int keyExpiryMinutes;
 
+  private TimeUnit keyExpiryUnits = TimeUnit.MINUTES;
+
   public ClaimsAwareJwkProvider newInstance(JwksConfiguration config) {
-    UrlJwkProvider urlJwkProvider = new UrlJwkProvider(config.getJwksUrl());
+    JwkProvider urlJwkProvider = createUrlJwkProvider(config.getJwksUrl());
     return new ClaimsAwareJwkProvider(
         urlJwkProvider,
         maxCachedKeysPerProvider,
         keyExpiryMinutes,
-        TimeUnit.MINUTES,
+        keyExpiryUnits,
         config.getIssuer(),
         config.getAudience());
   }
+
+  protected JwkProvider createUrlJwkProvider(URL url) {
+    return new UrlJwkProvider(url);
+  }
+
 }
