@@ -50,6 +50,8 @@ import uk.gov.defra.tracesx.common.security.jwks.JwksConfiguration;
 
 public class JwtTokenFilterComponentTest {
 
+  private static final int KEY_EXPIRY_MILLIS = 250;
+
   private JwtTokenFilter jwtTokenFilter;
   private JwtTokenValidator jwtTokenValidator;
   private JwtUserMapper jwtUserMapper;
@@ -79,7 +81,7 @@ public class JwtTokenFilterComponentTest {
 
     jwkProviderFactory = spy(new SpyableJwkProviderFactory());
     FieldUtils.writeField(jwkProviderFactory, "maxCachedKeysPerProvider", 5, true);
-    FieldUtils.writeField(jwkProviderFactory, "keyExpiryMinutes", 250, true); // millis
+    FieldUtils.writeField(jwkProviderFactory, "keyExpiryMinutes", KEY_EXPIRY_MILLIS, true); // millis
     FieldUtils.writeField(jwkProviderFactory, "keyExpiryUnits", TimeUnit.MILLISECONDS, true);
 
     jwkProvider1 = mock(JwkProvider.class, "jwkProvider1");
@@ -159,7 +161,31 @@ public class JwtTokenFilterComponentTest {
 
     verify(jwksCache, times(2)).getPublicKeys(JWK_ELEMENT1.getKid());
     verify(jwksCache).getPublicKeys(JWK_ELEMENT2.getKid());
+  }
 
+  @Test
+  public void doFilter_keyExpiresBetweenRequests_keyIsFetchedAgain() throws Exception {
+    when(request.getHeader("Authorization")).thenReturn("Bearer " + createToken1(expiresInTenMinutes()));
+    Authentication authentication;
+
+    jwtTokenFilter.doFilterInternal(request, response, filterChain);
+    authentication = SecurityContextHolder.getContext().getAuthentication(); // TODO: assert
+
+    Thread.sleep(KEY_EXPIRY_MILLIS * 2);
+
+    jwtTokenFilter.doFilterInternal(request, response, filterChain);
+    authentication = SecurityContextHolder.getContext().getAuthentication(); // TODO: assert
+
+    verify(filterChain, times(2)).doFilter(request, response);
+
+    verify(jwkProviderFactory, times(2)).newInstance(any(JwksConfiguration.class));
+    verify(jwkProviderFactory).createUrlJwkProvider(eq(new URL(JWKS_URL1)));
+    verify(jwkProviderFactory).createUrlJwkProvider(eq(new URL(JWKS_URL2)));
+
+    verify(jwkProvider1, times(2)).get(JWK_ELEMENT1.getKid());
+    verify(jwkProvider2).get(JWK_ELEMENT1.getKid());
+
+    verify(jwksCache, times(2)).getPublicKeys(JWK_ELEMENT1.getKid());
   }
 
   private Date expiresInTenMinutes() {
