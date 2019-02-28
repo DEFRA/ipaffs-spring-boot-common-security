@@ -1,9 +1,12 @@
 package uk.gov.defra.tracesx.common.security.jwt;
 
+import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -18,8 +21,10 @@ import static uk.gov.defra.tracesx.common.security.jwt.MockJwks.JWKS_URL2;
 import static uk.gov.defra.tracesx.common.security.jwt.MockJwks.JWK_ELEMENT1;
 import static uk.gov.defra.tracesx.common.security.jwt.MockJwks.JWK_ELEMENT2;
 import static uk.gov.defra.tracesx.common.security.jwt.MockJwks.createToken1;
+import static uk.gov.defra.tracesx.common.security.jwt.MockJwks.createToken2;
 
 import com.auth0.jwk.JwkProvider;
+import com.auth0.jwk.SigningKeyNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URL;
 import java.time.OffsetDateTime;
@@ -60,23 +65,32 @@ public class JwtTokenFilterComponentTest {
   private HttpServletRequest request;
   private HttpServletResponse response;
   private FilterChain filterChain;
-  private JwkProvider jwkProvider;
+  private JwkProvider jwkProvider1;
+  private JwkProvider jwkProvider2;
 
   @Before
   public void before() throws Exception {
     roleToAuthorityMapper = new RoleToAuthorityMapper();
     jwtUserMapper = new JwtUserMapper(roleToAuthorityMapper);
+
     jwksConfiguration1 = JwksConfiguration.builder().jwksUrl(new URL(JWKS_URL1)).audience(JWKS_AUDIENCE1).issuer(JWKS_ISSUER1).build();
     jwksConfiguration2 = JwksConfiguration.builder().jwksUrl(new URL(JWKS_URL2)).audience(JWKS_AUDIENCE2).issuer(JWKS_ISSUER2).build();
     jwksConfigurations = Arrays.asList(jwksConfiguration1, jwksConfiguration2);
+
     jwkProviderFactory = spy(new SpyableJwkProviderFactory());
     FieldUtils.writeField(jwkProviderFactory, "maxCachedKeysPerProvider", 5, true);
     FieldUtils.writeField(jwkProviderFactory, "keyExpiryMinutes", 250, true); // millis
     FieldUtils.writeField(jwkProviderFactory, "keyExpiryUnits", TimeUnit.MILLISECONDS, true);
-    jwkProvider = mock(JwkProvider.class);
-    when(jwkProvider.get(JWK_ELEMENT1.getKid())).thenReturn(JWK1);
-    when(jwkProvider.get(JWK_ELEMENT2.getKid())).thenReturn(JWK2);
-    doReturn(jwkProvider).when(jwkProviderFactory).createUrlJwkProvider(any(URL.class));
+
+    jwkProvider1 = mock(JwkProvider.class, "jwkProvider1");
+    when(jwkProvider1.get(eq(JWK_ELEMENT1.getKid()))).thenReturn(JWK1);
+    when(jwkProvider1.get(not(eq(JWK_ELEMENT1.getKid())))).thenThrow(new SigningKeyNotFoundException("not found", null));
+    jwkProvider2 = mock(JwkProvider.class, "jwkProvider2");
+    when(jwkProvider2.get(JWK_ELEMENT2.getKid())).thenReturn(JWK2);
+    when(jwkProvider2.get(not(eq(JWK_ELEMENT2.getKid())))).thenThrow(new SigningKeyNotFoundException("not found", null));
+    doReturn(jwkProvider1).when(jwkProviderFactory).createUrlJwkProvider(eq(new URL(JWKS_URL1)));
+    doReturn(jwkProvider2).when(jwkProviderFactory).createUrlJwkProvider(eq(new URL(JWKS_URL2)));
+
     jwksCache = spy(new JwksCache(jwksConfigurations, jwkProviderFactory));
     jwtTokenValidator = new JwtTokenValidator(jwtUserMapper, jwksCache, objectMapper);
     jwtTokenFilter = new JwtTokenFilter(jwtTokenValidator);
@@ -88,17 +102,64 @@ public class JwtTokenFilterComponentTest {
 
   @After
   public void after() {
-    verifyNoMoreInteractions(filterChain, response, jwkProvider, jwksCache);
+    verifyNoMoreInteractions(filterChain, response, jwkProvider1, jwkProvider2, jwksCache, jwkProviderFactory);
   }
 
   @Test
-  public void doFilter_validRequest_succeeds() throws Exception {
+  public void doFilter_validRequestsSingleProvider_eachProviderIsCalledOnce() throws Exception {
+    when(request.getHeader("Authorization")).thenReturn("Bearer " + createToken1(expiresInTenMinutes()));
+    Authentication authentication;
+
+    jwtTokenFilter.doFilterInternal(request, response, filterChain);
+    authentication = SecurityContextHolder.getContext().getAuthentication(); // TODO: assert
+
+    jwtTokenFilter.doFilterInternal(request, response, filterChain);
+    authentication = SecurityContextHolder.getContext().getAuthentication(); // TODO: assert
+
+    jwtTokenFilter.doFilterInternal(request, response, filterChain);
+    authentication = SecurityContextHolder.getContext().getAuthentication(); // TODO: assert
+
+    verify(filterChain, times(3)).doFilter(request, response);
+
+    verify(jwkProviderFactory, times(2)).newInstance(any(JwksConfiguration.class));
+    verify(jwkProviderFactory).createUrlJwkProvider(eq(new URL(JWKS_URL1)));
+    verify(jwkProviderFactory).createUrlJwkProvider(eq(new URL(JWKS_URL2)));
+
+    verify(jwkProvider1).get(JWK_ELEMENT1.getKid());
+    verify(jwkProvider2).get(JWK_ELEMENT1.getKid());
+
+    verify(jwksCache, times(3)).getPublicKeys(JWK_ELEMENT1.getKid());
+  }
+
+  @Test
+  public void doFilter_validRequestsMultipleProviders_eachProviderIsCalledOnce() throws Exception {
+    Authentication authentication;
     when(request.getHeader("Authorization")).thenReturn("Bearer " + createToken1(expiresInTenMinutes()));
     jwtTokenFilter.doFilterInternal(request, response, filterChain);
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication(); // TODO: assert
-    verify(filterChain).doFilter(request, response);
-    verify(jwksCache).getPublicKeys(JWK_ELEMENT1.getKid());
-    verify(jwkProvider).get(JWK_ELEMENT1.getKid());
+    authentication = SecurityContextHolder.getContext().getAuthentication(); // TODO: assert
+
+    when(request.getHeader("Authorization")).thenReturn("Bearer " + createToken2(expiresInTenMinutes()));
+    jwtTokenFilter.doFilterInternal(request, response, filterChain);
+    authentication = SecurityContextHolder.getContext().getAuthentication(); // TODO: assert
+
+    when(request.getHeader("Authorization")).thenReturn("Bearer " + createToken1(expiresInTenMinutes()));
+    jwtTokenFilter.doFilterInternal(request, response, filterChain);
+    authentication = SecurityContextHolder.getContext().getAuthentication(); // TODO: assert
+
+    verify(filterChain, times(3)).doFilter(request, response);
+
+    verify(jwkProviderFactory, times(2)).newInstance(any(JwksConfiguration.class));
+    verify(jwkProviderFactory).createUrlJwkProvider(eq(new URL(JWKS_URL1)));
+    verify(jwkProviderFactory).createUrlJwkProvider(eq(new URL(JWKS_URL2)));
+
+    verify(jwkProvider1).get(JWK_ELEMENT1.getKid());
+    verify(jwkProvider2).get(JWK_ELEMENT1.getKid());
+    verify(jwkProvider1).get(JWK_ELEMENT2.getKid());
+    verify(jwkProvider2).get(JWK_ELEMENT2.getKid());
+
+    verify(jwksCache, times(2)).getPublicKeys(JWK_ELEMENT1.getKid());
+    verify(jwksCache).getPublicKeys(JWK_ELEMENT2.getKid());
+
   }
 
   private Date expiresInTenMinutes() {
