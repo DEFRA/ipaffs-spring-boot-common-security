@@ -32,7 +32,10 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     http.authorizeRequests()
+        .antMatchers("/**")
+        .anonymous()
         //.antMatchers("/base/*")
+//        .antMatchers(serviceUrlPatterns.getPatterns().toArray(new String[0]))
         .antMatchers(serviceUrlPatterns.getBaseUrl())
         .authenticated()
         .and()
