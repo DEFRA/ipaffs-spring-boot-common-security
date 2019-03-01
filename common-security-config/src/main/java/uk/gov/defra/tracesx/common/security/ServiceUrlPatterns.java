@@ -9,4 +9,6 @@ public interface ServiceUrlPatterns {
    * @see org.springframework.boot.web.servlet.FilterRegistrationBean#setUrlPatterns(Collection)
    */
   List<String> getPatterns();
+
+  String getBaseUrl();
 }

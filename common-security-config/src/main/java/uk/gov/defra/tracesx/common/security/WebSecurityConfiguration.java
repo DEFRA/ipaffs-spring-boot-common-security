@@ -26,10 +26,14 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
   @Autowired
   private JwtTokenFilter jwtTokenFilter;
 
+  @Autowired
+  private ServiceUrlPatterns serviceUrlPatterns;
+
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     http.authorizeRequests()
-        .antMatchers("/base/*")
+        //.antMatchers("/base/*")
+        .antMatchers(serviceUrlPatterns.getBaseUrl())
         .authenticated()
         .and()
         .exceptionHandling().authenticationEntryPoint(unauthorizedEntryPoint())
@@ -46,9 +50,6 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
   @Autowired
   private PermissionsFilter permissionsFilter;
-
-  @Autowired
-  private ServiceUrlPatterns serviceUrlPatterns;
 
   @Bean
   public FilterRegistrationBean jwtTokenFilterRegistration() {
