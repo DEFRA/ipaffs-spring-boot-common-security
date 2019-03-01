@@ -50,5 +50,4 @@ Example implementation:
       protected String getAdminUrl() {
         return helper.getUrl("/admin");
       }
-    
     }
