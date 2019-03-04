@@ -23,7 +23,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import uk.gov.defra.tracesx.common.service.PermissionsService;
+import uk.gov.defra.tracesx.common.service.PermissionsClient;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PermissionsFilterTest {
@@ -48,7 +48,7 @@ public class PermissionsFilterTest {
   private UserDetails userDetails;
 
   @Mock
-  private PermissionsService permissionsService;
+  private PermissionsClient permissionsClient;
 
   @Mock
   private AuthenticationFacade authenticationFacade;
@@ -63,7 +63,7 @@ public class PermissionsFilterTest {
   @Before
   public void setup() {
     grantedAuthoritiesList.add(new SimpleGrantedAuthority(ECONOMIC_OPERATOR_READ));
-    when(permissionsService.permissionsList(any(), any())).thenReturn(perms);
+    when(permissionsClient.permissionsList(any(), any())).thenReturn(perms);
     when(authenticationFacade.getAuthentication()).thenReturn(authentication);
     when(authentication.getDetails()).thenReturn(userDetails);
     when(userDetails.getAuthorities()).thenReturn(grantedAuthorities);
@@ -71,7 +71,7 @@ public class PermissionsFilterTest {
 
   @Test
   public void filterAddsAuthoritiesToCurrentSecurityContext() throws Exception {
-    when(permissionsService.permissionsList(any(), any())).thenReturn(singletonList(ECONOMIC_OPERATOR_READ));
+    when(permissionsClient.permissionsList(any(), any())).thenReturn(singletonList(ECONOMIC_OPERATOR_READ));
 
     permissionsFilter.doFilterInternal(request, response, filterChain);
 
@@ -80,7 +80,7 @@ public class PermissionsFilterTest {
 
   @Test
   public void filterReturnsUnauthorisedResponseWhenUserHasNoPermissions() throws Exception {
-    when(permissionsService.permissionsList(any(), any())).thenReturn(EMPTY_LIST);
+    when(permissionsClient.permissionsList(any(), any())).thenReturn(EMPTY_LIST);
 
     permissionsFilter.doFilterInternal(request, response, filterChain);
 

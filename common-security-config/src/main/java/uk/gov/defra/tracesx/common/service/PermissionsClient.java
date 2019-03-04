@@ -17,7 +17,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
-public class PermissionsService {
+public class PermissionsClient {
 
   private static final String ROLES = "roles";
   private static final String PERMISSIONS = "permissions";
@@ -47,7 +47,7 @@ public class PermissionsService {
   private final RestTemplate permissionsRestTemplate;
 
   @Autowired
-  PermissionsService(final RestTemplate permissionsRestTemplate) {
+  PermissionsClient(final RestTemplate permissionsRestTemplate) {
     this.permissionsRestTemplate = permissionsRestTemplate;
   }
 

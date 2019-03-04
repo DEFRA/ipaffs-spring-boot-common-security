@@ -20,7 +20,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import uk.gov.defra.tracesx.common.service.PermissionsService;
+import uk.gov.defra.tracesx.common.service.PermissionsClient;
 
 @Component
 public class PermissionsFilter extends OncePerRequestFilter {
@@ -32,7 +32,7 @@ public class PermissionsFilter extends OncePerRequestFilter {
   private AuthenticationFacade authenticationFacade;
 
   @Autowired
-  private PermissionsService permissionsService;
+  private PermissionsClient permissionsClient;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PermissionsFilter.class);
 
@@ -60,7 +60,7 @@ public class PermissionsFilter extends OncePerRequestFilter {
     final List<GrantedAuthority> perms =
         roles
             .stream()
-            .map(role -> permissionsService.permissionsList(role, authorisationToken))
+            .map(role -> permissionsClient.permissionsList(role, authorisationToken))
             .flatMap(List::stream)
             .distinct()
             .map(SimpleGrantedAuthority::new)
