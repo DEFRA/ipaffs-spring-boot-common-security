@@ -79,17 +79,20 @@ public class JwtTokenFilterComponentTest {
     jwksConfiguration2 = JwksConfiguration.builder().jwksUrl(new URL(JWKS_URL2)).audience(JWKS_AUDIENCE2).issuer(JWKS_ISSUER2).build();
     jwksConfigurations = Arrays.asList(jwksConfiguration1, jwksConfiguration2);
 
+    // expire the key in milliseconds instead of seconds
     jwkProviderFactory = spy(new SpyableJwkProviderFactory());
     FieldUtils.writeField(jwkProviderFactory, "maxCachedKeysPerProvider", 5, true);
     FieldUtils.writeField(jwkProviderFactory, "keyExpiryMinutes", KEY_EXPIRY_MILLIS, true); // millis
     FieldUtils.writeField(jwkProviderFactory, "keyExpiryUnits", TimeUnit.MILLISECONDS, true);
 
+    // providers should return the jwk for their respective kids else throw a not found exception
     jwkProvider1 = mock(JwkProvider.class, "jwkProvider1");
     when(jwkProvider1.get(eq(JWK_ELEMENT1.getKid()))).thenReturn(JWK1);
     when(jwkProvider1.get(not(eq(JWK_ELEMENT1.getKid())))).thenThrow(new SigningKeyNotFoundException("not found", null));
     jwkProvider2 = mock(JwkProvider.class, "jwkProvider2");
     when(jwkProvider2.get(JWK_ELEMENT2.getKid())).thenReturn(JWK2);
     when(jwkProvider2.get(not(eq(JWK_ELEMENT2.getKid())))).thenThrow(new SigningKeyNotFoundException("not found", null));
+    // return the correct mock for the jwk url
     doReturn(jwkProvider1).when(jwkProviderFactory).createUrlJwkProvider(eq(new URL(JWKS_URL1)));
     doReturn(jwkProvider2).when(jwkProviderFactory).createUrlJwkProvider(eq(new URL(JWKS_URL2)));
 
