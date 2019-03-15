@@ -9,7 +9,24 @@ import org.junit.Test;
 
 public abstract class AbstractAdminAuthenticationTest {
 
+  /**
+   * @return the url for the service's /admin path (of which /admin/info and /admin/healthcheck are child paths)
+   */
   protected abstract String getAdminUrl();
+
+  /**
+   * @return the url for the service's root path
+   */
+  protected abstract String getRootUrl();
+
+  @Test
+  public void callRoot_withoutAuth_successfully() {
+    given()
+        .when()
+        .get(getRootUrl())
+        .then()
+        .statusCode(200);
+  }
 
   @Test
   public void callAdmin_withoutBasicAuth_successfully() {
