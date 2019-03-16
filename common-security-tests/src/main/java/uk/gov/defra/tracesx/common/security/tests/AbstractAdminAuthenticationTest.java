@@ -10,12 +10,12 @@ import org.junit.Test;
 public abstract class AbstractAdminAuthenticationTest {
 
   /**
-   * @return the url for the service's /admin path (of which /admin/info and /admin/healthcheck are child paths)
+   * @return the url for the permissions's /admin path (of which /admin/info and /admin/healthcheck are child paths)
    */
   protected abstract String getAdminUrl();
 
   /**
-   * @return the url for the service's root path
+   * @return the url for the permissions's root path
    */
   protected abstract String getRootUrl();
 

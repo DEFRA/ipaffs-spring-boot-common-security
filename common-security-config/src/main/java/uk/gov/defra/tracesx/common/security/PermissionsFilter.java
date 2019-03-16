@@ -20,7 +20,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import uk.gov.defra.tracesx.common.service.PermissionsClient;
+import uk.gov.defra.tracesx.common.permissions.PermissionsClient;
 
 @Component
 public class PermissionsFilter extends OncePerRequestFilter {
