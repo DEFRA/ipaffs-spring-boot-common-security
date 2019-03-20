@@ -36,7 +36,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     System.out.println(serviceUrlPatterns.getBaseUrl().toString());
 
     http.authorizeRequests()
-        .antMatchers(serviceUrlPatterns.getBaseUrl().toString())
+        .antMatchers(String.join(",", serviceUrlPatterns.getBaseUrl()))
         .authenticated()
         .antMatchers("/**")
         .anonymous()
