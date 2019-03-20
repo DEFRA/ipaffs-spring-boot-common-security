@@ -23,66 +23,63 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 
+@RunWith(MockitoJUnitRunner.class)
 public class PermissionsClientTest {
 
-  @RunWith(MockitoJUnitRunner.class)
-  public class PermissionsServiceTest {
+  private static final String USER = "testUser";
+  private static final String PASSWORD = "testPassword";
+  private static final String READ = "read";
+  private static final String ROLE = "importer";
+  private static final String TOKEN = "dummyToken";
+  private static final String INVALID_ROLE = "invalid.role";
+  private static final String PERMISSIONS_USER = "permissionsUser";
+  private static final String PERMISSIONS_PASSWORD = "permissionsPassword";
+  private static final String SECURITY_TOKEN_FEATURE_SWITCH = "securityTokenFeatureSwitch";
+  private final List<String> perms = singletonList(READ);
 
-    private static final String USER = "testUser";
-    private static final String PASSWORD = "testPassword";
-    private static final String READ = "read";
-    private static final String ROLE = "importer";
-    private static final String TOKEN = "dummyToken";
-    private static final String INVALID_ROLE = "invalid.role";
-    private static final String PERMISSIONS_USER = "permissionsUser";
-    private static final String PERMISSIONS_PASSWORD = "permissionsPassword";
-    private static final String SECURITY_TOKEN_FEATURE_SWITCH = "securityTokenFeatureSwitch";
-    private final List<String> perms = singletonList(READ);
+  @Mock private RestTemplate restTemplate;
+  @InjectMocks private PermissionsClient permissionsService;
 
-    @Mock private RestTemplate restTemplate;
-    @InjectMocks private PermissionsClient permissionsService;
+  @Before
+  public void setup() {
+    ReflectionTestUtils.setField(permissionsService, PERMISSIONS_USER, USER);
+    ReflectionTestUtils.setField(permissionsService, PERMISSIONS_PASSWORD, PASSWORD);
+    ReflectionTestUtils.setField(permissionsService, SECURITY_TOKEN_FEATURE_SWITCH, TRUE);
 
-    @Before
-    public void setup() {
-      ReflectionTestUtils.setField(permissionsService, PERMISSIONS_USER, USER);
-      ReflectionTestUtils.setField(permissionsService, PERMISSIONS_PASSWORD, PASSWORD);
-      ReflectionTestUtils.setField(permissionsService, SECURITY_TOKEN_FEATURE_SWITCH, TRUE);
+    final ResponseEntity<List<String>> responseEntity = createResponseEntity();
+    when(restTemplate.exchange(
+            any(),
+            eq(GET),
+            any(HttpEntity.class),
+            eq(new ParameterizedTypeReference<List<String>>() {})))
+        .thenReturn(responseEntity);
+  }
 
-      final ResponseEntity<List<String>> responseEntity = createResponseEntity();
-      when(restTemplate.exchange(
-              any(),
-              eq(GET),
-              any(HttpEntity.class),
-              eq(new ParameterizedTypeReference<List<String>>() {})))
-          .thenReturn(responseEntity);
-    }
+  @Test
+  public void testWhenPermissionsListIsCalledThenReturnListOfPermissions() {
 
-    @Test
-    public void testWhenPermissionsListIsCalledThenReturnListOfPermissions() {
+    final List<String> permissionsList = permissionsService.permissionsList(ROLE, TOKEN);
 
-      final List<String> permissionsList = permissionsService.permissionsList(ROLE, TOKEN);
+    assertThat(permissionsList).hasSize(1);
+    assertThat(permissionsList.get(0)).isEqualTo(READ);
+  }
 
-      assertThat(permissionsList).hasSize(1);
-      assertThat(permissionsList.get(0)).isEqualTo(READ);
-    }
+  @Test
+  public void testWhenPermissionsCalledWithInvalidRoleThenReturnEmptyList() {
 
-    @Test
-    public void testWhenPermissionsCalledWithInvalidRoleThenReturnEmptyList() {
+    when(restTemplate.exchange(
+            any(),
+            eq(GET),
+            any(HttpEntity.class),
+            eq(new ParameterizedTypeReference<List<String>>() {})))
+        .thenReturn(new ResponseEntity<>(EMPTY_LIST, OK));
 
-      when(restTemplate.exchange(
-              any(),
-              eq(GET),
-              any(HttpEntity.class),
-              eq(new ParameterizedTypeReference<List<String>>() {})))
-          .thenReturn(new ResponseEntity<>(EMPTY_LIST, OK));
+    final List<String> permissionsList = permissionsService.permissionsList(INVALID_ROLE, TOKEN);
 
-      final List<String> permissionsList = permissionsService.permissionsList(INVALID_ROLE, TOKEN);
+    assertThat(permissionsList).hasSize(0);
+  }
 
-      assertThat(permissionsList).hasSize(0);
-    }
-
-    private ResponseEntity<List<String>> createResponseEntity() {
-      return new ResponseEntity<>(perms, OK);
-    }
+  private ResponseEntity<List<String>> createResponseEntity() {
+    return new ResponseEntity<>(perms, OK);
   }
 }
