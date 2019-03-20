@@ -1,6 +1,9 @@
 package uk.gov.defra.tracesx.common;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static uk.gov.defra.tracesx.common.permissions.PermissionsCache.CACHE_KEY;
+
+import com.microsoft.applicationinsights.TelemetryClient;
+import com.microsoft.applicationinsights.TelemetryConfiguration;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -10,6 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.concurrent.ConcurrentMapCache;
+import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -22,35 +29,17 @@ import uk.gov.defra.tracesx.common.security.ServiceUrlPatterns;
 import uk.gov.defra.tracesx.common.security.jwks.JwksConfiguration;
 
 @Configuration
+@EnableCaching
 @EnableConfigurationProperties
 public class CommonWebMvcConfiguration implements WebMvcConfigurer {
 
-  public static final String PERMISSIONS_REST_TEMPLATE_BEAN_NAME = "permissionsRestTemplate";
+  public static final String PERMISSIONS_REST_TEMPLATE_QUALIFIER = "permissionsRestTemplate";
 
   @Value("${permissions.service.connectionTimeout}")
   private int permissionsServiceConnectionTimeout;
 
   @Value("${permissions.service.readTimeout}")
   private int permissionsServiceReadTimeout;
-
-  @Bean(PERMISSIONS_REST_TEMPLATE_BEAN_NAME)
-  public RestTemplate permissionsRestTemplate() {
-    return createRestTemplate(
-        permissionsServiceConnectionTimeout,
-        permissionsServiceReadTimeout);
-  }
-
-  private RestTemplate createRestTemplate(final int connectionTimeout, final int readTimeout) {
-
-    final HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory();
-    clientHttpRequestFactory.setConnectTimeout(connectionTimeout);
-    clientHttpRequestFactory.setReadTimeout(readTimeout);
-
-    final RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory);
-    restTemplate.getMessageConverters().add(new StringHttpMessageConverter());
-
-    return restTemplate;
-  }
 
   @Value("${spring.security.jwt.jwks}")
   private String jwkUrl;
@@ -60,6 +49,23 @@ public class CommonWebMvcConfiguration implements WebMvcConfigurer {
 
   @Value("${spring.security.jwt.aud}")
   private String aud;
+
+  @Autowired
+  private ServiceUrlPatterns serviceUrlPatterns;
+
+  @Override
+  public void addInterceptors(InterceptorRegistry registry) {
+    registry.addInterceptor(new PreAuthorizeChecker())
+        .addPathPatterns(serviceUrlPatterns.getPatterns());
+  }
+
+  @Bean
+  @Qualifier(PERMISSIONS_REST_TEMPLATE_QUALIFIER)
+  public RestTemplate permissionsRestTemplate() {
+    return createRestTemplate(
+        permissionsServiceConnectionTimeout,
+        permissionsServiceReadTimeout);
+  }
 
   @Bean
   @Qualifier("jwksConfiguration")
@@ -81,13 +87,26 @@ public class CommonWebMvcConfiguration implements WebMvcConfigurer {
     }
   }
 
-  @Autowired
-  private ServiceUrlPatterns serviceUrlPatterns;
+  @Bean
+  public TelemetryClient telemetryClient() {
+    TelemetryConfiguration configuration = TelemetryConfiguration.getActive();
+    return new TelemetryClient(configuration);
+  }
 
-  @Override
-  public void addInterceptors(InterceptorRegistry registry) {
-    registry.addInterceptor(new PreAuthorizeChecker())
-            .addPathPatterns(serviceUrlPatterns.getPatterns());
+  @Bean
+  public CacheManager cacheManager() {
+    SimpleCacheManager cacheManager = new SimpleCacheManager();
+    cacheManager.setCaches(Collections.singletonList(new ConcurrentMapCache(CACHE_KEY)));
+    return cacheManager;
+  }
+
+  private RestTemplate createRestTemplate(int connectionTimeout, int readTimeout) {
+    HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory();
+    clientHttpRequestFactory.setConnectTimeout(connectionTimeout);
+    clientHttpRequestFactory.setReadTimeout(readTimeout);
+    RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory);
+    restTemplate.getMessageConverters().add(new StringHttpMessageConverter());
+    return restTemplate;
   }
 
 }

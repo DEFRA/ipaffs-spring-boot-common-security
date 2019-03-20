@@ -5,12 +5,14 @@ import static java.util.Base64.getEncoder;
 import static java.util.Collections.emptyList;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpMethod.GET;
+import static uk.gov.defra.tracesx.common.CommonWebMvcConfiguration.PERMISSIONS_REST_TEMPLATE_QUALIFIER;
 
 import com.microsoft.applicationinsights.TelemetryClient;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -23,15 +25,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Component
 public class PermissionsClient {
 
-  private static final String ROLES = "roles";
-  private static final String PERMISSIONS = "permissions";
-  private static final String FORWARD_SLASH = "/";
-  private static final String BASIC = "Basic ";
-  private static final String COLON = ":";
-  private static final String X_AUTH_HEADER_BASIC = "x-auth-basic";
+  private static String BASIC = "Basic ";
+  private static String X_AUTH_HEADER_BASIC = "x-auth-basic";
 
-  private static final String PERMISSIONS_RETRY_EVENT = "PermissionsRetryEvent";
-  private static final Logger logger = LoggerFactory.getLogger(PermissionsClient.class);
+  private static String PERMISSIONS_RETRY_EVENT = "PermissionsRetryEvent";
+  private static Logger logger = LoggerFactory.getLogger(PermissionsClient.class);
 
   @Value("${permissions.service.scheme}")
   private String permissionsScheme;
@@ -51,62 +49,58 @@ public class PermissionsClient {
   @Value("${permissions.security.token-feature-switch}")
   private boolean securityTokenFeatureSwitch;
 
-  private final RestTemplate permissionsRestTemplate;
-  private final TelemetryClient telemetryClient;
+  private RestTemplate permissionsRestTemplate;
+  private TelemetryClient telemetryClient;
 
   @Autowired
-  PermissionsClient(RestTemplate permissionsRestTemplate,
+  public PermissionsClient(@Qualifier(PERMISSIONS_REST_TEMPLATE_QUALIFIER) RestTemplate permissionsRestTemplate,
       TelemetryClient telemetryClient) {
     this.permissionsRestTemplate = permissionsRestTemplate;
     this.telemetryClient = telemetryClient;
   }
 
-  public List<String> permissionsList(final String role, final String authorisationToken) {
+  public List<String> permissionsList(String role, String authorisationToken) {
+    UriComponentsBuilder uriComponentsBuilder = getPath(role);
+    HttpHeaders httpHeaders = getHeaders(authorisationToken);
+    HttpEntity<String> httpEntity = new HttpEntity<>(httpHeaders);
+    return getPermissions(uriComponentsBuilder, httpEntity);
+  }
 
-    final UriComponentsBuilder builder = getPath(role);
+  private UriComponentsBuilder getPath(String role) {
+    return UriComponentsBuilder.newInstance()
+        .scheme(permissionsScheme)
+        .host(permissionsHost)
+        .port(permissionsPort)
+        .path("/roles")
+        .pathSegment(role)
+        .path("/permissions");
+  }
 
-    final String encodedBasicAuth = BASIC + getEncoder().encodeToString(permissionsUser
-            .concat(COLON)
-            .concat(permissionsPassword)
-            .getBytes(UTF_8));
+  private HttpHeaders getHeaders(String authorisationToken) {
+    String encodedBasicAuth = BASIC + getEncoder().encodeToString(permissionsUser
+        .concat(":")
+        .concat(permissionsPassword)
+        .getBytes(UTF_8));
 
-    final HttpHeaders headers = new HttpHeaders();
+    HttpHeaders headers = new HttpHeaders();
     headers.set(X_AUTH_HEADER_BASIC, encodedBasicAuth);
     if (securityTokenFeatureSwitch && authorisationToken != null) {
       headers.add(AUTHORIZATION, authorisationToken);
     }
-    final HttpEntity<String> entity = new HttpEntity<>(headers);
-
-    final List<String> response = getPermissions(builder, entity);
-
-    if (response == null) {
-      return emptyList();
-    }
-    return response;
+    return headers;
   }
 
-  private List<String> getPermissions(final UriComponentsBuilder builder, final HttpEntity<String> entity) {
-    List<String> permissions;
+  private List<String> getPermissions(UriComponentsBuilder builder, HttpEntity<String> entity) {
     try {
-      permissions = permissionsRestTemplate
+      return permissionsRestTemplate
           .exchange(builder.build().encode().toUri(), GET, entity,
               new ParameterizedTypeReference<List<String>>() {})
           .getBody();
     } catch (ResourceAccessException e) {
       telemetryClient.trackEvent(PERMISSIONS_RETRY_EVENT);
-      logger.error("Call to permissions from Economic Operator failed");
+      logger.error("Unable to get permissions");
       throw e;
     }
-    return permissions;
   }
 
-  private UriComponentsBuilder getPath(final String role) {
-    return UriComponentsBuilder.newInstance()
-        .scheme(permissionsScheme)
-        .host(permissionsHost)
-        .port(permissionsPort)
-        .path(FORWARD_SLASH + ROLES)
-        .pathSegment(role)
-        .path(FORWARD_SLASH + PERMISSIONS);
-  }
 }
