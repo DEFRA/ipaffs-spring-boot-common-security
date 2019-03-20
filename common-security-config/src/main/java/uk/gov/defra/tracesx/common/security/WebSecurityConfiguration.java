@@ -33,13 +33,11 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
-    System.out.println(serviceUrlPatterns.getBaseUrl().toString());
-
     http.authorizeRequests()
-        .antMatchers(String.join(",", serviceUrlPatterns.getBaseUrl()))
-        .authenticated()
         .antMatchers("/**")
         .anonymous()
+        .antMatchers(String.join(",", serviceUrlPatterns.getBaseUrl()))
+        .authenticated()
         .and()
         .exceptionHandling().authenticationEntryPoint(unauthorizedEntryPoint())
         .and()
