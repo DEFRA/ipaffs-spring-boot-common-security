@@ -17,5 +17,5 @@ public class MockServiceUrlPatterns implements ServiceUrlPatterns {
   }
 
   @Override
-  public String getBaseUrl() { return "/path/*"; }
+  public List<String> getBaseUrl() { return Arrays.asList("/path/*"); }
 }

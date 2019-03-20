@@ -13,6 +13,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import uk.gov.defra.tracesx.common.security.jwt.JwtTokenFilter;
 
+import java.util.Arrays;
+
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -31,13 +33,13 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
+    System.out.println(serviceUrlPatterns.getBaseUrl().toString());
+
     http.authorizeRequests()
+        .antMatchers(serviceUrlPatterns.getBaseUrl().toString())
+        .authenticated()
         .antMatchers("/**")
         .anonymous()
-        //.antMatchers("/base/*")
-//        .antMatchers(serviceUrlPatterns.getPatterns().toArray(new String[0]))
-        .antMatchers(serviceUrlPatterns.getBaseUrl())
-        .authenticated()
         .and()
         .exceptionHandling().authenticationEntryPoint(unauthorizedEntryPoint())
         .and()

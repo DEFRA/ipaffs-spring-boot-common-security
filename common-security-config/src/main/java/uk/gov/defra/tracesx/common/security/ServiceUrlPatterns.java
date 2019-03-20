@@ -10,5 +10,5 @@ public interface ServiceUrlPatterns {
    */
   List<String> getPatterns();
 
-  String getBaseUrl();
+  List<String> getBaseUrl();
 }
