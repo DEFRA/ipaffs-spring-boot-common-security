@@ -10,33 +10,41 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import uk.gov.defra.tracesx.common.permissions.PermissionsCache;
 import uk.gov.defra.tracesx.common.security.filter.PermissionsFilter;
 import uk.gov.defra.tracesx.common.security.filter.JwtTokenFilter;
+import uk.gov.defra.tracesx.common.security.jwt.JwtTokenValidator;
 
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-  @Autowired
-  private JwtTokenFilter jwtTokenFilter;
+   @Autowired
+   private JwtTokenValidator jwtTokenValidator;
 
   @Autowired
   private ServiceUrlPatterns serviceUrlPatterns;
 
   @Autowired
-  private PermissionsFilter permissionsFilter;
+  private PermissionsCache permissionsCache;
+
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     http.csrf().disable()
         .authorizeRequests()
-        .antMatchers(String.join(",", serviceUrlPatterns.getBaseUrl())).fullyAuthenticated()
-        .and()
-        .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
-        .addFilterBefore(permissionsFilter, UsernamePasswordAuthenticationFilter.class)
+        .antMatchers(serviceUrlPatterns.getBaseUrl().toArray(new String[0])).fullyAuthenticated();
+
+    for(String baseUrl : serviceUrlPatterns.getBaseUrl()) {
+      http.addFilterBefore(jwtTokenFilter(baseUrl), UsernamePasswordAuthenticationFilter.class);
+      http.addFilterBefore(permissionsFilter(baseUrl), UsernamePasswordAuthenticationFilter.class);
+    }
+
+    http
         .antMatcher("/**").anonymous();
 
     http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
@@ -51,6 +59,14 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
   @Bean
   public AuthenticationEntryPoint unauthorizedEntryPoint() {
     return (request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+  }
+
+  private JwtTokenFilter jwtTokenFilter(String antUrlPattern) {
+    return new JwtTokenFilter(antUrlPattern, jwtTokenValidator);
+  }
+
+  private PermissionsFilter permissionsFilter(String antUrlPattern) {
+    return new PermissionsFilter(antUrlPattern, permissionsCache);
   }
 
 }
