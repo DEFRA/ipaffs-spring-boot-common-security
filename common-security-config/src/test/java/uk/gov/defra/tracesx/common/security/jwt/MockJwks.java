@@ -19,25 +19,25 @@ import lombok.Getter;
 
 public class MockJwks {
 
-  static final String JWKS_URL1 = "https://provider-one.com/jwks";
-  static final String JWKS_ISSUER1 = "https://provider-one.com";
-  static final String JWKS_AUDIENCE1 = "08ece0b1-2e8d-4c12-9f85-b8f758a3f977";
+  public static final String JWKS_URL1 = "https://provider-one.com/jwks";
+  public static final String JWKS_ISSUER1 = "https://provider-one.com";
+  public static final String JWKS_AUDIENCE1 = "08ece0b1-2e8d-4c12-9f85-b8f758a3f977";
 
-  static final String JWKS_URL2 = "https://provider-two.com/jwks";
-  static final String JWKS_ISSUER2 = "https://provider-two.com";
-  static final String JWKS_AUDIENCE2 = "20ffdf69-9430-4791-86c2-dd86b6186112";
+  public static final String JWKS_URL2 = "https://provider-two.com/jwks";
+  public static final String JWKS_ISSUER2 = "https://provider-two.com";
+  public static final String JWKS_AUDIENCE2 = "20ffdf69-9430-4791-86c2-dd86b6186112";
 
-  static final String SUB_VALUE = "14f30ce2-114f-4375-982f-68c43023ce02";
-  static final List<String> ROLES_VALUE = Collections.singletonList("ROLE1");
+  public static final String SUB_VALUE = "14f30ce2-114f-4375-982f-68c43023ce02";
+  public static final List<String> ROLES_VALUE = Collections.singletonList("ROLE1");
 
-  static final RSAKey NIMBUS_KEY1 = createNimbusKey();
-  static final KeyPair KEY_PAIR1 = toKeyPair(NIMBUS_KEY1);
-  static final JwkElement JWK_ELEMENT1 = createJwkElement(NIMBUS_KEY1);
-  static final Jwk JWK1 = createJwkForProvider(NIMBUS_KEY1);
-  static final RSAKey NIMBUS_KEY2 = createNimbusKey();
-  static final KeyPair KEY_PAIR2 = toKeyPair(NIMBUS_KEY2);
-  static final JwkElement JWK_ELEMENT2 = createJwkElement(NIMBUS_KEY2);
-  static final Jwk JWK2 = createJwkForProvider(NIMBUS_KEY2);
+  public static final RSAKey NIMBUS_KEY1 = createNimbusKey();
+  public static final KeyPair KEY_PAIR1 = toKeyPair(NIMBUS_KEY1);
+  public static final JwkElement JWK_ELEMENT1 = createJwkElement(NIMBUS_KEY1);
+  public static final Jwk JWK1 = createJwkForProvider(NIMBUS_KEY1);
+  public static final RSAKey NIMBUS_KEY2 = createNimbusKey();
+  public static final KeyPair KEY_PAIR2 = toKeyPair(NIMBUS_KEY2);
+  public static final JwkElement JWK_ELEMENT2 = createJwkElement(NIMBUS_KEY2);
+  public static final Jwk JWK2 = createJwkForProvider(NIMBUS_KEY2);
 
   private static RSAKey createNimbusKey() {
     try {
@@ -111,7 +111,7 @@ public class MockJwks {
 
   @Getter
   @Builder
-  static class JwkElement {
+  public static class JwkElement {
     private final String alg = "RS256";
     private final String kty = "RSA";
     private final String use = "sig";

@@ -1,11 +1,16 @@
-package uk.gov.defra.tracesx.common.security;
+package uk.gov.defra.tracesx.common.security.filter;
 
-import static javax.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
-import static org.mockito.ArgumentMatchers.argThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.defra.tracesx.common.security.filter.PermissionsFilter.PERMISSIONS_ARE_EMPTY;
+import static uk.gov.defra.tracesx.common.security.filter.PermissionsFilter.ROLES_ARE_EMPTY;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -13,21 +18,26 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import uk.gov.defra.tracesx.common.permissions.PermissionsCache;
+import uk.gov.defra.tracesx.common.security.IdTokenAuthentication;
+import uk.gov.defra.tracesx.common.security.IdTokenUserDetails;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PermissionsFilterTest {
@@ -40,101 +50,98 @@ public class PermissionsFilterTest {
 
   @Mock private HttpServletResponse response;
 
-  @Mock private FilterChain filterChain;
+  @Mock
+  private IdTokenAuthentication authentication;
 
-  @Mock private Authentication authentication;
-
-  @Mock private UserDetails userDetails;
+  @Mock
+  private IdTokenUserDetails userDetails;
 
   @Mock private PermissionsCache permissionsCache;
 
-  @Mock private AuthenticationFacade authenticationFacade;
+  private PermissionsFilter permissionsFilter;
 
-  @InjectMocks private PermissionsFilter permissionsFilter;
+  @Before
+  public void before() {
+    permissionsFilter = new PermissionsFilter("/url", permissionsCache);
+  }
 
   @After
   public void after() {
-    verify(authenticationFacade).getAuthentication();
-    verify(authentication).getDetails();
     verifyNoMoreInteractions(
         request,
         response,
-        filterChain,
         authentication,
-        userDetails,
-        permissionsCache,
-        authenticationFacade);
+        permissionsCache);
   }
 
   private void mockAuthenticationSingleton(List<GrantedAuthority> authorities) {
-    when(userDetails.getAuthorities()).thenReturn((Collection) authorities);
+    when(userDetails.getAuthorities()).thenReturn(authorities);
     when(authentication.getDetails()).thenReturn(userDetails);
-    when(authenticationFacade.getAuthentication()).thenReturn(authentication);
+    SecurityContextHolder.getContext().setAuthentication(authentication);
   }
 
   @Test
-  public void doFilter_noUserDetails_sendErrorUnauthorized() throws Exception {
+  public void doFilter_noUserDetails_throwsAuthenticationException() {
+    authentication = mock(IdTokenAuthentication.class);
     when(authentication.getDetails()).thenReturn(null);
-    when(authenticationFacade.getAuthentication()).thenReturn(authentication);
+    SecurityContextHolder.getContext().setAuthentication(authentication);
 
-    permissionsFilter.doFilterInternal(request, response, filterChain);
+    assertThatExceptionOfType(AuthenticationException.class)
+        .isThrownBy(() -> permissionsFilter.attemptAuthentication(request, response))
+        .withMessageContaining(ROLES_ARE_EMPTY);
 
-    verify(response)
-        .sendError(
-            eq(SC_UNAUTHORIZED),
-            argThat(message -> message.contains(PermissionsFilter.ROLES_ARE_EMPTY)));
+    verify(authentication).getDetails();
   }
 
   @Test
-  public void doFilter_userHasNoRoles_sendErrorUnauthorized() throws Exception {
+  public void doFilter_userHasNoRoles_throwsAuthenticationException() {
     mockAuthenticationSingleton(Collections.emptyList());
 
-    permissionsFilter.doFilterInternal(request, response, filterChain);
+    assertThatExceptionOfType(AuthenticationException.class)
+        .isThrownBy(() -> permissionsFilter.attemptAuthentication(request, response))
+        .withMessageContaining(ROLES_ARE_EMPTY);
 
+    verify(authentication).getDetails();
     verify(userDetails).getAuthorities();
-    verify(response)
-        .sendError(
-            eq(SC_UNAUTHORIZED),
-            argThat(message -> message.contains(PermissionsFilter.ROLES_ARE_EMPTY)));
   }
 
   @Test
-  public void doFilter_userHasNoPermissions_sendErrorUnauthorized() throws Exception {
+  public void doFilter_userHasNoPermissions_throwsAuthenticationException() throws Exception {
     mockAuthenticationSingleton(Collections.singletonList(new SimpleGrantedAuthority(ROLE)));
     when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn(BEARER_TOKEN);
     when(permissionsCache.permissionsList(eq(ROLE), eq(BEARER_TOKEN)))
         .thenReturn(Collections.emptyList());
 
-    permissionsFilter.doFilterInternal(request, response, filterChain);
+    assertThatExceptionOfType(AuthenticationException.class)
+        .isThrownBy(() -> permissionsFilter.attemptAuthentication(request, response))
+        .withMessageContaining(PERMISSIONS_ARE_EMPTY);
 
+    verify(authentication).getDetails();
     verify(userDetails).getAuthorities();
     verify(request).getHeader(HttpHeaders.AUTHORIZATION);
     verify(permissionsCache).permissionsList(eq(ROLE), eq(BEARER_TOKEN));
-    verify(response)
-        .sendError(
-            eq(SC_UNAUTHORIZED),
-            argThat(message -> message.contains(PermissionsFilter.PERMISSIONS_ARE_EMPTY)));
   }
 
   @Test
-  public void doFilter_userHasSingleRoleAndPermission_callsFilterChain() throws Exception {
+  public void doFilter_userHasSingleRoleAndPermission_amendsAuthentication() throws Exception {
     mockAuthenticationSingleton(Collections.singletonList(new SimpleGrantedAuthority(ROLE)));
     when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn(BEARER_TOKEN);
     when(permissionsCache.permissionsList(eq(ROLE), eq(BEARER_TOKEN)))
         .thenReturn(Collections.singletonList(PERMISSION));
 
-    permissionsFilter.doFilterInternal(request, response, filterChain);
+    // TODO assert authentication
+    Authentication amendedAuthentication = permissionsFilter.attemptAuthentication(request, response);
+    GrantedAuthority expectedAuthority = new SimpleGrantedAuthority(PERMISSION);
+    assertThat((Collection<GrantedAuthority>) amendedAuthentication.getAuthorities()).containsOnly(expectedAuthority);
 
+    verify(authentication, times(2)).getDetails();
     verify(userDetails).getAuthorities();
     verify(request).getHeader(HttpHeaders.AUTHORIZATION);
     verify(permissionsCache).permissionsList(eq(ROLE), eq(BEARER_TOKEN));
-    verify(authenticationFacade)
-        .replaceAuthorities(eq(Collections.singletonList(new SimpleGrantedAuthority(PERMISSION))));
-    verify(filterChain).doFilter(request, response);
   }
 
   @Test
-  public void doFilter_userHasMultipleRolesAndPermissions_callsFilterChain() throws Exception {
+  public void doFilter_userHasMultipleRolesAndPermissions_amendsAuthentication() throws Exception {
     final String role1 = "ROLE1";
     final String role2 = "ROLE2";
     List<String> ROLES = Arrays.asList(role1, role2);
@@ -148,19 +155,21 @@ public class PermissionsFilterTest {
     when(permissionsCache.permissionsList(eq(role2), eq(BEARER_TOKEN)))
         .thenReturn(PERMISSIONS_ROLE2);
 
-    permissionsFilter.doFilterInternal(request, response, filterChain);
+    // TODO assert authentication
+    Authentication amendedAuthentication = permissionsFilter.attemptAuthentication(request, response);
 
     List<GrantedAuthority> expectedAuthorities =
         Stream.of(PERMISSIONS_ROLE1, PERMISSIONS_ROLE2)
             .flatMap(List::stream)
             .map(SimpleGrantedAuthority::new)
             .collect(Collectors.toList());
+
+    assertThat(amendedAuthentication.getAuthorities()).containsOnlyElementsOf((Iterable) expectedAuthorities);
+
+    verify(authentication, times(2)).getDetails();
     verify(userDetails).getAuthorities();
     verify(request).getHeader(HttpHeaders.AUTHORIZATION);
     verify(permissionsCache).permissionsList(eq(role1), eq(BEARER_TOKEN));
     verify(permissionsCache).permissionsList(eq(role2), eq(BEARER_TOKEN));
-    verify(authenticationFacade)
-        .replaceAuthorities(argThat(authorities -> authorities.containsAll(expectedAuthorities)));
-    verify(filterChain).doFilter(request, response);
   }
 }

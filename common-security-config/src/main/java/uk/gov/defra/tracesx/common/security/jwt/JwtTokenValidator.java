@@ -17,7 +17,7 @@ import org.springframework.security.jwt.crypto.sign.InvalidSignatureException;
 import org.springframework.security.jwt.crypto.sign.RsaVerifier;
 import org.springframework.security.jwt.crypto.sign.SignatureVerifier;
 import org.springframework.stereotype.Component;
-import uk.gov.defra.tracesx.common.exceptions.UnauthorizedException;
+import uk.gov.defra.tracesx.common.exceptions.JwtAuthenticationException;
 import uk.gov.defra.tracesx.common.security.IdTokenUserDetails;
 import uk.gov.defra.tracesx.common.security.jwks.JwksCache;
 import uk.gov.defra.tracesx.common.security.jwks.KeyAndClaims;
@@ -40,12 +40,12 @@ public class JwtTokenValidator {
     this.objectMapper = objectMapper;
   }
 
-  public IdTokenUserDetails validateToken(String idToken) throws UnauthorizedException {
+  public IdTokenUserDetails validateToken(String idToken) throws JwtAuthenticationException {
     Map<String, Object> decoded = decode(idToken);
     return jwtUserMapper.createUser(decoded, idToken);
   }
 
-  private Map<String, Object> decode(String idToken) throws UnauthorizedException {
+  private Map<String, Object> decode(String idToken) throws JwtAuthenticationException {
     String kid = JwtHelper.headers(idToken).get("kid");
     if(StringUtils.isEmpty(kid)) {
       LOGGER.error("Key id (kid) is missing from the id token header.");
@@ -71,7 +71,7 @@ public class JwtTokenValidator {
     throw unauthorizedException();
   }
 
-  private Map<String, Object> parseClaims(Jwt jwt) throws UnauthorizedException {
+  private Map<String, Object> parseClaims(Jwt jwt) throws JwtAuthenticationException {
     try {
       return objectMapper.readValue(jwt.getClaims(), Map.class);
     } catch (IOException e) {
@@ -80,7 +80,7 @@ public class JwtTokenValidator {
     }
   }
 
-  private void verifyExpiry(Map claims) throws UnauthorizedException {
+  private void verifyExpiry(Map claims) throws JwtAuthenticationException {
     if(!claims.containsKey(EXP)) {
       LOGGER.error("Token does not contain an expiry (exp) claim.");
       throw unauthorizedException();
@@ -106,8 +106,8 @@ public class JwtTokenValidator {
         && keyAndClaims.getAud().equals(claims.get(AUD));
   }
 
-  private UnauthorizedException unauthorizedException() {
-    return new UnauthorizedException("Unable to validate credentials");
+  private JwtAuthenticationException unauthorizedException() {
+    return new JwtAuthenticationException("Unable to validate credentials");
   }
 
 }

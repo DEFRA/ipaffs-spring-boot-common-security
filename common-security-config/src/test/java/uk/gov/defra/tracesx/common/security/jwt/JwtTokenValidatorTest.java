@@ -25,12 +25,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.defra.tracesx.common.exceptions.UnauthorizedException;
+import uk.gov.defra.tracesx.common.exceptions.JwtAuthenticationException;
 import uk.gov.defra.tracesx.common.security.IdTokenUserDetails;
 import uk.gov.defra.tracesx.common.security.jwks.JwksCache;
 import uk.gov.defra.tracesx.common.security.jwks.KeyAndClaims;
-import uk.gov.defra.tracesx.common.security.jwt.JwtTokenValidator;
-import uk.gov.defra.tracesx.common.security.jwt.JwtUserMapper;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JwtTokenValidatorTest {
@@ -68,7 +66,7 @@ public class JwtTokenValidatorTest {
   }
 
   @Test
-  public void validateToken_valid_successfully() throws UnauthorizedException {
+  public void validateToken_valid_successfully() throws JwtAuthenticationException {
     Date exp = Date.from(LocalDateTime.now().plusDays(1).toInstant(ZoneOffset.UTC));
     String token =
         Jwts.builder().setHeader(Collections.singletonMap("kid", KID))
@@ -90,7 +88,7 @@ public class JwtTokenValidatorTest {
         Jwts.builder().setHeader(Collections.emptyMap())
             .claim("oid", "ac4cc24d-5351-49ee-83e6-1ddaab285524")
             .signWith(KEY_PAIR.getPrivate()).compact();
-    assertThatExceptionOfType(UnauthorizedException.class)
+    assertThatExceptionOfType(JwtAuthenticationException.class)
         .isThrownBy(() -> jwtTokenValidator.validateToken(token));
   }
 
@@ -104,7 +102,7 @@ public class JwtTokenValidatorTest {
             .claim("iss", ISS)
             .signWith(KEY_PAIR.getPrivate()).compact();
     when(jwksCache.getPublicKeys(KID)).thenReturn(keyAndClaims);
-    assertThatExceptionOfType(UnauthorizedException.class)
+    assertThatExceptionOfType(JwtAuthenticationException.class)
         .isThrownBy(() -> jwtTokenValidator.validateToken(token));
     verify(jwksCache).getPublicKeys(KID);
   }
@@ -117,7 +115,7 @@ public class JwtTokenValidatorTest {
             .claim("iss", ISS)
             .signWith(KEY_PAIR.getPrivate()).compact();
     when(jwksCache.getPublicKeys(KID)).thenReturn(keyAndClaims);
-    assertThatExceptionOfType(UnauthorizedException.class)
+    assertThatExceptionOfType(JwtAuthenticationException.class)
         .isThrownBy(() -> jwtTokenValidator.validateToken(token));
     verify(jwksCache).getPublicKeys(KID);
   }
@@ -131,7 +129,7 @@ public class JwtTokenValidatorTest {
             .claim("iss", ISS)
             .signWith(KEY_PAIR.getPrivate()).compact();
     when(jwksCache.getPublicKeys(KID)).thenReturn(keyAndClaims);
-    assertThatExceptionOfType(UnauthorizedException.class)
+    assertThatExceptionOfType(JwtAuthenticationException.class)
         .isThrownBy(() -> jwtTokenValidator.validateToken(token));
     verify(jwksCache).getPublicKeys(KID);
   }
@@ -146,7 +144,7 @@ public class JwtTokenValidatorTest {
             .claim("iss", ISS)
             .signWith(ALT_KEY_PAIR.getPrivate()).compact();
     when(jwksCache.getPublicKeys(KID)).thenReturn(keyAndClaims);
-    assertThatExceptionOfType(UnauthorizedException.class)
+    assertThatExceptionOfType(JwtAuthenticationException.class)
         .isThrownBy(() -> jwtTokenValidator.validateToken(token));
     verify(jwksCache).getPublicKeys(KID);
   }
@@ -161,7 +159,7 @@ public class JwtTokenValidatorTest {
             .claim("iss", ISS)
             .signWith(KEY_PAIR.getPrivate()).compact();
     when(jwksCache.getPublicKeys(KID)).thenReturn(keyAndClaims);
-    assertThatExceptionOfType(UnauthorizedException.class)
+    assertThatExceptionOfType(JwtAuthenticationException.class)
         .isThrownBy(() -> jwtTokenValidator.validateToken(token));
     verify(jwksCache).getPublicKeys(KID);
   }
@@ -176,7 +174,7 @@ public class JwtTokenValidatorTest {
             .claim("iss", "invalid_issuer")
             .signWith(KEY_PAIR.getPrivate()).compact();
     when(jwksCache.getPublicKeys(KID)).thenReturn(keyAndClaims);
-    assertThatExceptionOfType(UnauthorizedException.class)
+    assertThatExceptionOfType(JwtAuthenticationException.class)
         .isThrownBy(() -> jwtTokenValidator.validateToken(token));
     verify(jwksCache).getPublicKeys(KID);
   }

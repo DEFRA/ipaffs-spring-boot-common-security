@@ -1,4 +1,4 @@
-package uk.gov.defra.tracesx.common.security.jwt;
+package uk.gov.defra.tracesx.common.security.filter;
 
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,7 +34,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -42,11 +41,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import uk.gov.defra.tracesx.common.security.RoleToAuthorityMapper;
 import uk.gov.defra.tracesx.common.security.jwks.JwkProviderFactory;
 import uk.gov.defra.tracesx.common.security.jwks.JwksCache;
 import uk.gov.defra.tracesx.common.security.jwks.JwksConfiguration;
+import uk.gov.defra.tracesx.common.security.jwt.JwtTokenValidator;
+import uk.gov.defra.tracesx.common.security.jwt.JwtUserMapper;
 
 public class JwtTokenFilterComponentTest {
 
@@ -66,7 +66,6 @@ public class JwtTokenFilterComponentTest {
 
   private HttpServletRequest request;
   private HttpServletResponse response;
-  private FilterChain filterChain;
   private JwkProvider jwkProvider1;
   private JwkProvider jwkProvider2;
 
@@ -98,16 +97,15 @@ public class JwtTokenFilterComponentTest {
 
     jwksCache = spy(new JwksCache(jwksConfigurations, jwkProviderFactory));
     jwtTokenValidator = new JwtTokenValidator(jwtUserMapper, jwksCache, objectMapper);
-    jwtTokenFilter = new JwtTokenFilter(jwtTokenValidator);
+    jwtTokenFilter = new JwtTokenFilter("/url", jwtTokenValidator);
 
     request = mock(HttpServletRequest.class);
     response = mock(HttpServletResponse.class);
-    filterChain = mock(FilterChain.class);
   }
 
   @After
   public void after() {
-    verifyNoMoreInteractions(filterChain, response, jwkProvider1, jwkProvider2, jwksCache, jwkProviderFactory);
+    verifyNoMoreInteractions(response, jwkProvider1, jwkProvider2, jwksCache, jwkProviderFactory);
   }
 
   @Test
@@ -115,16 +113,10 @@ public class JwtTokenFilterComponentTest {
     when(request.getHeader("Authorization")).thenReturn("Bearer " + createToken1(expiresInTenMinutes()));
     Authentication authentication;
 
-    jwtTokenFilter.doFilterInternal(request, response, filterChain);
-    authentication = SecurityContextHolder.getContext().getAuthentication(); // TODO: assert
-
-    jwtTokenFilter.doFilterInternal(request, response, filterChain);
-    authentication = SecurityContextHolder.getContext().getAuthentication(); // TODO: assert
-
-    jwtTokenFilter.doFilterInternal(request, response, filterChain);
-    authentication = SecurityContextHolder.getContext().getAuthentication(); // TODO: assert
-
-    verify(filterChain, times(3)).doFilter(request, response);
+    // TODO: assert authentication details
+    authentication = jwtTokenFilter.attemptAuthentication(request, response);
+    authentication = jwtTokenFilter.attemptAuthentication(request, response);
+    authentication = jwtTokenFilter.attemptAuthentication(request, response);
 
     verify(jwkProviderFactory, times(2)).newInstance(any(JwksConfiguration.class));
     verify(jwkProviderFactory).createUrlJwkProvider(eq(new URL(JWKS_URL1)));
@@ -140,18 +132,14 @@ public class JwtTokenFilterComponentTest {
   public void doFilter_validRequestsMultipleProviders_eachProviderIsCalledOnce() throws Exception {
     Authentication authentication;
     when(request.getHeader("Authorization")).thenReturn("Bearer " + createToken1(expiresInTenMinutes()));
-    jwtTokenFilter.doFilterInternal(request, response, filterChain);
-    authentication = SecurityContextHolder.getContext().getAuthentication(); // TODO: assert
+    authentication = jwtTokenFilter.attemptAuthentication(request, response);
+    // TODO: assert authentication details
 
     when(request.getHeader("Authorization")).thenReturn("Bearer " + createToken2(expiresInTenMinutes()));
-    jwtTokenFilter.doFilterInternal(request, response, filterChain);
-    authentication = SecurityContextHolder.getContext().getAuthentication(); // TODO: assert
+    authentication = jwtTokenFilter.attemptAuthentication(request, response);
 
     when(request.getHeader("Authorization")).thenReturn("Bearer " + createToken1(expiresInTenMinutes()));
-    jwtTokenFilter.doFilterInternal(request, response, filterChain);
-    authentication = SecurityContextHolder.getContext().getAuthentication(); // TODO: assert
-
-    verify(filterChain, times(3)).doFilter(request, response);
+    authentication = jwtTokenFilter.attemptAuthentication(request, response);
 
     verify(jwkProviderFactory, times(2)).newInstance(any(JwksConfiguration.class));
     verify(jwkProviderFactory).createUrlJwkProvider(eq(new URL(JWKS_URL1)));
@@ -171,15 +159,12 @@ public class JwtTokenFilterComponentTest {
     when(request.getHeader("Authorization")).thenReturn("Bearer " + createToken1(expiresInTenMinutes()));
     Authentication authentication;
 
-    jwtTokenFilter.doFilterInternal(request, response, filterChain);
-    authentication = SecurityContextHolder.getContext().getAuthentication(); // TODO: assert
+    authentication = jwtTokenFilter.attemptAuthentication(request, response);
+    // TODO: assert authentication details
 
     Thread.sleep(KEY_EXPIRY_MILLIS * 2);
 
-    jwtTokenFilter.doFilterInternal(request, response, filterChain);
-    authentication = SecurityContextHolder.getContext().getAuthentication(); // TODO: assert
-
-    verify(filterChain, times(2)).doFilter(request, response);
+    authentication = jwtTokenFilter.attemptAuthentication(request, response);
 
     verify(jwkProviderFactory, times(2)).newInstance(any(JwksConfiguration.class));
     verify(jwkProviderFactory).createUrlJwkProvider(eq(new URL(JWKS_URL1)));

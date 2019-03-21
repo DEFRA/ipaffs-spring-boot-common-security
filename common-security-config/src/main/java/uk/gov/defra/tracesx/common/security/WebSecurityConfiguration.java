@@ -12,7 +12,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import uk.gov.defra.tracesx.common.security.jwt.JwtTokenFilter;
+import uk.gov.defra.tracesx.common.security.filter.PermissionsFilter;
+import uk.gov.defra.tracesx.common.security.filter.JwtTokenFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -32,7 +33,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
   protected void configure(HttpSecurity http) throws Exception {
     http.csrf().disable()
         .authorizeRequests()
-        .antMatchers(String.join(",", serviceUrlPatterns.getBaseUrl())).authenticated()
+        .antMatchers(String.join(",", serviceUrlPatterns.getBaseUrl())).fullyAuthenticated()
         .and()
         .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
         .addFilterBefore(permissionsFilter, UsernamePasswordAuthenticationFilter.class)
