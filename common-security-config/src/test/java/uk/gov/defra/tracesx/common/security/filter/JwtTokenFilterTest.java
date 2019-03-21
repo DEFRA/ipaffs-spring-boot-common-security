@@ -50,7 +50,8 @@ public class JwtTokenFilterTest {
 
   @After
   public void after() {
-    verifyNoMoreInteractions(jwtTokenValidator, response); // TODO: add request?
+    verify(request).getHeader("Authorization");
+    verifyNoMoreInteractions(jwtTokenValidator, request, response);
   }
 
   @Test

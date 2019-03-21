@@ -129,7 +129,6 @@ public class PermissionsFilterTest {
     when(permissionsCache.permissionsList(eq(ROLE), eq(BEARER_TOKEN)))
         .thenReturn(Collections.singletonList(PERMISSION));
 
-    // TODO assert authentication
     Authentication amendedAuthentication = permissionsFilter.attemptAuthentication(request, response);
     GrantedAuthority expectedAuthority = new SimpleGrantedAuthority(PERMISSION);
     assertThat((Collection<GrantedAuthority>) amendedAuthentication.getAuthorities()).containsOnly(expectedAuthority);
@@ -155,7 +154,6 @@ public class PermissionsFilterTest {
     when(permissionsCache.permissionsList(eq(role2), eq(BEARER_TOKEN)))
         .thenReturn(PERMISSIONS_ROLE2);
 
-    // TODO assert authentication
     Authentication amendedAuthentication = permissionsFilter.attemptAuthentication(request, response);
 
     List<GrantedAuthority> expectedAuthorities =
