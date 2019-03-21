@@ -1,5 +1,7 @@
 package uk.gov.defra.tracesx.common.security.filter;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -20,6 +22,7 @@ import static uk.gov.defra.tracesx.common.security.jwt.MockJwks.JWKS_URL1;
 import static uk.gov.defra.tracesx.common.security.jwt.MockJwks.JWKS_URL2;
 import static uk.gov.defra.tracesx.common.security.jwt.MockJwks.JWK_ELEMENT1;
 import static uk.gov.defra.tracesx.common.security.jwt.MockJwks.JWK_ELEMENT2;
+import static uk.gov.defra.tracesx.common.security.jwt.MockJwks.SUB_VALUE;
 import static uk.gov.defra.tracesx.common.security.jwt.MockJwks.createToken1;
 import static uk.gov.defra.tracesx.common.security.jwt.MockJwks.createToken2;
 
@@ -31,9 +34,11 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -41,12 +46,17 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import uk.gov.defra.tracesx.common.security.IdTokenAuthentication;
+import uk.gov.defra.tracesx.common.security.IdTokenUserDetails;
 import uk.gov.defra.tracesx.common.security.RoleToAuthorityMapper;
 import uk.gov.defra.tracesx.common.security.jwks.JwkProviderFactory;
 import uk.gov.defra.tracesx.common.security.jwks.JwksCache;
 import uk.gov.defra.tracesx.common.security.jwks.JwksConfiguration;
 import uk.gov.defra.tracesx.common.security.jwt.JwtTokenValidator;
 import uk.gov.defra.tracesx.common.security.jwt.JwtUserMapper;
+import uk.gov.defra.tracesx.common.security.jwt.MockJwks;
 
 public class JwtTokenFilterComponentTest {
 
@@ -113,10 +123,12 @@ public class JwtTokenFilterComponentTest {
     when(request.getHeader("Authorization")).thenReturn("Bearer " + createToken1(expiresInTenMinutes()));
     Authentication authentication;
 
-    // TODO: assert authentication details
     authentication = jwtTokenFilter.attemptAuthentication(request, response);
+    assertThatAuthenticationIsValid(authentication);
     authentication = jwtTokenFilter.attemptAuthentication(request, response);
+    assertThatAuthenticationIsValid(authentication);
     authentication = jwtTokenFilter.attemptAuthentication(request, response);
+    assertThatAuthenticationIsValid(authentication);
 
     verify(jwkProviderFactory, times(2)).newInstance(any(JwksConfiguration.class));
     verify(jwkProviderFactory).createUrlJwkProvider(eq(new URL(JWKS_URL1)));
@@ -128,18 +140,39 @@ public class JwtTokenFilterComponentTest {
     verify(jwksCache, times(3)).getPublicKeys(JWK_ELEMENT1.getKid());
   }
 
+  private static final List<GrantedAuthority> EXPECTED_AUTHORITIES = Collections.unmodifiableList(MockJwks.ROLES_VALUE.stream().map(
+      SimpleGrantedAuthority::new).collect(Collectors.toList()));
+
+  private void assertThatAuthenticationIsValid(Authentication authentication) {
+    assertThat(authentication).isInstanceOf(IdTokenAuthentication.class);
+    assertThat(authentication.isAuthenticated()).isTrue();
+    assertThat(authentication.getAuthorities()).containsOnlyElementsOf((Iterable) EXPECTED_AUTHORITIES);
+    assertThat(authentication.getPrincipal()).isEqualTo(SUB_VALUE);
+    assertThat(authentication.getDetails()).isInstanceOf(IdTokenUserDetails.class);
+    IdTokenUserDetails details = (IdTokenUserDetails) authentication.getDetails();
+    assertThat(details.getUserObjectId()).isEqualTo(SUB_VALUE);
+    assertThat(details.getDisplayName()).isEqualTo(SUB_VALUE);
+    assertThat(details.getUsername()).isEqualTo(SUB_VALUE);
+    assertThat(details.getPassword()).isNull();
+    assertThat(details.getAuthorities()).containsOnlyElementsOf((Iterable) EXPECTED_AUTHORITIES);
+    assertThat(details.getIdToken()).isNotBlank();
+  }
+
   @Test
   public void doFilter_validRequestsMultipleProviders_eachProviderIsCalledOnce() throws Exception {
     Authentication authentication;
     when(request.getHeader("Authorization")).thenReturn("Bearer " + createToken1(expiresInTenMinutes()));
     authentication = jwtTokenFilter.attemptAuthentication(request, response);
-    // TODO: assert authentication details
+    assertThatAuthenticationIsValid(authentication);
+
 
     when(request.getHeader("Authorization")).thenReturn("Bearer " + createToken2(expiresInTenMinutes()));
     authentication = jwtTokenFilter.attemptAuthentication(request, response);
+    assertThatAuthenticationIsValid(authentication);
 
     when(request.getHeader("Authorization")).thenReturn("Bearer " + createToken1(expiresInTenMinutes()));
     authentication = jwtTokenFilter.attemptAuthentication(request, response);
+    assertThatAuthenticationIsValid(authentication);
 
     verify(jwkProviderFactory, times(2)).newInstance(any(JwksConfiguration.class));
     verify(jwkProviderFactory).createUrlJwkProvider(eq(new URL(JWKS_URL1)));
@@ -160,11 +193,12 @@ public class JwtTokenFilterComponentTest {
     Authentication authentication;
 
     authentication = jwtTokenFilter.attemptAuthentication(request, response);
-    // TODO: assert authentication details
+    assertThatAuthenticationIsValid(authentication);
 
     Thread.sleep(KEY_EXPIRY_MILLIS * 2);
 
     authentication = jwtTokenFilter.attemptAuthentication(request, response);
+    assertThatAuthenticationIsValid(authentication);
 
     verify(jwkProviderFactory, times(2)).newInstance(any(JwksConfiguration.class));
     verify(jwkProviderFactory).createUrlJwkProvider(eq(new URL(JWKS_URL1)));
