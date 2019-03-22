@@ -7,8 +7,12 @@
   <packaging>pom</packaging>
   <groupId>uk.gov.defra.tracesx</groupId>
 
+  <properties>
+    <project.scm.id>gitlab</project.scm.id>
+  </properties>
+
   <scm>
-    <connection>scm:git:git@giteux.azure.defra.cloud:imports/spring-boot-common-security.git</connection>
+    <connection>scm:git:https://giteux.azure.defra.cloud/imports/spring-boot-common-security.git</connection>
     <tag>HEAD</tag>
   </scm>
 
