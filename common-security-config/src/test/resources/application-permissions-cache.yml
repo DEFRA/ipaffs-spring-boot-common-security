@@ -1,0 +1,15 @@
+info:
+  app:
+    name: Unit-Test App
+permissions:
+  service:
+    schema: http
+    host: test-host
+    port: 8080
+    user: test-user
+    password: test-password
+    connectionTimeout: 30
+    readTimeout: 30
+  security:
+    token-feature-switch: false
+    default-roles: importer,inspector
