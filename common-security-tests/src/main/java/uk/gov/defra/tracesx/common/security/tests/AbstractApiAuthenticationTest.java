@@ -24,8 +24,9 @@ public abstract class AbstractApiAuthenticationTest {
 
   private final SelfSignedTokenClient tokenClient = new SelfSignedTokenClient();
 
+  @SuppressWarnings("squid:S2386")
   @DataPoints("Token Types")
-  public static TokenType[] tokenTypes = new TokenType[]{AD, B2C};
+  public static final TokenType[] tokenTypes = new TokenType[]{AD, B2C};
 
   @Theory
   public void callApi_withoutBearerToken_respondsWith401Error(
