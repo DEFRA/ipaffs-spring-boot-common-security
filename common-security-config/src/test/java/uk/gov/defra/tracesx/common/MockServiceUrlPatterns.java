@@ -7,15 +7,11 @@ import uk.gov.defra.tracesx.common.security.ServiceUrlPatterns;
 
 public class MockServiceUrlPatterns implements ServiceUrlPatterns {
 
-  public static final List<String> PATTERNS = Collections.unmodifiableList(
-      Arrays.asList("/path1/*", "/path2/*")
-  );
+  public static final List<String> PATTERNS =
+      Collections.unmodifiableList(Arrays.asList("/path1/*", "/path2/*"));
 
   @Override
-  public List<String> getPatterns() {
+  public List<String> getAuthorizedPatterns() {
     return PATTERNS;
   }
-
-  @Override
-  public List<String> getBaseUrl() { return Arrays.asList("/path/*"); }
 }

@@ -17,6 +17,7 @@ public class ClaimsAwareJwkProvider extends GuavaCachedJwkProvider {
 
   /**
    * Creates a new cached provider specifying cache size and ttl
+   *
    * @param provider fallback provider to use when jwk is not cached
    * @param size number of jwt to cache
    * @param expiresIn amount of time a jwk will live in the cache
@@ -24,8 +25,13 @@ public class ClaimsAwareJwkProvider extends GuavaCachedJwkProvider {
    * @param issuer the issuer associated with this jwk provider
    * @param audience the audience associated with this jwk provider
    */
-  public ClaimsAwareJwkProvider(JwkProvider provider, long size, long expiresIn,
-      TimeUnit expiresUnit, String issuer, String audience) {
+  public ClaimsAwareJwkProvider(
+      JwkProvider provider,
+      long size,
+      long expiresIn,
+      TimeUnit expiresUnit,
+      String issuer,
+      String audience) {
     super(provider, size, expiresIn, expiresUnit);
     this.issuer = issuer;
     this.audience = audience;

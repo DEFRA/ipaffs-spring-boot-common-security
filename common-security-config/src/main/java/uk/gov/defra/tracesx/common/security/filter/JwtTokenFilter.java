@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import uk.gov.defra.tracesx.common.security.IdTokenAuthentication;
 import uk.gov.defra.tracesx.common.security.IdTokenUserDetails;
 import uk.gov.defra.tracesx.common.security.jwt.JwtTokenValidator;
@@ -24,8 +25,15 @@ public class JwtTokenFilter extends StatelessAuthenticationProcessingFilter {
     this.jwtTokenValidator = jwtTokenValidator;
   }
 
+  public JwtTokenFilter(
+      RequestMatcher requiresAuthenticationRequestMatcher, JwtTokenValidator jwtTokenValidator) {
+    super(requiresAuthenticationRequestMatcher);
+    this.jwtTokenValidator = jwtTokenValidator;
+  }
+
   @Override
-  public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse res) throws AuthenticationException, IOException, ServletException {
+  public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse res)
+      throws AuthenticationException, IOException, ServletException {
     String token = resolveToken(req);
     if (null != token) {
       IdTokenUserDetails userDetails = jwtTokenValidator.validateToken(token);
@@ -43,5 +51,4 @@ public class JwtTokenFilter extends StatelessAuthenticationProcessingFilter {
     }
     return null;
   }
-
 }

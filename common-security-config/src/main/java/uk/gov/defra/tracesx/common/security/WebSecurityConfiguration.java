@@ -1,17 +1,17 @@
 package uk.gov.defra.tracesx.common.security;
 
 import javax.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 import uk.gov.defra.tracesx.common.permissions.PermissionsCache;
 import uk.gov.defra.tracesx.common.security.filter.JwtTokenFilter;
 import uk.gov.defra.tracesx.common.security.filter.PermissionsFilter;
@@ -20,52 +20,98 @@ import uk.gov.defra.tracesx.common.security.jwt.JwtTokenValidator;
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfiguration {
+  private static final int ERROR_PATH_SECURITY_ORDER = 1;
+  private static final int ROOT_PATH_SECURITY_ORDER = 2;
+  private static final int ADMIN_PATH_SECURITY_ORDER = 3;
+  private static final int SERVICE_RESOURCES_SECURITY_ORDER = 4;
 
-   @Autowired
-   private JwtTokenValidator jwtTokenValidator;
-
-  @Autowired
-  private ServiceUrlPatterns serviceUrlPatterns;
-
-  @Autowired
-  private PermissionsCache permissionsCache;
-
-
-  @Override
-  protected void configure(HttpSecurity http) throws Exception {
-    http.csrf().disable()
+  private void configureForUnsecuredAccess(HttpSecurity http, String pathPattern) throws Exception {
+    http.antMatcher(pathPattern)
         .authorizeRequests()
-        .antMatchers(serviceUrlPatterns.getBaseUrl().toArray(new String[0])).fullyAuthenticated();
+        .anyRequest()
+        .permitAll()
+        .and()
+        .csrf()
+        .disable()
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+  }
 
-    for(String baseUrl : serviceUrlPatterns.getBaseUrl()) {
-      http.addFilterBefore(jwtTokenFilter(baseUrl), UsernamePasswordAuthenticationFilter.class);
-      http.addFilterBefore(permissionsFilter(baseUrl), UsernamePasswordAuthenticationFilter.class);
+  @Configuration
+  @Order(ERROR_PATH_SECURITY_ORDER)
+  public class ErrorSecurityConfiguration extends WebSecurityConfigurerAdapter {
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+      configureForUnsecuredAccess(http, "/error");
+    }
+  }
+
+  @Configuration
+  @Order(ROOT_PATH_SECURITY_ORDER)
+  public class RootSecurityConfiguration extends WebSecurityConfigurerAdapter {
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+      configureForUnsecuredAccess(http, "/");
+    }
+  }
+
+  @Configuration
+  @Order(ADMIN_PATH_SECURITY_ORDER)
+  public class AdminSecurityConfiguration extends WebSecurityConfigurerAdapter {
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+      configureForUnsecuredAccess(http, "/admin/**");
+    }
+  }
+
+  @Configuration
+  @Order(SERVICE_RESOURCES_SECURITY_ORDER)
+  public static class ServiceResourcesSecurityConfiguration extends WebSecurityConfigurerAdapter {
+    private final JwtTokenValidator jwtTokenValidator;
+
+    private final PermissionsCache permissionsCache;
+
+    public ServiceResourcesSecurityConfiguration(
+        JwtTokenValidator jwtTokenValidator, PermissionsCache permissionsCache) {
+      super();
+      this.jwtTokenValidator = jwtTokenValidator;
+      this.permissionsCache = permissionsCache;
     }
 
-    http
-        .antMatcher("/**").anonymous();
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+      http.csrf()
+          .disable()
+          .exceptionHandling()
+          .authenticationEntryPoint(unauthorizedEntryPoint())
+          .and()
+          .sessionManagement()
+          .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+          .and()
+          .authorizeRequests()
+          .anyRequest()
+          .fullyAuthenticated()
+          .and()
+          .addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class)
+          .addFilterBefore(permissionsFilter(), UsernamePasswordAuthenticationFilter.class);
+    }
 
-    http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-    http.exceptionHandling().authenticationEntryPoint(unauthorizedEntryPoint());
+    @Bean
+    public AuthenticationEntryPoint unauthorizedEntryPoint() {
+      return (request, response, authException) ->
+          response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+    }
+
+    private JwtTokenFilter jwtTokenFilter() {
+      return new JwtTokenFilter(AnyRequestMatcher.INSTANCE, jwtTokenValidator);
+    }
+
+    private PermissionsFilter permissionsFilter() {
+      return new PermissionsFilter(AnyRequestMatcher.INSTANCE, permissionsCache);
+    }
   }
-
-  @Override
-  public void configure(WebSecurity web) {
-    web.ignoring().antMatchers("/", "/admin", "/admin/*");
-  }
-
-  @Bean
-  public AuthenticationEntryPoint unauthorizedEntryPoint() {
-    return (request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-  }
-
-  private JwtTokenFilter jwtTokenFilter(String antUrlPattern) {
-    return new JwtTokenFilter(antUrlPattern, jwtTokenValidator);
-  }
-
-  private PermissionsFilter permissionsFilter(String antUrlPattern) {
-    return new PermissionsFilter(antUrlPattern, permissionsCache);
-  }
-
 }

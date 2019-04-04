@@ -8,7 +8,5 @@ public class JwtContants {
   public static final String UPN = "upn";
   public static final String OID = "oid";
 
-  private JwtContants() {
-
-  }
+  private JwtContants() {}
 }
