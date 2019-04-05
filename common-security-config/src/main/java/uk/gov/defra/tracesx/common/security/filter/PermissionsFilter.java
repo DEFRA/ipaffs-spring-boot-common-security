@@ -16,6 +16,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import uk.gov.defra.tracesx.common.exceptions.PermissionsAuthenticationException;
 import uk.gov.defra.tracesx.common.permissions.PermissionsCache;
 import uk.gov.defra.tracesx.common.security.IdTokenAuthentication;
@@ -27,19 +28,25 @@ public class PermissionsFilter extends StatelessAuthenticationProcessingFilter {
 
   static final String ROLES_ARE_EMPTY = "Roles are empty";
   static final String PERMISSIONS_ARE_EMPTY = "Permissions are empty";
-  public static final String AUTHENTICATION_NOT_FOUND = "Authentication not found on security context.";
+  public static final String AUTHENTICATION_NOT_FOUND =
+      "Authentication not found on security context.";
 
   private final PermissionsCache permissionsCache;
 
-  public PermissionsFilter(String defaultFilterProcessesUrl,
-      PermissionsCache permissionsCache) {
+  public PermissionsFilter(String defaultFilterProcessesUrl, PermissionsCache permissionsCache) {
     super(defaultFilterProcessesUrl);
     this.permissionsCache = permissionsCache;
   }
 
+  public PermissionsFilter(
+      RequestMatcher requiresAuthenticationRequestMatcher, PermissionsCache permissionsCache) {
+    super(requiresAuthenticationRequestMatcher);
+    this.permissionsCache = permissionsCache;
+  }
+
   @Override
-  public Authentication attemptAuthentication(HttpServletRequest request,
-      HttpServletResponse response) throws AuthenticationException {
+  public Authentication attemptAuthentication(
+      HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
     List<String> roles = getRoles();
     if (roles.isEmpty()) {
@@ -50,7 +57,7 @@ public class PermissionsFilter extends StatelessAuthenticationProcessingFilter {
     List<GrantedAuthority> permissions = getPermissions(request, roles);
     if (permissions.isEmpty()) {
       LOGGER.error(PERMISSIONS_ARE_EMPTY);
-     throw new PermissionsAuthenticationException(PERMISSIONS_ARE_EMPTY);
+      throw new PermissionsAuthenticationException(PERMISSIONS_ARE_EMPTY);
     }
 
     return replaceAuthorities(permissions);
@@ -79,25 +86,29 @@ public class PermissionsFilter extends StatelessAuthenticationProcessingFilter {
 
   private IdTokenAuthentication getAuthentication() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if(authentication instanceof IdTokenAuthentication) {
+    if (authentication instanceof IdTokenAuthentication) {
       return (IdTokenAuthentication) authentication;
     }
-    LOGGER.error("Could not find an instance of {} on the Spring Security Context. Actual: ", IdTokenAuthentication.class, authentication != null ? authentication.getClass() : null);
+    LOGGER.error(
+        "Could not find an instance of {} on the Spring Security Context. Actual: ",
+        IdTokenAuthentication.class,
+        authentication != null ? authentication.getClass() : null);
     throw new AuthenticationCredentialsNotFoundException(AUTHENTICATION_NOT_FOUND);
   }
 
   private Authentication replaceAuthorities(List<GrantedAuthority> permissions) {
     IdTokenAuthentication originalAuthentication = getAuthentication();
-    IdTokenUserDetails originalUserDetails = (IdTokenUserDetails) originalAuthentication.getDetails();
+    IdTokenUserDetails originalUserDetails =
+        (IdTokenUserDetails) originalAuthentication.getDetails();
 
-    IdTokenUserDetails newUserDetails = IdTokenUserDetails.builder()
-        .userObjectId(originalUserDetails.getUserObjectId())
-        .displayName(originalUserDetails.getDisplayName())
-        .idToken(originalUserDetails.getIdToken())
-        .username(originalUserDetails.getUsername())
-        .authorities(permissions)
-        .build();
+    IdTokenUserDetails newUserDetails =
+        IdTokenUserDetails.builder()
+            .userObjectId(originalUserDetails.getUserObjectId())
+            .displayName(originalUserDetails.getDisplayName())
+            .idToken(originalUserDetails.getIdToken())
+            .username(originalUserDetails.getUsername())
+            .authorities(permissions)
+            .build();
     return new IdTokenAuthentication(newUserDetails);
   }
-
 }

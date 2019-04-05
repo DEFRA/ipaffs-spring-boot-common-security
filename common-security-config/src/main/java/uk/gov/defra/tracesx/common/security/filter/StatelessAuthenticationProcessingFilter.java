@@ -11,15 +11,21 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
-public abstract class StatelessAuthenticationProcessingFilter extends
-    AbstractAuthenticationProcessingFilter {
+public abstract class StatelessAuthenticationProcessingFilter
+    extends AbstractAuthenticationProcessingFilter {
 
   protected StatelessAuthenticationProcessingFilter(String defaultFilterProcessesUrl) {
     super(defaultFilterProcessesUrl);
   }
 
-  //Customized version of spring security filter, to remove session state calls and events
+  protected StatelessAuthenticationProcessingFilter(
+      RequestMatcher requiresAuthenticationRequestMatcher) {
+    super(requiresAuthenticationRequestMatcher);
+  }
+
+  // Customized version of spring security filter, to remove session state calls and events
   @Override
   public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
       throws IOException, ServletException {
@@ -49,5 +55,4 @@ public abstract class StatelessAuthenticationProcessingFilter extends
 
     chain.doFilter(request, response);
   }
-
 }

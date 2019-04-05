@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.defra.tracesx.common.CommonWebMvcConfiguration.PERMISSIONS_REST_TEMPLATE_QUALIFIER;
 
 import java.util.Collections;
-import java.util.List;
 import org.apache.http.client.config.RequestConfig;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,7 +22,7 @@ import uk.gov.defra.tracesx.common.CommonWebMvcConfigurationComponentTest.Config
 import uk.gov.defra.tracesx.common.security.ServiceUrlPatterns;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes={Config.class, CommonWebMvcConfiguration.class})
+@SpringBootTest(classes = {Config.class, CommonWebMvcConfiguration.class})
 @ActiveProfiles("webmvc-config")
 public class CommonWebMvcConfigurationComponentTest {
 
@@ -36,26 +35,17 @@ public class CommonWebMvcConfigurationComponentTest {
   static class Config {
     @Bean
     public ServiceUrlPatterns serviceUrlPatterns() {
-      return new ServiceUrlPatterns() {
-        @Override
-        public List<String> getPatterns() {
-          return Collections.singletonList("test/**");
-        }
-
-        @Override
-        public List<String> getBaseUrl() {
-          return Collections.singletonList("test/**");
-        }
-      };
+      return () -> Collections.singletonList("test/**");
     }
   }
 
   @Test
   public void permissionRestTemplate_noTimeoutSpecified_defaultsUsedInstead() {
-    HttpComponentsClientHttpRequestFactory factory = (HttpComponentsClientHttpRequestFactory) permissionsRestTemplate.getRequestFactory();
-    RequestConfig requestConfig = (RequestConfig) ReflectionTestUtils.getField(factory, "requestConfig");
+    HttpComponentsClientHttpRequestFactory factory =
+        (HttpComponentsClientHttpRequestFactory) permissionsRestTemplate.getRequestFactory();
+    RequestConfig requestConfig =
+        (RequestConfig) ReflectionTestUtils.getField(factory, "requestConfig");
     assertThat(requestConfig.getConnectTimeout()).isEqualTo(25000);
     assertThat(requestConfig.getSocketTimeout()).isEqualTo(25000);
   }
-
 }

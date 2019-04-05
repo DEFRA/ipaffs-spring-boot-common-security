@@ -37,10 +37,10 @@ public class CommonWebMvcConfiguration implements WebMvcConfigurer {
 
   private static final String DEFAULT_PERMISSIONS_TIMEOUT_MILLIS = "25000";
 
-  @Value("${permissions.service.connectionTimeout:"+DEFAULT_PERMISSIONS_TIMEOUT_MILLIS+"}")
+  @Value("${permissions.service.connectionTimeout:" + DEFAULT_PERMISSIONS_TIMEOUT_MILLIS + "}")
   private int permissionsServiceConnectionTimeout;
 
-  @Value("${permissions.service.readTimeout:"+DEFAULT_PERMISSIONS_TIMEOUT_MILLIS+"}")
+  @Value("${permissions.service.readTimeout:" + DEFAULT_PERMISSIONS_TIMEOUT_MILLIS + "}")
   private int permissionsServiceReadTimeout;
 
   @Value("${spring.security.jwt.jwks}")
@@ -52,21 +52,19 @@ public class CommonWebMvcConfiguration implements WebMvcConfigurer {
   @Value("${spring.security.jwt.aud}")
   private String aud;
 
-  @Autowired
-  private ServiceUrlPatterns serviceUrlPatterns;
+  @Autowired private ServiceUrlPatterns serviceUrlPatterns;
 
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
-    registry.addInterceptor(new PreAuthorizeChecker())
-        .addPathPatterns(serviceUrlPatterns.getPatterns());
+    registry
+        .addInterceptor(new PreAuthorizeChecker())
+        .addPathPatterns(serviceUrlPatterns.getAuthorizedPatterns());
   }
 
   @Bean
   @Qualifier(PERMISSIONS_REST_TEMPLATE_QUALIFIER)
   public RestTemplate permissionsRestTemplate() {
-    return createRestTemplate(
-        permissionsServiceConnectionTimeout,
-        permissionsServiceReadTimeout);
+    return createRestTemplate(permissionsServiceConnectionTimeout, permissionsServiceReadTimeout);
   }
 
   @Bean
@@ -76,16 +74,19 @@ public class CommonWebMvcConfiguration implements WebMvcConfigurer {
     String[] issuers = iss.split(",");
     String[] audiences = aud.split(",");
     List<JwksConfiguration> jwksConfigurations = new ArrayList<>();
-    if(jwkUrls.length == issuers.length && issuers.length == audiences.length) {
-      for(int i = 0; i < jwkUrls.length; i++) {
-        jwksConfigurations.add(JwksConfiguration.builder()
-            .jwksUrl(new URL(jwkUrls[i]))
-            .issuer(issuers[i])
-            .audience(audiences[i]).build());
+    if (jwkUrls.length == issuers.length && issuers.length == audiences.length) {
+      for (int i = 0; i < jwkUrls.length; i++) {
+        jwksConfigurations.add(
+            JwksConfiguration.builder()
+                .jwksUrl(new URL(jwkUrls[i]))
+                .issuer(issuers[i])
+                .audience(audiences[i])
+                .build());
       }
       return Collections.unmodifiableList(jwksConfigurations);
     } else {
-      throw new RuntimeException("The comma-separated properties spring.security.jwt.[jwks, iss, aud] must all have the same number of elements.");
+      throw new RuntimeException(
+          "The comma-separated properties spring.security.jwt.[jwks, iss, aud] must all have the same number of elements.");
     }
   }
 
@@ -103,12 +104,12 @@ public class CommonWebMvcConfiguration implements WebMvcConfigurer {
   }
 
   private RestTemplate createRestTemplate(int connectionTimeout, int readTimeout) {
-    HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory();
+    HttpComponentsClientHttpRequestFactory clientHttpRequestFactory =
+        new HttpComponentsClientHttpRequestFactory();
     clientHttpRequestFactory.setConnectTimeout(connectionTimeout);
     clientHttpRequestFactory.setReadTimeout(readTimeout);
     RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory);
     restTemplate.getMessageConverters().add(new StringHttpMessageConverter());
     return restTemplate;
   }
-
 }
