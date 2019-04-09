@@ -56,7 +56,7 @@ public class SelfSignedTokenClient {
     try {
       body = objectMapper.writeValueAsString(overrides);
     } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
+      throw new IllegalArgumentException(e);
     }
     Response response = given()
         .header(AUTHORIZATION, TEST_OPENID_BASIC)

@@ -85,7 +85,7 @@ public class CommonWebMvcConfiguration implements WebMvcConfigurer {
       }
       return Collections.unmodifiableList(jwksConfigurations);
     } else {
-      throw new RuntimeException(
+      throw new IllegalArgumentException(
           "The comma-separated properties spring.security.jwt.[jwks, iss, aud] must all have the same number of elements.");
     }
   }

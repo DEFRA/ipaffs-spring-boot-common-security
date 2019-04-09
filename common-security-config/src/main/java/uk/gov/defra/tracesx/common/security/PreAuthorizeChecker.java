@@ -19,7 +19,7 @@ public class PreAuthorizeChecker extends HandlerInterceptorAdapter {
       PreAuthorize annotation = findAnnotation(hm.getMethod(), PreAuthorize.class);
       if (annotation == null) {
         // prevent access to method without security restrictions
-        throw new RuntimeException(MESSAGE);
+        throw new NullPointerException(MESSAGE);
       }
     }
     return true;

@@ -11,6 +11,10 @@ public class CommonProperties {
   public static final String SERVICE_PASSWORD = getPropertyOrEnv("auth.password", "SERVICE_PASSWORD");
   public static final String SERVICE_BASE_URL = System.getProperty("service.base.url", "http://localhost:4000");
 
+  private CommonProperties() {
+    // no-arg constructor
+  }
+
   public static String getPropertyOrEnv(String property, String envKey) {
     String value = System.getProperty(property);
     if (StringUtils.isEmpty(value)) {
