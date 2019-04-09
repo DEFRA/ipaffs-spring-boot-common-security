@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <artifactId>TracesX-SpringBoot-CommonSecurity-Config</artifactId>
-  <version>1.0.3-SNAPSHOT</version>
+  <version>1.0.3</version>
   <name>common-security-config</name>
   <description>Shared Spring Boot Web Security configuration</description>
   <groupId>uk.gov.defra.tracesx</groupId>
@@ -36,7 +36,7 @@
 
   <scm>
     <connection>${parent.scm.connection}</connection>
-    <tag>HEAD</tag>
+    <tag>1.0.3-8</tag>
   </scm>
 
   <dependencies>
