@@ -9,4 +9,8 @@ public class JwtConstants {
   public static final String AUD = "aud";
   public static final String ISS = "iss";
   public static final String SUB = "sub";
+
+  private JwtConstants() {
+    // no-arg constructor
+  }
 }

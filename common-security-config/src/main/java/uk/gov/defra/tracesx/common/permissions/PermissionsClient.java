@@ -24,10 +24,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Component
 public class PermissionsClient {
 
-  private static String BASIC = "Basic ";
-  private static String X_AUTH_HEADER_BASIC = "x-auth-basic";
+  private static final String BASIC = "Basic ";
+  private static final String X_AUTH_HEADER_BASIC = "x-auth-basic";
 
-  private static Logger LOGGER = LoggerFactory.getLogger(PermissionsClient.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(PermissionsClient.class);
 
   @Value("${permissions.service.scheme}")
   private String permissionsScheme;

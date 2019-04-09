@@ -19,7 +19,7 @@ public class RoleToAuthorityMapper {
   }
 
   private GrantedAuthority mapRole(String role) {
-    String parts[] = role.split(":");
+    String[] parts = role.split(":");
     if(parts.length == 3) {
       return OrganisationGrantedAuthority.builder()
           .organisation(parts[ORG_INDEX])

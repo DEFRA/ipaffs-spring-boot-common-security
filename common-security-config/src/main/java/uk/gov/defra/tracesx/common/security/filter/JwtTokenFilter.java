@@ -32,8 +32,7 @@ public class JwtTokenFilter extends StatelessAuthenticationProcessingFilter {
   }
 
   @Override
-  public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse res)
-      throws AuthenticationException, IOException, ServletException {
+  public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse res) {
     String token = resolveToken(req);
     if (null != token) {
       IdTokenUserDetails userDetails = jwtTokenValidator.validateToken(token);
