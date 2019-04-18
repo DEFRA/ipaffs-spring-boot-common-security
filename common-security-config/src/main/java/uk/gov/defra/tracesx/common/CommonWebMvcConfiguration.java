@@ -4,11 +4,6 @@ import static uk.gov.defra.tracesx.common.permissions.PermissionsCache.CACHE_KEY
 
 import com.microsoft.applicationinsights.TelemetryClient;
 import com.microsoft.applicationinsights.TelemetryConfiguration;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +22,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import uk.gov.defra.tracesx.common.security.PreAuthorizeChecker;
 import uk.gov.defra.tracesx.common.security.ServiceUrlPatterns;
 import uk.gov.defra.tracesx.common.security.jwks.JwksConfiguration;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Configuration
 @EnableCaching
@@ -52,7 +53,8 @@ public class CommonWebMvcConfiguration implements WebMvcConfigurer {
   @Value("${spring.security.jwt.aud}")
   private String aud;
 
-  @Autowired private ServiceUrlPatterns serviceUrlPatterns;
+  @Autowired
+  private ServiceUrlPatterns serviceUrlPatterns;
 
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
@@ -86,7 +88,8 @@ public class CommonWebMvcConfiguration implements WebMvcConfigurer {
       return Collections.unmodifiableList(jwksConfigurations);
     } else {
       throw new IllegalArgumentException(
-          "The comma-separated properties spring.security.jwt.[jwks, iss, aud] must all have the same number of elements.");
+          "The comma-separated properties spring.security.jwt.[jwks, iss, aud] "
+              + "must all have the same number of elements.");
     }
   }
 

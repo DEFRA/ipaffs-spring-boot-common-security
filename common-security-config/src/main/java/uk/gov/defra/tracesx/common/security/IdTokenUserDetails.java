@@ -1,12 +1,13 @@
 package uk.gov.defra.tracesx.common.security;
 
-import java.util.List;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.List;
 
 @Data
 @Builder

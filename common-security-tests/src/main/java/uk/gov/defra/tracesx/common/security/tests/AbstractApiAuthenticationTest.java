@@ -19,7 +19,9 @@ import uk.gov.defra.tracesx.common.security.tests.jwt.SelfSignedTokenClient.Toke
 public abstract class AbstractApiAuthenticationTest {
 
   public static final String DATA_POINTS_NAME = "API Methods";
-  private static final String TOKEN_INVALID_SIGNATURE = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
+  private static final String TOKEN_INVALID_SIGNATURE =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9l"
+          + "IiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
   private static final String AUTHORIZATION = "Authorization";
 
   private final SelfSignedTokenClient tokenClient = new SelfSignedTokenClient();
@@ -31,12 +33,8 @@ public abstract class AbstractApiAuthenticationTest {
   @Theory
   public void callApi_withoutBearerToken_respondsWith401Error(
       @FromDataPoints("API Methods") ApiMethod apiMethod) {
-    RequestSpecification spec =
-        given()
-            .contentType(ContentType.JSON);
-    apiMethod.call(spec)
-        .then()
-        .statusCode(401);
+    RequestSpecification spec = given().contentType(ContentType.JSON);
+    apiMethod.call(spec).then().statusCode(401);
   }
 
   @Theory
@@ -46,9 +44,7 @@ public abstract class AbstractApiAuthenticationTest {
         given()
             .contentType(ContentType.JSON)
             .header(AUTHORIZATION, "Basic " + TOKEN_INVALID_SIGNATURE);
-    apiMethod.call(spec)
-        .then()
-        .statusCode(401);
+    apiMethod.call(spec).then().statusCode(401);
   }
 
   @Theory
@@ -58,9 +54,7 @@ public abstract class AbstractApiAuthenticationTest {
         given()
             .contentType(ContentType.JSON)
             .header(AUTHORIZATION, BEARER + TOKEN_INVALID_SIGNATURE);
-    apiMethod.call(spec)
-        .then()
-        .statusCode(401);
+    apiMethod.call(spec).then().statusCode(401);
   }
 
   @Theory
@@ -71,9 +65,7 @@ public abstract class AbstractApiAuthenticationTest {
         given()
             .contentType(ContentType.JSON)
             .header(AUTHORIZATION, BEARER + tokenClient.getExpiredToken(tokenType));
-    apiMethod.call(spec)
-        .then()
-        .statusCode(401);
+    apiMethod.call(spec).then().statusCode(401);
   }
 
   @Theory
@@ -84,8 +76,8 @@ public abstract class AbstractApiAuthenticationTest {
         given()
             .contentType(ContentType.JSON)
             .header(
-                AUTHORIZATION, BEARER
-                    + tokenClient.getTokenWithClaim(tokenType, AUD, "invalid-audience"));
+                AUTHORIZATION,
+                BEARER + tokenClient.getTokenWithClaim(tokenType, AUD, "invalid-audience"));
     apiMethod.call(spec).then().statusCode(401);
   }
 
@@ -98,8 +90,7 @@ public abstract class AbstractApiAuthenticationTest {
             .contentType(ContentType.JSON)
             .header(
                 AUTHORIZATION,
-                BEARER
-                    + tokenClient.getTokenWithClaim(tokenType, ISS, "invalid-issuer"));
+                BEARER + tokenClient.getTokenWithClaim(tokenType, ISS, "invalid-issuer"));
     apiMethod.call(spec).then().statusCode(401);
   }
 }

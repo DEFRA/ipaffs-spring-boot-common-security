@@ -2,10 +2,13 @@ package uk.gov.defra.tracesx.common.security.tests;
 
 import static uk.gov.defra.tracesx.common.security.tests.jwt.JwtConstants.BEARER;
 
-import java.util.function.Supplier;
 import org.apache.commons.lang3.StringUtils;
 
-/** Override this class for additional paths in service specific tests. */
+import java.util.function.Supplier;
+
+/**
+ * Override this class for additional paths in service specific tests.
+ */
 public class ServiceTestHelper {
 
   public static final String AUTHORIZATION = "Authorization";

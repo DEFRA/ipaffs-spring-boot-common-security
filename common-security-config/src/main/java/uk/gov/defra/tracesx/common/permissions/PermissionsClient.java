@@ -6,8 +6,6 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpMethod.GET;
 import static uk.gov.defra.tracesx.common.CommonWebMvcConfiguration.PERMISSIONS_REST_TEMPLATE_QUALIFIER;
 
-import com.microsoft.applicationinsights.TelemetryClient;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +18,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.List;
 
 @Component
 public class PermissionsClient {
@@ -48,16 +48,14 @@ public class PermissionsClient {
   private boolean securityTokenFeatureSwitch;
 
   private RestTemplate permissionsRestTemplate;
-  private TelemetryClient telemetryClient;
 
   @Autowired
-  public PermissionsClient(@Qualifier(PERMISSIONS_REST_TEMPLATE_QUALIFIER) RestTemplate permissionsRestTemplate,
-      TelemetryClient telemetryClient) {
+  public PermissionsClient(
+      @Qualifier(PERMISSIONS_REST_TEMPLATE_QUALIFIER) RestTemplate permissionsRestTemplate) {
     this.permissionsRestTemplate = permissionsRestTemplate;
-    this.telemetryClient = telemetryClient;
   }
 
-  public List<String> permissionsList(String role, String authorisationToken) {
+  List<String> permissionsList(String role, String authorisationToken) {
     UriComponentsBuilder uriComponentsBuilder = getPath(role);
     HttpHeaders httpHeaders = getHeaders(authorisationToken);
     HttpEntity<String> httpEntity = new HttpEntity<>(httpHeaders);
@@ -75,10 +73,11 @@ public class PermissionsClient {
   }
 
   private HttpHeaders getHeaders(String authorisationToken) {
-    String encodedBasicAuth = BASIC + getEncoder().encodeToString(permissionsUser
-        .concat(":")
-        .concat(permissionsPassword)
-        .getBytes(UTF_8));
+    String encodedBasicAuth =
+        BASIC
+            + getEncoder()
+                .encodeToString(
+                    permissionsUser.concat(":").concat(permissionsPassword).getBytes(UTF_8));
 
     HttpHeaders headers = new HttpHeaders();
     headers.set(X_AUTH_HEADER_BASIC, encodedBasicAuth);
@@ -91,13 +90,15 @@ public class PermissionsClient {
   private List<String> getPermissions(UriComponentsBuilder builder, HttpEntity<String> entity) {
     try {
       return permissionsRestTemplate
-          .exchange(builder.build().encode().toUri(), GET, entity,
+          .exchange(
+              builder.build().encode().toUri(),
+              GET,
+              entity,
               new ParameterizedTypeReference<List<String>>() {})
           .getBody();
-    } catch (ResourceAccessException e) {
-      LOGGER.warn("Unable to get permissions", e);
-      throw e;
+    } catch (ResourceAccessException exception) {
+      LOGGER.warn("Unable to get permissions", exception);
+      throw exception;
     }
   }
-
 }
