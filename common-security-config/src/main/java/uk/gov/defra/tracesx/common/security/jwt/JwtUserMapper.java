@@ -20,6 +20,7 @@ public class JwtUserMapper {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JwtUserMapper.class);
   private static final String SUB = "sub";
+  private static final String CONTACT_ID = "contactId";
 
   private final RoleToAuthorityMapper roleToAuthorityMapper;
 
@@ -28,19 +29,20 @@ public class JwtUserMapper {
     this.roleToAuthorityMapper = roleToAuthorityMapper;
   }
 
-  IdTokenUserDetails createUser(Map<String, Object> decoded, String idToken) {
+  public IdTokenUserDetails createUser(Map<String, Object> decoded, String idToken) {
     return IdTokenUserDetails.builder()
         .idToken(idToken)
-        .displayName(getRequiredClaim(SUB, decoded))
-        .username(getRequiredClaim(SUB, decoded))
-        .userObjectId(getRequiredClaim(SUB, decoded))
+        .displayName(getRequiredClaim(SUB, decoded, true))
+        .username(getRequiredClaim(SUB, decoded, true))
+        .userObjectId(getRequiredClaim(SUB, decoded, true))
+        .contactId(getRequiredClaim(CONTACT_ID, decoded, false))
         .authorities(getAuthorities(decoded))
         .build();
   }
 
-  private String getRequiredClaim(String claimName, Map<String, Object> body) {
+  private String getRequiredClaim(String claimName, Map<String, Object> body, boolean required) {
     String value = (String) body.get(claimName);
-    if (StringUtils.isEmpty(value)) {
+    if (StringUtils.isEmpty(value) && required) {
       LOGGER.error("The JWT token is missing the claim '{}'", claimName);
       throw missingRequiredClaims();
     }

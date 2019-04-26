@@ -16,10 +16,12 @@ import java.util.List;
 public class IdTokenUserDetails implements UserDetails {
 
   private List<GrantedAuthority> authorities;
+  private List<String> organisations; // b2c only
   private String username; // upn
   private String idToken;
   private String displayName; // name
   private String userObjectId; // oid
+  private String contactId; //contactId
 
   @Override
   public boolean isAccountNonExpired() {
