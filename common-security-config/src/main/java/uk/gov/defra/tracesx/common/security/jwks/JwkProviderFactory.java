@@ -2,10 +2,11 @@ package uk.gov.defra.tracesx.common.security.jwks;
 
 import com.auth0.jwk.JwkProvider;
 import com.auth0.jwk.UrlJwkProvider;
-import java.net.URL;
-import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class JwkProviderFactory {
@@ -32,5 +33,4 @@ public class JwkProviderFactory {
   protected JwkProvider createUrlJwkProvider(URL url) {
     return new UrlJwkProvider(url);
   }
-
 }

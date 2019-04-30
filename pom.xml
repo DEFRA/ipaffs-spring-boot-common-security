@@ -9,6 +9,7 @@
 
   <properties>
     <project.scm.id>gitlab</project.scm.id>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
   <scm>

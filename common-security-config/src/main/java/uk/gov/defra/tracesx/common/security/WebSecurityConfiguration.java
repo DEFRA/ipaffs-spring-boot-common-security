@@ -1,6 +1,5 @@
 package uk.gov.defra.tracesx.common.security;
 
-import javax.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -16,6 +15,8 @@ import uk.gov.defra.tracesx.common.permissions.PermissionsCache;
 import uk.gov.defra.tracesx.common.security.filter.JwtTokenFilter;
 import uk.gov.defra.tracesx.common.security.filter.PermissionsFilter;
 import uk.gov.defra.tracesx.common.security.jwt.JwtTokenValidator;
+
+import javax.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity

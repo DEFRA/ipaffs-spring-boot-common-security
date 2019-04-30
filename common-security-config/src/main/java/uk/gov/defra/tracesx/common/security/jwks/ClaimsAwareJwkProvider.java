@@ -2,6 +2,7 @@ package uk.gov.defra.tracesx.common.security.jwks;
 
 import com.auth0.jwk.GuavaCachedJwkProvider;
 import com.auth0.jwk.JwkProvider;
+
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -16,7 +17,7 @@ public class ClaimsAwareJwkProvider extends GuavaCachedJwkProvider {
   private final String audience;
 
   /**
-   * Creates a new cached provider specifying cache size and ttl
+   * Creates a new cached provider specifying cache size and ttl.
    *
    * @param provider fallback provider to use when jwk is not cached
    * @param size number of jwt to cache

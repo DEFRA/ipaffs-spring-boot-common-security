@@ -2,8 +2,6 @@ package uk.gov.defra.tracesx.common.security.jwt;
 
 import static uk.gov.defra.tracesx.common.security.jwt.JwtContants.ROLES;
 
-import java.util.List;
-import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +12,9 @@ import uk.gov.defra.tracesx.common.exceptions.InsSecurityException;
 import uk.gov.defra.tracesx.common.security.IdTokenUserDetails;
 import uk.gov.defra.tracesx.common.security.RoleToAuthorityMapper;
 
+import java.util.List;
+import java.util.Map;
+
 @Component
 public class JwtUserMapper {
 
@@ -23,13 +24,11 @@ public class JwtUserMapper {
   private final RoleToAuthorityMapper roleToAuthorityMapper;
 
   @Autowired
-  public JwtUserMapper(
-      RoleToAuthorityMapper roleToAuthorityMapper) {
+  public JwtUserMapper(RoleToAuthorityMapper roleToAuthorityMapper) {
     this.roleToAuthorityMapper = roleToAuthorityMapper;
   }
 
-
-  public IdTokenUserDetails createUser(Map<String, Object> decoded, String idToken) {
+  IdTokenUserDetails createUser(Map<String, Object> decoded, String idToken) {
     return IdTokenUserDetails.builder()
         .idToken(idToken)
         .displayName(getRequiredClaim(SUB, decoded))
@@ -41,7 +40,7 @@ public class JwtUserMapper {
 
   private String getRequiredClaim(String claimName, Map<String, Object> body) {
     String value = (String) body.get(claimName);
-    if(StringUtils.isEmpty(value)) {
+    if (StringUtils.isEmpty(value)) {
       LOGGER.error("The JWT token is missing the claim '{}'", claimName);
       throw missingRequiredClaims();
     }
@@ -49,13 +48,13 @@ public class JwtUserMapper {
   }
 
   private List<GrantedAuthority> getAuthorities(Map<String, Object> body) {
-    if(!body.containsKey("roles")) {
+    if (!body.containsKey("roles")) {
       LOGGER.error("The JWT token is missing the claim 'roles'");
       throw missingRequiredClaims();
     }
 
     Object rolesObj = body.get(ROLES);
-    if(!(rolesObj instanceof List)) {
+    if (!(rolesObj instanceof List)) {
       LOGGER.error("The JWT token does not contain a list of 'roles'");
       throw missingRequiredClaims();
     }
@@ -67,5 +66,4 @@ public class JwtUserMapper {
   private InsSecurityException missingRequiredClaims() {
     return new InsSecurityException("User is missing required claims");
   }
-
 }
