@@ -2,6 +2,7 @@ package uk.gov.defra.tracesx.common.security.jwt;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,6 +29,9 @@ public class JwtUserMapperTest {
   private RoleToAuthorityMapper roleToAuthorityMapper = new RoleToAuthorityMapper();
   private JwtUserMapper jwtUserMapper = new JwtUserMapper(roleToAuthorityMapper);
 
+  private static final String USER_OBJECT_ID = "e9f6447d-2979-4322-8e52-307dafdef649";
+  public static final String DISPLAY_NAME = "Joseph William Token";
+  public static final String USERNAME = "jtoken@tenant.com";
   private static final String ID_TOKEN = "adfgsdf.dfgsdrgerg.dfgdfgd";
   private static final String SUB = "e9f6447d-2979-4322-8e52-307dafdef649";
   private static final List<String> ROLES = Arrays.asList("ROLE1", "ROLE2");
@@ -39,6 +43,9 @@ public class JwtUserMapperTest {
     decoded = new HashMap<>();
     decoded.put("sub", SUB);
     decoded.put("roles", ROLES);
+    decoded.put("oid", USER_OBJECT_ID);
+    decoded.put("name", DISPLAY_NAME);
+    decoded.put("upn", USERNAME);
   }
 
   @Test

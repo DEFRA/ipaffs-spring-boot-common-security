@@ -1,8 +1,5 @@
 package uk.gov.defra.tracesx.common.security.filter;
 
-import static java.util.stream.Collectors.toList;
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
@@ -16,11 +13,17 @@ import uk.gov.defra.tracesx.common.exceptions.PermissionsAuthenticationException
 import uk.gov.defra.tracesx.common.permissions.PermissionsCache;
 import uk.gov.defra.tracesx.common.security.IdTokenAuthentication;
 import uk.gov.defra.tracesx.common.security.IdTokenUserDetails;
+import uk.gov.defra.tracesx.common.security.OrganisationGrantedAuthority;
 
-import java.util.Collections;
-import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 public class PermissionsFilter extends StatelessAuthenticationProcessingFilter {
 
@@ -49,6 +52,7 @@ public class PermissionsFilter extends StatelessAuthenticationProcessingFilter {
       HttpServletRequest request, HttpServletResponse response) {
 
     List<String> roles = getRoles();
+    List<String> organisations = getOrganisationsList();
     if (roles.isEmpty()) {
       LOGGER.error(ROLES_ARE_EMPTY);
       throw new PermissionsAuthenticationException(ROLES_ARE_EMPTY);
@@ -60,7 +64,7 @@ public class PermissionsFilter extends StatelessAuthenticationProcessingFilter {
       throw new PermissionsAuthenticationException(PERMISSIONS_ARE_EMPTY);
     }
 
-    return replaceAuthorities(permissions);
+    return replaceAuthorities(permissions, organisations);
   }
 
   private List<String> getRoles() {
@@ -74,6 +78,20 @@ public class PermissionsFilter extends StatelessAuthenticationProcessingFilter {
     return Collections.emptyList();
   }
 
+  private List<String> getOrganisationsList() {
+    Authentication authentication = getAuthentication();
+    UserDetails userDetails = (UserDetails) authentication.getDetails();
+    if(userDetails != null) {
+        return userDetails.getAuthorities()
+                .stream().filter(authority -> authority instanceof OrganisationGrantedAuthority)
+                .map(authority -> ((OrganisationGrantedAuthority) authority).getOrganisation())
+                .filter(organisation -> !organisation.isEmpty() && !organisation.equals("null"))
+                .collect(Collectors.toList());
+    } else {
+        return emptyList();
+    }
+  }
+
   private List<GrantedAuthority> getPermissions(HttpServletRequest request, List<String> roles) {
     final String authorisationToken = request.getHeader(AUTHORIZATION);
     return roles.stream()
@@ -84,7 +102,7 @@ public class PermissionsFilter extends StatelessAuthenticationProcessingFilter {
         .collect(toList());
   }
 
-  private IdTokenAuthentication getAuthentication() {
+  public IdTokenAuthentication getAuthentication() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if (authentication instanceof IdTokenAuthentication) {
       return (IdTokenAuthentication) authentication;
@@ -96,18 +114,20 @@ public class PermissionsFilter extends StatelessAuthenticationProcessingFilter {
     throw new AuthenticationCredentialsNotFoundException(AUTHENTICATION_NOT_FOUND);
   }
 
-  private Authentication replaceAuthorities(List<GrantedAuthority> permissions) {
+  private Authentication replaceAuthorities(List<GrantedAuthority> permissions, List<String> organisations) {
     IdTokenAuthentication originalAuthentication = getAuthentication();
     IdTokenUserDetails originalUserDetails =
         (IdTokenUserDetails) originalAuthentication.getDetails();
 
     IdTokenUserDetails newUserDetails =
         IdTokenUserDetails.builder()
+            .organisations(organisations)
             .userObjectId(originalUserDetails.getUserObjectId())
             .displayName(originalUserDetails.getDisplayName())
             .idToken(originalUserDetails.getIdToken())
             .username(originalUserDetails.getUsername())
             .authorities(permissions)
+            .contactId(originalUserDetails.getContactId())
             .build();
     return new IdTokenAuthentication(newUserDetails);
   }
