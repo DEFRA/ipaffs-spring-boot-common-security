@@ -20,23 +20,26 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class PermissionsClient {
-
   private static final String BASIC = "Basic ";
   private static final String X_AUTH_HEADER_BASIC = "x-auth-basic";
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PermissionsClient.class);
 
-  @Value("${permissions.service.scheme}")
+  @Value("${permissions.service.scheme:#{null}}")
   private String permissionsScheme;
 
-  @Value("${permissions.service.host}")
+  @Value("${permissions.service.host:#{null}}")
   private String permissionsHost;
 
-  @Value("${permissions.service.port}")
+  @Value("${permissions.service.port:#{null}}")
   private String permissionsPort;
+
+  @Value("${permissions.service.url:#{null}}")
+  private String permissionsUrl;
 
   @Value("${permissions.service.user}")
   private String permissionsUser;
@@ -62,14 +65,27 @@ public class PermissionsClient {
     return getPermissions(uriComponentsBuilder, httpEntity);
   }
 
-  private UriComponentsBuilder getPath(String role) {
-    return UriComponentsBuilder.newInstance()
-        .scheme(permissionsScheme)
-        .host(permissionsHost)
-        .port(permissionsPort)
-        .path("/roles")
+  UriComponentsBuilder getPath(String role) {
+    return Optional.ofNullable(permissionsUrl)
+            .map(UriComponentsBuilder::fromUriString)
+            // Fall back to old environment naming standard during migration from old to new in services that use the
+            // security commons.
+            .orElseGet(() -> UriComponentsBuilder.newInstance()
+                    .scheme(Optional.ofNullable(permissionsScheme)
+                            .orElseThrow(() -> createPropertyNotFoundException("permissions.service.scheme")))
+                    .host(Optional.ofNullable(permissionsHost)
+                            .orElseThrow(() -> createPropertyNotFoundException("permissions.service.host")))
+                    .port(Optional.ofNullable(permissionsPort)
+                            .orElseThrow(() -> createPropertyNotFoundException("permissions.service.port")))
+            ).path("/roles")
         .pathSegment(role)
         .path("/permissions");
+  }
+
+  private IllegalArgumentException createPropertyNotFoundException(String propertyName) {
+    return new IllegalArgumentException(
+            "Could not resolve permission client placeholder 'prmissions.service.url' or fall back '"
+                    + propertyName + "'");
   }
 
   private HttpHeaders getHeaders(String authorisationToken) {
