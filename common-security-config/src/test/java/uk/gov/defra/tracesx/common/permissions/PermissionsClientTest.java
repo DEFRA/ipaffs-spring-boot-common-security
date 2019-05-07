@@ -32,6 +32,8 @@ public class PermissionsClientTest {
   private static final String ROLE = "importer";
   private static final String TOKEN = "dummyToken";
   private static final String INVALID_ROLE = "invalid.role";
+  private static final String URL = "https://permissions-local";
+  private static final String PERMISSIONS_URL = "permissionsUrl";
   private static final String PERMISSIONS_USER = "permissionsUser";
   private static final String PERMISSIONS_PASSWORD = "permissionsPassword";
   private static final String SECURITY_TOKEN_FEATURE_SWITCH = "securityTokenFeatureSwitch";
@@ -45,6 +47,7 @@ public class PermissionsClientTest {
     ReflectionTestUtils.setField(permissionsService, PERMISSIONS_USER, USER);
     ReflectionTestUtils.setField(permissionsService, PERMISSIONS_PASSWORD, PASSWORD);
     ReflectionTestUtils.setField(permissionsService, SECURITY_TOKEN_FEATURE_SWITCH, TRUE);
+    ReflectionTestUtils.setField(permissionsService, PERMISSIONS_URL, URL);
 
     final ResponseEntity<List<String>> responseEntity = createResponseEntity();
     when(restTemplate.exchange(
