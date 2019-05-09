@@ -24,6 +24,7 @@ import java.util.Optional;
 
 @Component
 public class PermissionsClient {
+
   private static final String BASIC = "Basic ";
   private static final String X_AUTH_HEADER_BASIC = "x-auth-basic";
 
@@ -67,33 +68,34 @@ public class PermissionsClient {
 
   UriComponentsBuilder getPath(String role) {
     return Optional.ofNullable(permissionsUrl)
-            .map(UriComponentsBuilder::fromUriString)
-            // Fall back to old environment naming standard during migration from old to new in services that use the
-            // security commons.
-            .orElseGet(() -> UriComponentsBuilder.newInstance()
-                    .scheme(Optional.ofNullable(permissionsScheme)
-                            .orElseThrow(() -> createPropertyNotFoundException("permissions.service.scheme")))
-                    .host(Optional.ofNullable(permissionsHost)
-                            .orElseThrow(() -> createPropertyNotFoundException("permissions.service.host")))
-                    .port(Optional.ofNullable(permissionsPort)
-                            .orElseThrow(() -> createPropertyNotFoundException("permissions.service.port")))
-            ).path("/roles")
+        .map(UriComponentsBuilder::fromUriString)
+        // Fall back to old environment naming standard during migration from old to new
+        // in services that use the
+        // security commons.
+        .orElseGet(() -> UriComponentsBuilder.newInstance()
+            .scheme(Optional.ofNullable(permissionsScheme)
+                .orElseThrow(() -> createPropertyNotFoundException("permissions.service.scheme")))
+            .host(Optional.ofNullable(permissionsHost)
+                .orElseThrow(() -> createPropertyNotFoundException("permissions.service.host")))
+            .port(Optional.ofNullable(permissionsPort)
+                .orElseThrow(() -> createPropertyNotFoundException("permissions.service.port")))
+        ).path("/roles")
         .pathSegment(role)
         .path("/permissions");
   }
 
   private IllegalArgumentException createPropertyNotFoundException(String propertyName) {
     return new IllegalArgumentException(
-            "Could not resolve permission client placeholder 'prmissions.service.url' or fall back '"
-                    + propertyName + "'");
+        "Could not resolve permission client placeholder 'prmissions.service.url' or fall back '"
+            + propertyName + "'");
   }
 
   private HttpHeaders getHeaders(String authorisationToken) {
     String encodedBasicAuth =
         BASIC
             + getEncoder()
-                .encodeToString(
-                    permissionsUser.concat(":").concat(permissionsPassword).getBytes(UTF_8));
+            .encodeToString(
+                permissionsUser.concat(":").concat(permissionsPassword).getBytes(UTF_8));
 
     HttpHeaders headers = new HttpHeaders();
     headers.set(X_AUTH_HEADER_BASIC, encodedBasicAuth);
@@ -110,7 +112,8 @@ public class PermissionsClient {
               builder.build().encode().toUri(),
               GET,
               entity,
-              new ParameterizedTypeReference<List<String>>() {})
+              new ParameterizedTypeReference<List<String>>() {
+              })
           .getBody();
     } catch (ResourceAccessException exception) {
       LOGGER.warn("Unable to get permissions", exception);

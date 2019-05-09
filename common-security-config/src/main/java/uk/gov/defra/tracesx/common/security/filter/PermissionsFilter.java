@@ -1,5 +1,9 @@
 package uk.gov.defra.tracesx.common.security.filter;
 
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
@@ -15,15 +19,11 @@ import uk.gov.defra.tracesx.common.security.IdTokenAuthentication;
 import uk.gov.defra.tracesx.common.security.IdTokenUserDetails;
 import uk.gov.defra.tracesx.common.security.OrganisationGrantedAuthority;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toList;
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 public class PermissionsFilter extends StatelessAuthenticationProcessingFilter {
 
@@ -81,14 +81,14 @@ public class PermissionsFilter extends StatelessAuthenticationProcessingFilter {
   private List<String> getOrganisationsList() {
     Authentication authentication = getAuthentication();
     UserDetails userDetails = (UserDetails) authentication.getDetails();
-    if(userDetails != null) {
-        return userDetails.getAuthorities()
-                .stream().filter(authority -> authority instanceof OrganisationGrantedAuthority)
-                .map(authority -> ((OrganisationGrantedAuthority) authority).getOrganisation())
-                .filter(organisation -> !organisation.isEmpty() && !organisation.equals("null"))
-                .collect(Collectors.toList());
+    if (userDetails != null) {
+      return userDetails.getAuthorities()
+          .stream().filter(authority -> authority instanceof OrganisationGrantedAuthority)
+          .map(authority -> ((OrganisationGrantedAuthority) authority).getOrganisation())
+          .filter(organisation -> !organisation.isEmpty() && !organisation.equals("null"))
+          .collect(Collectors.toList());
     } else {
-        return emptyList();
+      return emptyList();
     }
   }
 
@@ -114,7 +114,8 @@ public class PermissionsFilter extends StatelessAuthenticationProcessingFilter {
     throw new AuthenticationCredentialsNotFoundException(AUTHENTICATION_NOT_FOUND);
   }
 
-  private Authentication replaceAuthorities(List<GrantedAuthority> permissions, List<String> organisations) {
+  private Authentication replaceAuthorities(List<GrantedAuthority> permissions,
+      List<String> organisations) {
     IdTokenAuthentication originalAuthentication = getAuthentication();
     IdTokenUserDetails originalUserDetails =
         (IdTokenUserDetails) originalAuthentication.getDetails();
