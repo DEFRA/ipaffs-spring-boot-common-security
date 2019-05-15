@@ -50,6 +50,10 @@ public class SelfSignedTokenClient {
     return getToken(tokenType, Collections.singletonMap(claimName, claimValue));
   }
 
+  public String getTokenWithClaim(TokenType tokenType, String claimName, String[] claimValue) {
+    return getToken(tokenType, Collections.singletonMap(claimName, claimValue));
+  }
+
   private String getToken(TokenType tokenType, Map<String, Object> overrides) {
     String body;
     try {
@@ -58,12 +62,12 @@ public class SelfSignedTokenClient {
       throw new IllegalArgumentException(exception);
     }
     Response response =
-        given()
-            .header(AUTHORIZATION, TEST_OPENID_BASIC)
-            .header("Content-Type", "application/json")
-            .when()
-            .body(body)
-            .post(createUrl(tokenType, "/sign"));
+            given()
+                    .header(AUTHORIZATION, TEST_OPENID_BASIC)
+                    .header("Content-Type", "application/json")
+                    .when()
+                    .body(body)
+                    .post(createUrl(tokenType, "/sign"));
     response.then().statusCode(200);
     return response.getBody().asString();
   }
