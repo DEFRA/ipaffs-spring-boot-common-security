@@ -14,8 +14,6 @@ public class ServiceTestHelper {
   public static final String AUTHORIZATION = "Authorization";
 
   public ServiceTestHelper() {
-    assertNotNullOrEmpty(getServiceUsername(), "Username is empty");
-    assertNotNullOrEmpty(getServicePassword(), "Password is empty");
     assertNotNullOrEmpty(getServiceBaseUrl(), "Url is empty");
   }
 
