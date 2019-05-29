@@ -1,17 +1,13 @@
 package uk.gov.defra.tracesx.common.security;
 
 import lombok.Builder;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
 
-@Data
 @Builder
-@Getter
 @EqualsAndHashCode
 public class IdTokenUserDetails implements UserDetails {
 
@@ -21,7 +17,42 @@ public class IdTokenUserDetails implements UserDetails {
   private String idToken;
   private String displayName; // name
   private String userObjectId; // oid
-  private String contactId; //contactId
+  private String customerId; //customerId
+  private String customerOrganisationId; //customerOrganisationId
+
+  @Override
+  public List<GrantedAuthority> getAuthorities() {
+    return authorities;
+  }
+
+  public List<String> getOrganisations() {
+    return organisations;
+  }
+
+  @Override
+  public String getUsername() {
+    return username;
+  }
+
+  public String getIdToken() {
+    return idToken;
+  }
+
+  public String getDisplayName() {
+    return displayName;
+  }
+
+  public String getUserObjectId() {
+    return userObjectId;
+  }
+
+  public String getCustomerId() {
+    return customerId;
+  }
+
+  public String getCustomerOrganisationId() {
+    return customerOrganisationId;
+  }
 
   @Override
   public boolean isAccountNonExpired() {

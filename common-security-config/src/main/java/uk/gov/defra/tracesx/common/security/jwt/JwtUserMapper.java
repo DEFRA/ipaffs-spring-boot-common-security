@@ -20,7 +20,8 @@ public class JwtUserMapper {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JwtUserMapper.class);
   private static final String SUB = "sub";
-  private static final String CONTACT_ID = "contactId";
+  private static final String CUSTOMER_ID = "customer_id";
+  private static final String CUSTOMER_ORGANISATION_ID = "customer_organisation_id";
 
   private final RoleToAuthorityMapper roleToAuthorityMapper;
 
@@ -35,8 +36,9 @@ public class JwtUserMapper {
         .displayName(getRequiredClaim(SUB, decoded, true))
         .username(getRequiredClaim(SUB, decoded, true))
         .userObjectId(getRequiredClaim(SUB, decoded, true))
-        .contactId(getRequiredClaim(CONTACT_ID, decoded, false))
+        .customerId(getRequiredClaim(CUSTOMER_ID, decoded, false))
         .authorities(getAuthorities(decoded))
+        .customerOrganisationId(getRequiredClaim(CUSTOMER_ORGANISATION_ID, decoded, false))
         .build();
   }
 
@@ -56,6 +58,7 @@ public class JwtUserMapper {
     }
 
     Object rolesObj = body.get(ROLES);
+
     if (!(rolesObj instanceof List)) {
       LOGGER.error("The JWT token does not contain a list of 'roles'");
       throw missingRequiredClaims();

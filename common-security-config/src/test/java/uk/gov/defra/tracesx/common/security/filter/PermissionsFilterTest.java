@@ -2,6 +2,7 @@ package uk.gov.defra.tracesx.common.security.filter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -32,6 +33,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import uk.gov.defra.tracesx.common.permissions.PermissionsCache;
 import uk.gov.defra.tracesx.common.security.IdTokenAuthentication;
 import uk.gov.defra.tracesx.common.security.IdTokenUserDetails;
@@ -43,6 +45,8 @@ public class PermissionsFilterTest {
   private static final String ROLE = "ROLE";
   private static final String BEARER_TOKEN = "Bearer TOKEN";
   private static final String PERMISSION = "PERMISSION";
+  private static final String CUSTOMER_ORGANISATION_ID =  "bb55e17d-f6c8-40df-9d8f-19a7d9f5bdcc";
+  private static final String CUSTOMER_ID =  "ee55e17d-f6c8-40df-9d8f-19a7d9f5bd8b";
 
   @Mock private HttpServletRequest request;
 
@@ -99,7 +103,8 @@ public class PermissionsFilterTest {
         .withMessageContaining(ROLES_ARE_EMPTY);
 
     verify(authentication, times(2)).getDetails();
-    verify(userDetails, times(2)).getAuthorities();
+    verify(userDetails, times(1)).getAuthorities();
+    verify(userDetails, times(1)).getOrganisations();
   }
 
   @Test
@@ -114,7 +119,8 @@ public class PermissionsFilterTest {
         .withMessageContaining(PERMISSIONS_ARE_EMPTY);
 
     verify(authentication, times(2)).getDetails();
-    verify(userDetails, times(2)).getAuthorities();
+    verify(userDetails, times(1)).getAuthorities();
+    verify(userDetails, times(1)).getOrganisations();
     verify(request).getHeader(HttpHeaders.AUTHORIZATION);
     verify(permissionsCache).permissionsList(eq(ROLE), eq(BEARER_TOKEN));
   }
@@ -131,7 +137,8 @@ public class PermissionsFilterTest {
     assertThat((Collection<GrantedAuthority>) amendedAuthentication.getAuthorities()).containsOnly(expectedAuthority);
 
     verify(authentication, times(3)).getDetails();
-    verify(userDetails, times(2)).getAuthorities();
+    verify(userDetails, times(1)).getAuthorities();
+    verify(userDetails, times(1)).getOrganisations();
     verify(request).getHeader(HttpHeaders.AUTHORIZATION);
     verify(permissionsCache).permissionsList(eq(ROLE), eq(BEARER_TOKEN));
   }
@@ -162,7 +169,8 @@ public class PermissionsFilterTest {
     assertThat(amendedAuthentication.getAuthorities()).containsOnlyElementsOf((Iterable) expectedAuthorities);
 
     verify(authentication, times(3)).getDetails();
-    verify(userDetails, times(2)).getAuthorities();
+    verify(userDetails, times(1)).getAuthorities();
+    verify(userDetails, times(1)).getOrganisations();
     verify(request).getHeader(HttpHeaders.AUTHORIZATION);
     verify(permissionsCache).permissionsList(eq(role1), eq(BEARER_TOKEN));
     verify(permissionsCache).permissionsList(eq(role2), eq(BEARER_TOKEN));
@@ -170,23 +178,34 @@ public class PermissionsFilterTest {
 
   @Test
   public void doFilter_userHasOrganisationAndPermission_amendsAuthentication() {
+    mockAuthenticationSingleton(Collections.emptyList());
     OrganisationGrantedAuthority organisationGrantedAuthority =
-            OrganisationGrantedAuthority.builder().organisation("ORGANISATION").authority(ROLE).build();
+            OrganisationGrantedAuthority.builder().authority(ROLE).build();
+    List<String> organisations = Arrays.asList("Organisation1");
 
     SecurityContextHolder.getContext().setAuthentication(authentication);
     when(authentication.getDetails()).thenReturn(userDetails);
     when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn(BEARER_TOKEN);
     when(userDetails.getAuthorities())
             .thenReturn(Arrays.asList(new SimpleGrantedAuthority(ROLE), organisationGrantedAuthority));
+    when(userDetails.getCustomerOrganisationId())
+            .thenReturn(CUSTOMER_ORGANISATION_ID);
+    when(userDetails.getOrganisations())
+            .thenReturn(organisations);
+    when(userDetails.getCustomerId())
+            .thenReturn(CUSTOMER_ID);
     when(permissionsCache.permissionsList(eq(ROLE), eq(BEARER_TOKEN)))
             .thenReturn(Collections.singletonList(PERMISSION));
 
     Authentication amendedAuthentication = permissionsFilter.attemptAuthentication(request, response);
 
-    assertTrue(amendedAuthentication.getDetails().toString().contains(organisationGrantedAuthority.getOrganisation()));
+    assertTrue(userDetails.getOrganisations().contains(organisations.get(0)));
+    assertEquals(userDetails.getCustomerOrganisationId(), CUSTOMER_ORGANISATION_ID);
+    assertEquals(userDetails.getCustomerId(), CUSTOMER_ID);
 
     verify(authentication, times(3)).getDetails();
-    verify(userDetails, times(2)).getAuthorities();
+    verify(userDetails, times(1)).getAuthorities();
+    verify(userDetails, times(2)).getOrganisations();
     verify(request).getHeader(HttpHeaders.AUTHORIZATION);
     verify(permissionsCache, times(2)).permissionsList(eq(ROLE), eq(BEARER_TOKEN));
   }

@@ -49,6 +49,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import uk.gov.defra.tracesx.common.security.IdTokenAuthentication;
 import uk.gov.defra.tracesx.common.security.IdTokenUserDetails;
+import uk.gov.defra.tracesx.common.security.OrganisationGrantedAuthority;
 import uk.gov.defra.tracesx.common.security.RoleToAuthorityMapper;
 import uk.gov.defra.tracesx.common.security.jwks.JwkProviderFactory;
 import uk.gov.defra.tracesx.common.security.jwks.JwksCache;
@@ -140,7 +141,7 @@ public class JwtTokenFilterComponentTest {
   }
 
   private static final List<GrantedAuthority> EXPECTED_AUTHORITIES = Collections.unmodifiableList(MockJwks.ROLES_VALUE.stream().map(
-      SimpleGrantedAuthority::new).collect(Collectors.toList()));
+      OrganisationGrantedAuthority::new).collect(Collectors.toList()));
 
   private void assertThatAuthenticationIsValid(Authentication authentication) {
     assertThat(authentication).isInstanceOf(IdTokenAuthentication.class);

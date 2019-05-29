@@ -17,11 +17,9 @@ import uk.gov.defra.tracesx.common.exceptions.PermissionsAuthenticationException
 import uk.gov.defra.tracesx.common.permissions.PermissionsCache;
 import uk.gov.defra.tracesx.common.security.IdTokenAuthentication;
 import uk.gov.defra.tracesx.common.security.IdTokenUserDetails;
-import uk.gov.defra.tracesx.common.security.OrganisationGrantedAuthority;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -79,14 +77,12 @@ public class PermissionsFilter extends StatelessAuthenticationProcessingFilter {
   }
 
   private List<String> getOrganisationsList() {
-    Authentication authentication = getAuthentication();
-    UserDetails userDetails = (UserDetails) authentication.getDetails();
-    if (userDetails != null) {
-      return userDetails.getAuthorities()
-          .stream().filter(authority -> authority instanceof OrganisationGrantedAuthority)
-          .map(authority -> ((OrganisationGrantedAuthority) authority).getOrganisation())
-          .filter(organisation -> !organisation.isEmpty() && !organisation.equals("null"))
-          .collect(Collectors.toList());
+    IdTokenAuthentication originalAuthentication = getAuthentication();
+    IdTokenUserDetails originalUserDetails =
+            (IdTokenUserDetails) originalAuthentication.getDetails();
+
+    if (originalUserDetails != null) {
+      return originalUserDetails.getOrganisations();
     } else {
       return emptyList();
     }
@@ -128,7 +124,8 @@ public class PermissionsFilter extends StatelessAuthenticationProcessingFilter {
             .idToken(originalUserDetails.getIdToken())
             .username(originalUserDetails.getUsername())
             .authorities(permissions)
-            .contactId(originalUserDetails.getContactId())
+            .customerId(originalUserDetails.getCustomerId())
+            .customerOrganisationId(originalUserDetails.getCustomerOrganisationId())
             .build();
     return new IdTokenAuthentication(newUserDetails);
   }
