@@ -2,7 +2,6 @@ package uk.gov.defra.tracesx.common.security.jwt;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,9 +16,9 @@ import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import uk.gov.defra.tracesx.common.exceptions.InsSecurityException;
 import uk.gov.defra.tracesx.common.security.IdTokenUserDetails;
+import uk.gov.defra.tracesx.common.security.OrganisationGrantedAuthority;
 import uk.gov.defra.tracesx.common.security.RoleToAuthorityMapper;
 
 @RunWith(Theories.class)
@@ -36,7 +35,7 @@ public class JwtUserMapperTest {
   private static final String SUB = "e9f6447d-2979-4322-8e52-307dafdef649";
   private static final List<String> ROLES = Arrays.asList("ROLE1", "ROLE2");
   private static final List<GrantedAuthority> AUTHORITIES = Collections.unmodifiableList(
-      ROLES.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()));
+      ROLES.stream().map(OrganisationGrantedAuthority::new).collect(Collectors.toList()));
 
   @Before
   public void before() {
