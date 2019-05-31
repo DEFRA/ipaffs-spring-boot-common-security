@@ -12,6 +12,8 @@ import uk.gov.defra.tracesx.common.exceptions.InsSecurityException;
 import uk.gov.defra.tracesx.common.security.IdTokenUserDetails;
 import uk.gov.defra.tracesx.common.security.RoleToAuthorityMapper;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +35,7 @@ public class JwtUserMapper {
   public IdTokenUserDetails createUser(Map<String, Object> decoded, String idToken) {
     return IdTokenUserDetails.builder()
         .idToken(idToken)
+        .organisations(Arrays.asList(getRequiredClaim(CUSTOMER_ORGANISATION_ID, decoded, true)))
         .displayName(getRequiredClaim(SUB, decoded, true))
         .username(getRequiredClaim(SUB, decoded, true))
         .userObjectId(getRequiredClaim(SUB, decoded, true))

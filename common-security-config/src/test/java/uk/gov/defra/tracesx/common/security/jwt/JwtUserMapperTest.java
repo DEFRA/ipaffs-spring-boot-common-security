@@ -34,6 +34,9 @@ public class JwtUserMapperTest {
   private static final String ID_TOKEN = "adfgsdf.dfgsdrgerg.dfgdfgd";
   private static final String SUB = "e9f6447d-2979-4322-8e52-307dafdef649";
   private static final List<String> ROLES = Arrays.asList("ROLE1", "ROLE2");
+  private static final String ORG_ID = "3199a90f-a670-e911-a974-000d3a28da35";
+  private static final String CUSTOMER_ID = "e798a90f-a670-e911-a974-000d3a28da35";
+  private static final List<String> ORG_IDS = Arrays.asList(ORG_ID);
   private static final List<GrantedAuthority> AUTHORITIES = Collections.unmodifiableList(
       ROLES.stream().map(OrganisationGrantedAuthority::new).collect(Collectors.toList()));
 
@@ -45,6 +48,8 @@ public class JwtUserMapperTest {
     decoded.put("oid", USER_OBJECT_ID);
     decoded.put("name", DISPLAY_NAME);
     decoded.put("upn", USERNAME);
+    decoded.put("customer_id", CUSTOMER_ID);
+    decoded.put("customer_organisation_id", ORG_ID);
   }
 
   @Test
@@ -56,6 +61,9 @@ public class JwtUserMapperTest {
         .userObjectId(SUB)
         .displayName(SUB)
         .username(SUB)
+        .organisations(ORG_IDS)
+        .customerOrganisationId(ORG_ID)
+        .customerId(CUSTOMER_ID)
         .build();
     assertThat(user).isEqualTo(expected);
   }
