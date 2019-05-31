@@ -28,6 +28,7 @@ public class MockJwks {
   public static final String JWKS_AUDIENCE2 = "20ffdf69-9430-4791-86c2-dd86b6186112";
 
   public static final String SUB_VALUE = "14f30ce2-114f-4375-982f-68c43023ce02";
+  public static final String ORG_ID = "3199a90f-a670-e911-a974-000d3a28da35";
   public static final List<String> ROLES_VALUE = Collections.singletonList("ROLE1");
 
   public static final RSAKey NIMBUS_KEY1 = createNimbusKey();
@@ -66,6 +67,7 @@ public class MockJwks {
         .claim("iss", JWKS_ISSUER1)
         .claim("sub", SUB_VALUE)
         .claim("roles", ROLES_VALUE)
+        .claim("customer_organisation_id", ORG_ID)
         .signWith(KEY_PAIR1.getPrivate())
         .compact();
   }
@@ -78,6 +80,7 @@ public class MockJwks {
         .claim("iss", JWKS_ISSUER2)
         .claim("sub", SUB_VALUE)
         .claim("roles", ROLES_VALUE)
+        .claim("customer_organisation_id", ORG_ID)
         .signWith(KEY_PAIR2.getPrivate())
         .compact();
   }
