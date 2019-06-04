@@ -12,7 +12,7 @@
     <jjwt.version>0.10.5</jjwt.version>
     <spring.security.jwt.version>1.0.9.RELEASE</spring.security.jwt.version>
     <jwks.rsa.version>0.3.0</jwks.rsa.version>
-    <lombok.version>1.16.20</lombok.version>
+    <lombok.version>1.18.4</lombok.version>
     <javax.servlet.api.version>4.0.1</javax.servlet.api.version>
     <spring.boot.version>2.0.5.RELEASE</spring.boot.version>
     <spring.boot.framework.version>5.1.4.RELEASE</spring.boot.framework.version>

@@ -35,19 +35,19 @@ public class JwtUserMapper {
   public IdTokenUserDetails createUser(Map<String, Object> decoded, String idToken) {
     return IdTokenUserDetails.builder()
         .idToken(idToken)
-        .organisations(Arrays.asList(getRequiredClaim(CUSTOMER_ORGANISATION_ID, decoded, true)))
-        .displayName(getRequiredClaim(SUB, decoded, true))
-        .username(getRequiredClaim(SUB, decoded, true))
-        .userObjectId(getRequiredClaim(SUB, decoded, true))
-        .customerId(getRequiredClaim(CUSTOMER_ID, decoded, false))
+        .organisations(Arrays.asList(getClaim(CUSTOMER_ORGANISATION_ID, decoded, false)))
+        .displayName(getClaim(SUB, decoded, true))
+        .username(getClaim(SUB, decoded, true))
+        .userObjectId(getClaim(SUB, decoded, true))
+        .customerId(getClaim(CUSTOMER_ID, decoded, false))
         .authorities(getAuthorities(decoded))
-        .customerOrganisationId(getRequiredClaim(CUSTOMER_ORGANISATION_ID, decoded, false))
+        .customerOrganisationId(getClaim(CUSTOMER_ORGANISATION_ID, decoded, false))
         .build();
   }
 
-  private String getRequiredClaim(String claimName, Map<String, Object> body, boolean required) {
+  private String getClaim(String claimName, Map<String, Object> body, boolean isRequired) {
     String value = (String) body.get(claimName);
-    if (StringUtils.isEmpty(value) && required) {
+    if (StringUtils.isEmpty(value) && isRequired) {
       LOGGER.error("The JWT token is missing the claim '{}'", claimName);
       throw missingRequiredClaims();
     }
