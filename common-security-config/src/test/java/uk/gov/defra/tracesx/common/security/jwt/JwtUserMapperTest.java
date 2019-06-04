@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import static org.junit.Assert.assertNotNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
@@ -52,6 +53,22 @@ public class JwtUserMapperTest {
     decoded.put("customer_organisation_id", ORG_ID);
   }
 
+  @Test
+  public void createUser_allows_personal_account_with_no_org() {
+    
+    IdTokenUserDetails userDetails = IdTokenUserDetails.builder()
+        .idToken(ID_TOKEN)
+        .authorities(AUTHORITIES)
+        .userObjectId(SUB)
+        .displayName(SUB)
+        .username(SUB)
+        .customerOrganisationId(null)
+        .customerId(CUSTOMER_ID)
+        .build();
+    
+    assertNotNull(userDetails);
+  }
+  
   @Test
   public void createUser_fromCompleteClaims_isFullyPopulated() {
     IdTokenUserDetails user = jwtUserMapper.createUser(decoded, ID_TOKEN);
