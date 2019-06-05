@@ -1,6 +1,5 @@
 package uk.gov.defra.tracesx.common.security.filter;
 
-import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
@@ -50,7 +49,6 @@ public class PermissionsFilter extends StatelessAuthenticationProcessingFilter {
       HttpServletRequest request, HttpServletResponse response) {
 
     List<String> roles = getRoles();
-    List<String> organisations = getOrganisationsList();
     if (roles.isEmpty()) {
       LOGGER.error(ROLES_ARE_EMPTY);
       throw new PermissionsAuthenticationException(ROLES_ARE_EMPTY);
@@ -62,7 +60,7 @@ public class PermissionsFilter extends StatelessAuthenticationProcessingFilter {
       throw new PermissionsAuthenticationException(PERMISSIONS_ARE_EMPTY);
     }
 
-    return replaceAuthorities(permissions, organisations);
+    return replaceAuthorities(permissions);
   }
 
   private List<String> getRoles() {
@@ -74,18 +72,6 @@ public class PermissionsFilter extends StatelessAuthenticationProcessingFilter {
           .collect(toList());
     }
     return Collections.emptyList();
-  }
-
-  private List<String> getOrganisationsList() {
-    IdTokenAuthentication originalAuthentication = getAuthentication();
-    IdTokenUserDetails originalUserDetails =
-            (IdTokenUserDetails) originalAuthentication.getDetails();
-
-    if (originalUserDetails != null) {
-      return originalUserDetails.getOrganisations();
-    } else {
-      return emptyList();
-    }
   }
 
   private List<GrantedAuthority> getPermissions(HttpServletRequest request, List<String> roles) {
@@ -110,15 +96,13 @@ public class PermissionsFilter extends StatelessAuthenticationProcessingFilter {
     throw new AuthenticationCredentialsNotFoundException(AUTHENTICATION_NOT_FOUND);
   }
 
-  private Authentication replaceAuthorities(List<GrantedAuthority> permissions,
-      List<String> organisations) {
+  private Authentication replaceAuthorities(List<GrantedAuthority> permissions) {
     IdTokenAuthentication originalAuthentication = getAuthentication();
     IdTokenUserDetails originalUserDetails =
         (IdTokenUserDetails) originalAuthentication.getDetails();
 
     IdTokenUserDetails newUserDetails =
         IdTokenUserDetails.builder()
-            .organisations(organisations)
             .userObjectId(originalUserDetails.getUserObjectId())
             .displayName(originalUserDetails.getDisplayName())
             .idToken(originalUserDetails.getIdToken())
