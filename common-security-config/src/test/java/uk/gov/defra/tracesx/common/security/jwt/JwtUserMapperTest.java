@@ -78,7 +78,6 @@ public class JwtUserMapperTest {
         .userObjectId(SUB)
         .displayName(SUB)
         .username(SUB)
-        .organisations(ORG_IDS)
         .customerOrganisationId(ORG_ID)
         .customerId(CUSTOMER_ID)
         .build();

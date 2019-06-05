@@ -35,7 +35,6 @@ public class JwtUserMapper {
   public IdTokenUserDetails createUser(Map<String, Object> decoded, String idToken) {
     return IdTokenUserDetails.builder()
         .idToken(idToken)
-        .organisations(Arrays.asList(getClaim(CUSTOMER_ORGANISATION_ID, decoded, false)))
         .displayName(getClaim(SUB, decoded, true))
         .username(getClaim(SUB, decoded, true))
         .userObjectId(getClaim(SUB, decoded, true))

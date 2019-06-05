@@ -91,7 +91,7 @@ public class PermissionsFilterTest {
         .isThrownBy(() -> permissionsFilter.attemptAuthentication(request, response))
         .withMessageContaining(ROLES_ARE_EMPTY);
 
-    verify(authentication, times(2)).getDetails();
+    verify(authentication, times(1)).getDetails();
   }
 
   @Test
@@ -102,9 +102,8 @@ public class PermissionsFilterTest {
         .isThrownBy(() -> permissionsFilter.attemptAuthentication(request, response))
         .withMessageContaining(ROLES_ARE_EMPTY);
 
-    verify(authentication, times(2)).getDetails();
+    verify(authentication, times(1)).getDetails();
     verify(userDetails, times(1)).getAuthorities();
-    verify(userDetails, times(1)).getOrganisations();
   }
 
   @Test
@@ -118,9 +117,8 @@ public class PermissionsFilterTest {
         .isThrownBy(() -> permissionsFilter.attemptAuthentication(request, response))
         .withMessageContaining(PERMISSIONS_ARE_EMPTY);
 
-    verify(authentication, times(2)).getDetails();
+    verify(authentication, times(1)).getDetails();
     verify(userDetails, times(1)).getAuthorities();
-    verify(userDetails, times(1)).getOrganisations();
     verify(request).getHeader(HttpHeaders.AUTHORIZATION);
     verify(permissionsCache).permissionsList(eq(ROLE), eq(BEARER_TOKEN));
   }
@@ -136,9 +134,9 @@ public class PermissionsFilterTest {
     GrantedAuthority expectedAuthority = new SimpleGrantedAuthority(PERMISSION);
     assertThat((Collection<GrantedAuthority>) amendedAuthentication.getAuthorities()).containsOnly(expectedAuthority);
 
-    verify(authentication, times(3)).getDetails();
+    verify(authentication, times(2)).getDetails();
     verify(userDetails, times(1)).getAuthorities();
-    verify(userDetails, times(1)).getOrganisations();
+    verify(userDetails, times(1)).getCustomerOrganisationId();
     verify(request).getHeader(HttpHeaders.AUTHORIZATION);
     verify(permissionsCache).permissionsList(eq(ROLE), eq(BEARER_TOKEN));
   }
@@ -168,9 +166,9 @@ public class PermissionsFilterTest {
 
     assertThat(amendedAuthentication.getAuthorities()).containsOnlyElementsOf((Iterable) expectedAuthorities);
 
-    verify(authentication, times(3)).getDetails();
+    verify(authentication, times(2)).getDetails();
     verify(userDetails, times(1)).getAuthorities();
-    verify(userDetails, times(1)).getOrganisations();
+    verify(userDetails, times(1)).getCustomerOrganisationId();
     verify(request).getHeader(HttpHeaders.AUTHORIZATION);
     verify(permissionsCache).permissionsList(eq(role1), eq(BEARER_TOKEN));
     verify(permissionsCache).permissionsList(eq(role2), eq(BEARER_TOKEN));
@@ -190,22 +188,18 @@ public class PermissionsFilterTest {
             .thenReturn(Arrays.asList(new SimpleGrantedAuthority(ROLE), organisationGrantedAuthority));
     when(userDetails.getCustomerOrganisationId())
             .thenReturn(CUSTOMER_ORGANISATION_ID);
-    when(userDetails.getOrganisations())
-            .thenReturn(organisations);
     when(userDetails.getCustomerId())
             .thenReturn(CUSTOMER_ID);
     when(permissionsCache.permissionsList(eq(ROLE), eq(BEARER_TOKEN)))
             .thenReturn(Collections.singletonList(PERMISSION));
 
-    Authentication amendedAuthentication = permissionsFilter.attemptAuthentication(request, response);
+    permissionsFilter.attemptAuthentication(request, response);
 
-    assertTrue(userDetails.getOrganisations().contains(organisations.get(0)));
     assertEquals(userDetails.getCustomerOrganisationId(), CUSTOMER_ORGANISATION_ID);
     assertEquals(userDetails.getCustomerId(), CUSTOMER_ID);
 
-    verify(authentication, times(3)).getDetails();
+    verify(authentication, times(2)).getDetails();
     verify(userDetails, times(1)).getAuthorities();
-    verify(userDetails, times(2)).getOrganisations();
     verify(request).getHeader(HttpHeaders.AUTHORIZATION);
     verify(permissionsCache, times(2)).permissionsList(eq(ROLE), eq(BEARER_TOKEN));
   }
