@@ -38,16 +38,10 @@ Example implementation:
 
 ## AbstractAdminAuthenticationTest
 
-Just implement `getAdminUrl()` to return the full URL of the `/admin` endpoint.
+Just extend the class to ensure the tests are run.
 
 Example implementation:
 
     public class TestAdminAuthentication extends AbstractAdminAuthenticationTest {
     
-      private static final CountriesServiceHelper helper = new CountriesServiceHelper();
-    
-      @Override
-      protected String getAdminUrl() {
-        return helper.getUrl("/admin");
-      }
     }

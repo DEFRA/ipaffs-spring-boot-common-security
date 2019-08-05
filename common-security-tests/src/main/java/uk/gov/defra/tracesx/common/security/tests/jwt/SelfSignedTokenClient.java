@@ -54,6 +54,10 @@ public class SelfSignedTokenClient {
     return getToken(tokenType, Collections.singletonMap(claimName, claimValue));
   }
 
+  public String getToken(TokenType tokenType) {
+    return getToken(tokenType, Collections.emptyMap());
+  }
+
   private String getToken(TokenType tokenType, Map<String, Object> overrides) {
     String body;
     try {
@@ -62,18 +66,18 @@ public class SelfSignedTokenClient {
       throw new IllegalArgumentException(exception);
     }
     Response response =
-            given()
-                    .header(AUTHORIZATION, TEST_OPENID_BASIC)
-                    .header("Content-Type", "application/json")
-                    .when()
-                    .body(body)
-                    .post(createUrl(tokenType, "/sign"));
+        given()
+            .header(AUTHORIZATION, TEST_OPENID_BASIC)
+            .header("Content-Type", "application/json")
+            .when()
+            .body(body)
+            .post(createUrl(tokenType));
     response.then().statusCode(200);
     return response.getBody().asString();
   }
 
-  private String createUrl(TokenType tokenType, String path) {
-    return TEST_OPENID_TOKEN_SERVICE_URL + tokenType.getPrefix() + path;
+  private String createUrl(TokenType tokenType) {
+    return TEST_OPENID_TOKEN_SERVICE_URL + tokenType.getPrefix() + "/sign";
   }
 
   private void addExpiredTokenBodyOverride(Map<String, Object> overrides) {

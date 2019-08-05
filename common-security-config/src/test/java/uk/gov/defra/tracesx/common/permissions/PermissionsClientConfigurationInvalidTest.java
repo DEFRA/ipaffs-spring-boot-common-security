@@ -14,9 +14,6 @@ import static uk.gov.defra.tracesx.common.CommonWebMvcConfiguration.PERMISSIONS_
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = PermissionsClient.class)
-@TestPropertySource(properties = {
-        "permissions.security.token-feature-switch=false"
-})
 public class PermissionsClientConfigurationInvalidTest {
     @Autowired
     private PermissionsClient permissionsClient;

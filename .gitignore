@@ -24,4 +24,5 @@
 /.nb-gradle/
 /build/
 
+*.DS_STORE
 settings.xml

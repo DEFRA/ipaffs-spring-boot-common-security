@@ -30,15 +30,6 @@ public class PermissionsClient {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PermissionsClient.class);
 
-  @Value("${permissions.service.scheme:#{null}}")
-  private String permissionsScheme;
-
-  @Value("${permissions.service.host:#{null}}")
-  private String permissionsHost;
-
-  @Value("${permissions.service.port:#{null}}")
-  private String permissionsPort;
-
   @Value("${permissions.service.url:#{null}}")
   private String permissionsUrl;
 
@@ -47,9 +38,6 @@ public class PermissionsClient {
 
   @Value("${permissions.service.password}")
   private String permissionsPassword;
-
-  @Value("${permissions.security.token-feature-switch}")
-  private boolean securityTokenFeatureSwitch;
 
   private RestTemplate permissionsRestTemplate;
 
@@ -69,25 +57,15 @@ public class PermissionsClient {
   UriComponentsBuilder getPath(String role) {
     return Optional.ofNullable(permissionsUrl)
         .map(UriComponentsBuilder::fromUriString)
-        // Fall back to old environment naming standard during migration from old to new
-        // in services that use the
-        // security commons.
-        .orElseGet(() -> UriComponentsBuilder.newInstance()
-            .scheme(Optional.ofNullable(permissionsScheme)
-                .orElseThrow(() -> createPropertyNotFoundException("permissions.service.scheme")))
-            .host(Optional.ofNullable(permissionsHost)
-                .orElseThrow(() -> createPropertyNotFoundException("permissions.service.host")))
-            .port(Optional.ofNullable(permissionsPort)
-                .orElseThrow(() -> createPropertyNotFoundException("permissions.service.port")))
-        ).path("/roles")
+        .orElseThrow(() -> createPropertyNotFoundException("permissions.service.port"))
+        .path("/roles")
         .pathSegment(role)
         .path("/permissions");
   }
 
   private IllegalArgumentException createPropertyNotFoundException(String propertyName) {
     return new IllegalArgumentException(
-        "Could not resolve permission client placeholder 'prmissions.service.url' or fall back '"
-            + propertyName + "'");
+        "Could not resolve permission client placeholder '" + propertyName + "'");
   }
 
   private HttpHeaders getHeaders(String authorisationToken) {
@@ -99,9 +77,7 @@ public class PermissionsClient {
 
     HttpHeaders headers = new HttpHeaders();
     headers.set(X_AUTH_HEADER_BASIC, encodedBasicAuth);
-    if (securityTokenFeatureSwitch && authorisationToken != null) {
-      headers.add(AUTHORIZATION, authorisationToken);
-    }
+    headers.add(AUTHORIZATION, authorisationToken);
     return headers;
   }
 
