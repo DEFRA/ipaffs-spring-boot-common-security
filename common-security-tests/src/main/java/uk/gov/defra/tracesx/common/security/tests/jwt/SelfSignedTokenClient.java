@@ -54,6 +54,10 @@ public class SelfSignedTokenClient {
     return getToken(tokenType, Collections.singletonMap(claimName, claimValue));
   }
 
+  public String getTokenWithClaims(TokenType tokenType, Map<String, Object> claims) {
+    return getToken(tokenType, claims);
+  }
+
   public String getToken(TokenType tokenType) {
     return getToken(tokenType, Collections.emptyMap());
   }
