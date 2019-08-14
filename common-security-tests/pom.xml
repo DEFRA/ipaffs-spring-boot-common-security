@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>uk.gov.defra.tracesx</groupId>
 	<artifactId>TracesX-SpringBoot-CommonSecurity-Tests</artifactId>
-	<version>1.0.15-SNAPSHOT</version>
+	<version>1.0.15</version>
 	<name>common-security-tests</name>
 	<description>An integration test library for testing correct deployment of the Shared Spring Boot Web Security Configuration</description>
 
@@ -31,7 +31,7 @@
 
   <scm>
     <connection>${parent.scm.connection}</connection>
-    <tag>HEAD</tag>
+    <tag>1.0.15-32</tag>
   </scm>
 
 	<dependencies>
