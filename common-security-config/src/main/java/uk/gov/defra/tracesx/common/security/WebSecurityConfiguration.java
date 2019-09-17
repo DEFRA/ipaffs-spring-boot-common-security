@@ -12,6 +12,8 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 import uk.gov.defra.tracesx.common.permissions.PermissionsCache;
+import uk.gov.defra.tracesx.common.security.conversation.id.ConversationFilter;
+import uk.gov.defra.tracesx.common.security.conversation.id.ConversationStore;
 import uk.gov.defra.tracesx.common.security.filter.JwtTokenFilter;
 import uk.gov.defra.tracesx.common.security.filter.PermissionsFilter;
 import uk.gov.defra.tracesx.common.security.jwt.JwtTokenValidator;
@@ -73,14 +75,17 @@ public class WebSecurityConfiguration {
   @Order(SERVICE_RESOURCES_SECURITY_ORDER)
   public static class ServiceResourcesSecurityConfiguration extends WebSecurityConfigurerAdapter {
     private final JwtTokenValidator jwtTokenValidator;
-
     private final PermissionsCache permissionsCache;
+    private final ConversationStore conversationStore;
 
     public ServiceResourcesSecurityConfiguration(
-        JwtTokenValidator jwtTokenValidator, PermissionsCache permissionsCache) {
+        JwtTokenValidator jwtTokenValidator,
+        PermissionsCache permissionsCache,
+        ConversationStore conversationStore) {
       super();
       this.jwtTokenValidator = jwtTokenValidator;
       this.permissionsCache = permissionsCache;
+      this.conversationStore = conversationStore;
     }
 
     @Override
@@ -97,6 +102,7 @@ public class WebSecurityConfiguration {
           .anyRequest()
           .fullyAuthenticated()
           .and()
+          .addFilterBefore(conversationFilter(), UsernamePasswordAuthenticationFilter.class)
           .addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class)
           .addFilterBefore(permissionsFilter(), UsernamePasswordAuthenticationFilter.class);
     }
@@ -105,6 +111,10 @@ public class WebSecurityConfiguration {
     public AuthenticationEntryPoint unauthorizedEntryPoint() {
       return (request, response, authException) ->
           response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+    }
+
+    private ConversationFilter conversationFilter() {
+      return new ConversationFilter(conversationStore);
     }
 
     private JwtTokenFilter jwtTokenFilter() {
