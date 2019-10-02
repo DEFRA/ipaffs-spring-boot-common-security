@@ -7,25 +7,31 @@
   <description>Shared Spring Boot Web Security configuration</description>
   <groupId>uk.gov.defra.tracesx</groupId>
 
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-dependencies</artifactId>
+    <version>2.0.9.RELEASE</version>
+  </parent>
+
   <properties>
     <java.version>1.8</java.version>
-    <jjwt.version>0.10.5</jjwt.version>
-    <spring.security.jwt.version>1.0.9.RELEASE</spring.security.jwt.version>
-    <jwks.rsa.version>0.3.0</jwks.rsa.version>
-    <lombok.version>1.18.4</lombok.version>
-    <javax.servlet.api.version>4.0.1</javax.servlet.api.version>
-    <spring.boot.version>2.0.5.RELEASE</spring.boot.version>
-    <spring.boot.framework.version>5.1.4.RELEASE</spring.boot.framework.version>
-    <commons.lang3.version>3.8.1</commons.lang3.version>
-    <mockito.version>2.24.0</mockito.version>
-    <assertj.version>3.11.1</assertj.version>
-    <junit.version>4.12</junit.version>
-    <spring.test.version>5.1.5.RELEASE</spring.test.version>
-    <jackson.databind.version>2.9.7</jackson.databind.version>
-    <restassured.version>3.3.0</restassured.version>
-    <applicationinsights.version>2.0.0</applicationinsights.version>
+    <maven.compiler.source>${java.version}</maven.compiler.source>
+    <maven.compiler.target>${java.version}</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <!-- Spring Boot dependency version overrides -->
+    <commons.lang3.version>3.8.1</commons.lang3.version>
+    <jackson.version>2.9.10</jackson.version>
+    <lombok.version>1.18.4</lombok.version>
+    <!-- End Spring Boot dependency version overrides -->
+
+    <applicationinsights.version>2.0.0</applicationinsights.version>
     <checkstyle.version>3.0.0</checkstyle.version>
+    <javax.servlet.api.version>4.0.1</javax.servlet.api.version>
+    <jjwt.version>0.10.5</jjwt.version>
+    <jwks.rsa.version>0.3.0</jwks.rsa.version>
+    <restassured.version>3.3.0</restassured.version>
+    <spring.security.jwt.version>1.0.10.RELEASE</spring.security.jwt.version>
   </properties>
 
   <distributionManagement>
@@ -51,32 +57,26 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter</artifactId>
-      <version>${spring.boot.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
-      <version>${spring.boot.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
-      <version>${spring.boot.version}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>${jackson.databind.version}</version>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>${lombok.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>${commons.lang3.version}</version>
     </dependency>
     <dependency>
       <groupId>com.microsoft.azure</groupId>
@@ -100,13 +100,11 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>${mockito.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
-      <version>${assertj.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -118,13 +116,11 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
-      <version>${spring.boot.version}</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -166,11 +162,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.7.0</version>
-        <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
