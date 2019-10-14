@@ -1,46 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  <groupId>uk.gov.defra.tracesx</groupId>
   <artifactId>TracesX-SpringBoot-CommonSecurity-Config</artifactId>
-  <version>1.0.18-SNAPSHOT</version>
+  <version>2.0.0-SNAPSHOT</version>
   <name>common-security-config</name>
   <description>Shared Spring Boot Web Security configuration</description>
-  <groupId>uk.gov.defra.tracesx</groupId>
 
   <parent>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-dependencies</artifactId>
-    <version>2.0.9.RELEASE</version>
+    <groupId>uk.gov.defra.tracesx</groupId>
+    <artifactId>TracesX-SpringBoot-CommonSecurity</artifactId>
+    <version>2.0.0-SNAPSHOT</version>
   </parent>
-
-  <properties>
-    <java.version>1.8</java.version>
-    <maven.compiler.source>${java.version}</maven.compiler.source>
-    <maven.compiler.target>${java.version}</maven.compiler.target>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-    <!-- Spring Boot dependency version overrides -->
-    <commons.lang3.version>3.8.1</commons.lang3.version>
-    <jackson.version>2.9.10</jackson.version>
-    <lombok.version>1.18.4</lombok.version>
-    <!-- End Spring Boot dependency version overrides -->
-
-    <applicationinsights.version>2.0.0</applicationinsights.version>
-    <checkstyle.version>3.0.0</checkstyle.version>
-    <javax.servlet.api.version>4.0.1</javax.servlet.api.version>
-    <jjwt.version>0.10.5</jjwt.version>
-    <jwks.rsa.version>0.3.0</jwks.rsa.version>
-    <restassured.version>3.3.0</restassured.version>
-    <spring.security.jwt.version>1.0.10.RELEASE</spring.security.jwt.version>
-  </properties>
-
-  <distributionManagement>
-    <repository>
-      <id>release</id>
-      <name>Releases</name>
-      <url>${repo.releases.url}</url>
-    </repository>
-  </distributionManagement>
 
   <scm>
     <connection>${parent.scm.connection}</connection>
@@ -48,12 +19,6 @@
   </scm>
 
   <dependencies>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
-      <version>${javax.servlet.api.version}</version>
-      <scope>provided</scope>
-    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter</artifactId>
@@ -81,19 +46,16 @@
     <dependency>
       <groupId>com.microsoft.azure</groupId>
       <artifactId>applicationinsights-web</artifactId>
-      <version>${applicationinsights.version}</version>
     </dependency>
     <!-- used to decode and validate jwt tokens -->
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-jwt</artifactId>
-      <version>${spring.security.jwt.version}</version>
     </dependency>
     <!-- used to fetch public signing keys from jwks urls -->
     <dependency>
       <groupId>com.auth0</groupId>
       <artifactId>jwks-rsa</artifactId>
-      <version>${jwks.rsa.version}</version>
     </dependency>
 
     <!-- TEST Dependencies -->
@@ -110,7 +72,6 @@
     <dependency>
       <groupId>io.rest-assured</groupId>
       <artifactId>rest-assured</artifactId>
-      <version>${restassured.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -133,26 +94,23 @@
     <dependency>
       <groupId>io.jsonwebtoken</groupId>
       <artifactId>jjwt-api</artifactId>
-      <version>${jjwt.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>io.jsonwebtoken</groupId>
       <artifactId>jjwt-impl</artifactId>
-      <version>${jjwt.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>io.jsonwebtoken</groupId>
       <artifactId>jjwt-jackson</artifactId>
-      <version>${jjwt.version}</version>
       <scope>test</scope>
     </dependency>
     <!-- nimbus is needed to create the jwks used for component testing -->
     <dependency>
       <groupId>com.nimbusds</groupId>
       <artifactId>nimbus-jose-jwt</artifactId>
-      <version>6.8</version>
+      <scope>test</scope>
     </dependency>
 
   </dependencies>
@@ -161,23 +119,11 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>${checkstyle.version}</version>
         <configuration>
-          <configLocation>google_checks.xml</configLocation>
-          <logViolationsToConsole>true</logViolationsToConsole>
-          <outputFile>${project.build.directory}/checkstyle-result.xml</outputFile>
-          <violationSeverity>warning</violationSeverity>
-          <failsOnError>true</failsOnError>
           <suppressionsLocation>../checkstyle-suppressions.xml</suppressionsLocation>
-          <suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>
         </configuration>
       </plugin>
     </plugins>
   </build>
-
 </project>
