@@ -1,15 +1,38 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  <groupId>uk.gov.defra.tracesx</groupId>
   <artifactId>TracesX-SpringBoot-CommonSecurity</artifactId>
-  <version>1.0.18-SNAPSHOT</version>
+  <version>2.0.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
   <name>common-security-parent</name>
   <description>Shared Spring Boot Web Security: Parent</description>
-  <packaging>pom</packaging>
-  <groupId>uk.gov.defra.tracesx</groupId>
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-parent</artifactId>
+    <version>2.1.9.RELEASE</version>
+  </parent>
 
   <properties>
     <project.scm.id>gitlab</project.scm.id>
+
+    <java.version>11</java.version>
+    <maven.compiler.source>${java.version}</maven.compiler.source>
+    <maven.compiler.target>${java.version}</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <!-- Spring Boot dependency version overrides -->
+    <jackson.version>2.9.10</jackson.version>
+    <!-- End Spring Boot dependency version overrides -->
+
+    <applicationinsights.version>2.5.0</applicationinsights.version>
+    <checkstyle.version>3.0.0</checkstyle.version>
+    <javax.el.version>3.0.0</javax.el.version>
+    <jjwt.version>0.10.5</jjwt.version>
+    <jwks.rsa.version>0.3.0</jwks.rsa.version>
+    <nimbus.version>6.8</nimbus.version>
+    <rest-assured.version>3.3.0</rest-assured.version>
+    <spring.security.jwt.version>1.0.10.RELEASE</spring.security.jwt.version>
   </properties>
 
   <scm>
@@ -30,6 +53,48 @@
     </repository>
   </distributionManagement>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.microsoft.azure</groupId>
+        <artifactId>applicationinsights-web</artifactId>
+        <version>${applicationinsights.version}</version>
+      </dependency>
+      <!-- used to decode and validate jwt tokens -->
+      <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-jwt</artifactId>
+        <version>${spring.security.jwt.version}</version>
+      </dependency>
+      <!-- used to fetch public signing keys from jwks urls -->
+      <dependency>
+        <groupId>com.auth0</groupId>
+        <artifactId>jwks-rsa</artifactId>
+        <version>${jwks.rsa.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-api</artifactId>
+        <version>${jjwt.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-impl</artifactId>
+        <version>${jjwt.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-jackson</artifactId>
+        <version>${jjwt.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.nimbusds</groupId>
+        <artifactId>nimbus-jose-jwt</artifactId>
+        <version>${nimbus.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <build>
     <pluginManagement>
     <plugins>
@@ -42,7 +107,34 @@
           <releaseProfiles>release</releaseProfiles>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>${checkstyle.version}</version>
+        <configuration>
+          <configLocation>google_checks.xml</configLocation>
+          <logViolationsToConsole>true</logViolationsToConsole>
+          <outputFile>${project.build.directory}/checkstyle-result.xml</outputFile>
+          <violationSeverity>warning</violationSeverity>
+          <failsOnError>true</failsOnError>
+          <suppressionsLocation>checkstyle-suppressions.xml</suppressionsLocation>
+          <suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
     </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+      </plugin>
+    </plugins>
   </build>
 </project>
