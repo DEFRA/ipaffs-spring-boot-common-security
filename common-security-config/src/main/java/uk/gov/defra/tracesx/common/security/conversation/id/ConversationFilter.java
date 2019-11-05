@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 public class ConversationFilter implements Filter {
 
   private static final String CONVERSATION_ID_HEADER = "INS-ConversationId";
+  private static final String X_FORWARDED_FOR_HEADER = "X-Forwarded-For";
 
   private final ConversationStore conversationStore;
 
@@ -29,9 +30,10 @@ public class ConversationFilter implements Filter {
 
     HttpServletRequest request = (HttpServletRequest) servletRequest;
     String conversationId = request.getHeader(CONVERSATION_ID_HEADER);
-
+    String conversationIp = request.getHeader(X_FORWARDED_FOR_HEADER).split(":")[0];
     try {
       conversationStore.setConversationId(conversationId);
+      conversationStore.setConversationIp(conversationIp);
       chain.doFilter(servletRequest, servletResponse);
     } finally {
       // Clear the thread in case filter is skipped

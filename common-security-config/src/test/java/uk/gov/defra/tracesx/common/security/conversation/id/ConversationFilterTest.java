@@ -19,6 +19,8 @@ import javax.servlet.http.HttpServletRequest;
 public class ConversationFilterTest {
 
   private static final String CONVERSATION_ID = UUID.randomUUID().toString();
+  private static final String X_FORWARDED_FOR_HEADER = "0.0.0.0:0000";
+  private static final String X_FORWARDED_FOR = "0.0.0.0";
 
   @Mock
   private ConversationStore conversationStore;
@@ -42,9 +44,19 @@ public class ConversationFilterTest {
   @Test
   public void doFilter_withCorrectHeader_setsConversationId() throws Exception {
     when(servletRequest.getHeader("INS-ConversationId")).thenReturn(CONVERSATION_ID);
+    when(servletRequest.getHeader("X-Forwarded-For")).thenReturn(X_FORWARDED_FOR_HEADER);
     conversationFilter.doFilter(servletRequest, servletResponse, filterChain);
 
     verify(conversationStore, times(1)).setConversationId(CONVERSATION_ID);
+    verify(conversationStore, times(1)).clear();
+  }
+
+  @Test
+  public void doFilter_withCorrectHeader_setsConversationIp() throws Exception {
+    when(servletRequest.getHeader("X-Forwarded-For")).thenReturn(X_FORWARDED_FOR_HEADER);
+    conversationFilter.doFilter(servletRequest, servletResponse, filterChain);
+
+    verify(conversationStore, times(1)).setConversationIp(X_FORWARDED_FOR);
     verify(conversationStore, times(1)).clear();
   }
 }

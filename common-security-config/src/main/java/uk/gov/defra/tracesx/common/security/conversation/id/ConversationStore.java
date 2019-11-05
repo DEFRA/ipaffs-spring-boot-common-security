@@ -14,7 +14,10 @@ public class ConversationStore {
 
   private String conversationId;
 
+  private String conversationIp;
+
   public void clear() {
     this.conversationId = null;
+    this.conversationIp = null;
   }
 }
