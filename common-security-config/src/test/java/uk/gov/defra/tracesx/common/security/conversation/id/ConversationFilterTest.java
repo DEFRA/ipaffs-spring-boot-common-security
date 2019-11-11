@@ -1,5 +1,6 @@
 package uk.gov.defra.tracesx.common.security.conversation.id;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,8 +20,9 @@ import javax.servlet.http.HttpServletRequest;
 public class ConversationFilterTest {
 
   private static final String CONVERSATION_ID = UUID.randomUUID().toString();
-  private static final String X_FORWARDED_FOR_HEADER = "0.0.0.0:0000";
-  private static final String X_FORWARDED_FOR = "0.0.0.0";
+  private static final String CONVERSATION_IP_HEADER = "1.1.1.1:1111";
+  private static final String CONVERSATION_IP = "1.1.1.1";
+  private static final String DEFAULT_CONVERSATION_IP = "0.0.0.0";
 
   @Mock
   private ConversationStore conversationStore;
@@ -44,7 +46,7 @@ public class ConversationFilterTest {
   @Test
   public void doFilter_withCorrectHeader_setsConversationId() throws Exception {
     when(servletRequest.getHeader("INS-ConversationId")).thenReturn(CONVERSATION_ID);
-    when(servletRequest.getHeader("X-Forwarded-For")).thenReturn(X_FORWARDED_FOR_HEADER);
+    when(servletRequest.getHeader("INS-ConversationIp")).thenReturn(CONVERSATION_IP_HEADER);
     conversationFilter.doFilter(servletRequest, servletResponse, filterChain);
 
     verify(conversationStore, times(1)).setConversationId(CONVERSATION_ID);
@@ -53,10 +55,18 @@ public class ConversationFilterTest {
 
   @Test
   public void doFilter_withCorrectHeader_setsConversationIp() throws Exception {
-    when(servletRequest.getHeader("X-Forwarded-For")).thenReturn(X_FORWARDED_FOR_HEADER);
+    when(servletRequest.getHeader("INS-ConversationIp")).thenReturn(CONVERSATION_IP_HEADER);
     conversationFilter.doFilter(servletRequest, servletResponse, filterChain);
 
-    verify(conversationStore, times(1)).setConversationIp(X_FORWARDED_FOR);
+    verify(conversationStore, times(1)).setConversationIp(CONVERSATION_IP);
     verify(conversationStore, times(1)).clear();
+  }
+
+  @Test
+  public void doFilter_withNoConversationIpHeader_doesNotThrowException() {
+    when(servletRequest.getHeader("INS-ConversationIp")).thenReturn(null);
+
+    assertThatCode(() -> conversationFilter.doFilter(servletRequest, servletResponse, filterChain)).doesNotThrowAnyException();
+    verify(conversationStore, times(1)).setConversationIp(DEFAULT_CONVERSATION_IP);
   }
 }
