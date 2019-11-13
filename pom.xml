@@ -22,7 +22,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!-- Spring Boot dependency version overrides -->
-    <jackson.version>2.9.10</jackson.version>
+    <jackson.version>2.10.1</jackson.version>
     <!-- End Spring Boot dependency version overrides -->
 
     <applicationinsights.version>2.5.0</applicationinsights.version>
