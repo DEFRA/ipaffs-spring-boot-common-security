@@ -12,8 +12,6 @@ import uk.gov.defra.tracesx.common.exceptions.InsSecurityException;
 import uk.gov.defra.tracesx.common.security.IdTokenUserDetails;
 import uk.gov.defra.tracesx.common.security.RoleToAuthorityMapper;
 
-import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 

@@ -30,8 +30,8 @@ public class JwtUserMapperTest {
   private JwtUserMapper jwtUserMapper = new JwtUserMapper(roleToAuthorityMapper);
 
   private static final String USER_OBJECT_ID = "e9f6447d-2979-4322-8e52-307dafdef649";
-  public static final String DISPLAY_NAME = "Joseph William Token";
-  public static final String USERNAME = "jtoken@tenant.com";
+  private static final String DISPLAY_NAME = "Joseph William Token";
+  private static final String USERNAME = "jtoken@tenant.com";
   private static final String ID_TOKEN = "adfgsdf.dfgsdrgerg.dfgdfgd";
   private static final String SUB = "e9f6447d-2979-4322-8e52-307dafdef649";
   private static final List<String> ROLES = Arrays.asList("ROLE1", "ROLE2");
@@ -55,7 +55,7 @@ public class JwtUserMapperTest {
 
   @Test
   public void createUser_allows_personal_account_with_no_org() {
-    
+
     IdTokenUserDetails userDetails = IdTokenUserDetails.builder()
         .idToken(ID_TOKEN)
         .authorities(AUTHORITIES)
@@ -65,10 +65,10 @@ public class JwtUserMapperTest {
         .customerOrganisationId(null)
         .customerId(CUSTOMER_ID)
         .build();
-    
+
     assertNotNull(userDetails);
   }
-  
+
   @Test
   public void createUser_fromCompleteClaims_isFullyPopulated() {
     IdTokenUserDetails user = jwtUserMapper.createUser(decoded, ID_TOKEN);
@@ -87,6 +87,13 @@ public class JwtUserMapperTest {
   @Test
   public void createUser_rolesIsNotAList_isFullyPopulated() {
     decoded.put("roles", "NotAList");
+    assertThatExceptionOfType(InsSecurityException.class)
+        .isThrownBy(() -> jwtUserMapper.createUser(decoded, ID_TOKEN));
+  }
+
+  @Test
+  public void createUser_BodyDoesntContainRoles_ThrowsException() {
+    decoded.remove("roles");
     assertThatExceptionOfType(InsSecurityException.class)
         .isThrownBy(() -> jwtUserMapper.createUser(decoded, ID_TOKEN));
   }

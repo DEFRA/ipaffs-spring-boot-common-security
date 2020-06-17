@@ -93,7 +93,7 @@ public class PermissionsClient {
           .getBody();
     } catch (ResourceAccessException exception) {
       LOGGER.warn("Unable to get permissions", exception);
-      throw exception;
+      throw new ResourceAccessException("Unable to get permissions due to exception: " + exception);
     }
   }
 }
