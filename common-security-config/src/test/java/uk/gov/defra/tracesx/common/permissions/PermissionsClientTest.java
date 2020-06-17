@@ -2,6 +2,8 @@ package uk.gov.defra.tracesx.common.permissions;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -18,6 +20,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
@@ -82,6 +85,22 @@ public class PermissionsClientTest {
     final List<String> permissionsList = permissionsService.permissionsList(INVALID_ROLE, TOKEN);
 
     assertThat(permissionsList).hasSize(0);
+  }
+
+  @Test
+  public void testGetPermissions_ThrowsCustomException_WhenResourceAccessExceptionThrown() {
+
+    when(restTemplate.exchange(
+        any(),
+        eq(GET),
+        any(HttpEntity.class),
+        eq(new ParameterizedTypeReference<List<String>>() {
+        })))
+        .thenThrow(new ResourceAccessException("test"));
+
+    assertThatThrownBy(() -> permissionsService.permissionsList(INVALID_ROLE, TOKEN))
+        .isInstanceOf(ResourceAccessException.class)
+        .hasMessageContaining("Unable to get permissions due to exception: ");
   }
 
   private ResponseEntity<List<String>> createResponseEntity() {
