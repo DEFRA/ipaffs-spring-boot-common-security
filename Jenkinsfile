@@ -1,4 +1,4 @@
-@Library('pipeline-library') _
+@Library('pipeline-library@feature/EUXO-1489-ArtifactoryV2-Migration') _
 
 javaLibraryPipeline {
    SERVICE_NAME = "spring-boot-common-security"
