@@ -110,6 +110,7 @@ public class PermissionsFilter extends StatelessAuthenticationProcessingFilter {
             .authorities(permissions)
             .customerId(originalUserDetails.getCustomerId())
             .customerOrganisationId(originalUserDetails.getCustomerOrganisationId())
+            .centralCompetentAuthority(originalUserDetails.getCentralCompetentAuthority())
             .build();
     return new IdTokenAuthentication(newUserDetails);
   }

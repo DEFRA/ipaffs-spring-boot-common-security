@@ -7,6 +7,9 @@ import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import io.jsonwebtoken.Jwts;
+import lombok.Builder;
+import lombok.Getter;
+
 import java.lang.reflect.Method;
 import java.security.KeyPair;
 import java.util.Collections;
@@ -14,8 +17,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import lombok.Builder;
-import lombok.Getter;
 
 public class MockJwks {
 
@@ -29,6 +30,7 @@ public class MockJwks {
 
   public static final String SUB_VALUE = "14f30ce2-114f-4375-982f-68c43023ce02";
   public static final String ORG_ID = "3199a90f-a670-e911-a974-000d3a28da35";
+  public static final String CENTRAL_COMPETENT_AUTHORITY = "DEFRA";
   public static final List<String> ROLES_VALUE = Collections.singletonList("ROLE1");
 
   public static final RSAKey NIMBUS_KEY1 = createNimbusKey();
@@ -42,10 +44,10 @@ public class MockJwks {
 
   private static RSAKey createNimbusKey() {
     try {
-    return new RSAKeyGenerator(2048)
-        .keyUse(KeyUse.SIGNATURE) // indicate the intended use of the key
-        .keyID(UUID.randomUUID().toString()) // give the key a unique ID
-        .generate();
+      return new RSAKeyGenerator(2048)
+          .keyUse(KeyUse.SIGNATURE) // indicate the intended use of the key
+          .keyID(UUID.randomUUID().toString()) // give the key a unique ID
+          .generate();
     } catch (JOSEException e) {
       throw new RuntimeException(e);
     }
@@ -68,6 +70,7 @@ public class MockJwks {
         .claim("sub", SUB_VALUE)
         .claim("roles", ROLES_VALUE)
         .claim("customer_organisation_id", ORG_ID)
+        .claim("cca", CENTRAL_COMPETENT_AUTHORITY)
         .signWith(KEY_PAIR1.getPrivate())
         .compact();
   }
@@ -115,6 +118,7 @@ public class MockJwks {
   @Getter
   @Builder
   public static class JwkElement {
+
     private final String alg = "RS256";
     private final String kty = "RSA";
     private final String use = "sig";

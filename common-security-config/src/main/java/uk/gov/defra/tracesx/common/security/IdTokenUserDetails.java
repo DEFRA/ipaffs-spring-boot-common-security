@@ -11,13 +11,14 @@ import java.util.List;
 @EqualsAndHashCode
 public class IdTokenUserDetails implements UserDetails {
 
-  private List<GrantedAuthority> authorities;
-  private String username; // upn
-  private String idToken;
-  private String displayName; // name
-  private String userObjectId; // oid
-  private String customerId; //customerId
-  private String customerOrganisationId; //customerOrganisationId
+  private final List<GrantedAuthority> authorities;
+  private final String username; // upn
+  private final String idToken;
+  private final String displayName; // name
+  private final String userObjectId; // oid
+  private final String customerId; //customerId
+  private final String customerOrganisationId; //customerOrganisationId
+  private final String centralCompetentAuthority; //cca
 
   @Override
   public List<GrantedAuthority> getAuthorities() {
@@ -47,6 +48,10 @@ public class IdTokenUserDetails implements UserDetails {
 
   public String getCustomerOrganisationId() {
     return customerOrganisationId;
+  }
+
+  public String getCentralCompetentAuthority() {
+    return centralCompetentAuthority;
   }
 
   @Override

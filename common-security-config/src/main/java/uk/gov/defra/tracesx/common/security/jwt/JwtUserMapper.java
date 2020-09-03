@@ -22,6 +22,7 @@ public class JwtUserMapper {
   private static final String SUB = "sub";
   private static final String CUSTOMER_ID = "customer_id";
   private static final String CUSTOMER_ORGANISATION_ID = "customer_organisation_id";
+  private static final String CENTRAL_COMPETENT_AUTHORITY = "cca";
 
   private final RoleToAuthorityMapper roleToAuthorityMapper;
 
@@ -39,6 +40,7 @@ public class JwtUserMapper {
         .customerId(getClaim(CUSTOMER_ID, decoded, false))
         .authorities(getAuthorities(decoded))
         .customerOrganisationId(getClaim(CUSTOMER_ORGANISATION_ID, decoded, false))
+        .centralCompetentAuthority(getClaim(CENTRAL_COMPETENT_AUTHORITY, decoded, false))
         .build();
   }
 
