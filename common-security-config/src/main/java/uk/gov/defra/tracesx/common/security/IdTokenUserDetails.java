@@ -18,6 +18,7 @@ public class IdTokenUserDetails implements UserDetails {
   private String userObjectId; // oid
   private String customerId; //customerId
   private String customerOrganisationId; //customerOrganisationId
+  private String centralCompetentAuthority; //cca
 
   @Override
   public List<GrantedAuthority> getAuthorities() {
@@ -47,6 +48,10 @@ public class IdTokenUserDetails implements UserDetails {
 
   public String getCustomerOrganisationId() {
     return customerOrganisationId;
+  }
+
+  public String getCentralCompetentAuthority() {
+    return centralCompetentAuthority;
   }
 
   @Override
