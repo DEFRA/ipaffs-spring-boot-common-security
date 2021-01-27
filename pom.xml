@@ -81,6 +81,12 @@
         <groupId>com.auth0</groupId>
         <artifactId>jwks-rsa</artifactId>
         <version>${jwks.rsa.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>io.jsonwebtoken</groupId>
