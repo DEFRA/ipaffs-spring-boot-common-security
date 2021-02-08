@@ -10,7 +10,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-dependencies</artifactId>
-    <version>2.1.9.RELEASE</version>
+    <version>2.4.2</version>
   </parent>
 
   <properties>
@@ -21,18 +21,14 @@
     <maven.compiler.target>${java.version}</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <!-- Spring Boot dependency version overrides -->
-    <jackson.version>2.10.1</jackson.version>
-    <!-- End Spring Boot dependency version overrides -->
-
     <applicationinsights.version>2.5.0</applicationinsights.version>
     <checkstyle.version>3.0.0</checkstyle.version>
     <javax.el.version>3.0.0</javax.el.version>
     <jjwt.version>0.10.5</jjwt.version>
-    <jwks.rsa.version>0.3.0</jwks.rsa.version>
+    <jwks.rsa.version>0.9.0</jwks.rsa.version>
     <nimbus.version>6.8</nimbus.version>
-    <rest-assured.version>3.3.0</rest-assured.version>
-    <spring.security.jwt.version>1.0.10.RELEASE</spring.security.jwt.version>
+    <rest-assured.version>4.3.3</rest-assured.version>
+    <spring.security.jwt.version>1.1.1.RELEASE</spring.security.jwt.version>
     <jacoco.maven.plugin.version>0.8.4</jacoco.maven.plugin.version>
   </properties>
 
@@ -66,12 +62,31 @@
         <groupId>org.springframework.security</groupId>
         <artifactId>spring-security-jwt</artifactId>
         <version>${spring.security.jwt.version}</version>
+        <!-- avoid OWASP guava version issue -->
+        <exclusions>
+          <exclusion>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <!-- avoid OWASP guava version issue -->
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>30.1-jre</version>
       </dependency>
       <!-- used to fetch public signing keys from jwks urls -->
       <dependency>
         <groupId>com.auth0</groupId>
         <artifactId>jwks-rsa</artifactId>
         <version>${jwks.rsa.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>io.jsonwebtoken</groupId>
