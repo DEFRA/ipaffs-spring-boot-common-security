@@ -10,7 +10,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-dependencies</artifactId>
-    <version>2.4.2</version>
+    <version>2.3.8.RELEASE</version>
   </parent>
 
   <properties>
@@ -62,13 +62,6 @@
         <groupId>org.springframework.security</groupId>
         <artifactId>spring-security-jwt</artifactId>
         <version>${spring.security.jwt.version}</version>
-        <!-- avoid OWASP guava version issue -->
-        <exclusions>
-          <exclusion>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
       <!-- avoid OWASP guava version issue -->
       <dependency>
@@ -81,12 +74,6 @@
         <groupId>com.auth0</groupId>
         <artifactId>jwks-rsa</artifactId>
         <version>${jwks.rsa.version}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
       <dependency>
         <groupId>io.jsonwebtoken</groupId>
