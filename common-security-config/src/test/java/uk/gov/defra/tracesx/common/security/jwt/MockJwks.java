@@ -33,6 +33,9 @@ public class MockJwks {
   public static final String CENTRAL_COMPETENT_AUTHORITY = "DEFRA";
   public static final List<String> ROLES_VALUE = Collections.singletonList("ROLE1");
 
+  public static final String FAMILY_NAME = "Token";
+  public static final String GIVEN_NAME = "Joseph William";
+
   public static final RSAKey NIMBUS_KEY1 = createNimbusKey();
   public static final KeyPair KEY_PAIR1 = toKeyPair(NIMBUS_KEY1);
   public static final JwkElement JWK_ELEMENT1 = createJwkElement(NIMBUS_KEY1);
@@ -68,6 +71,8 @@ public class MockJwks {
         .claim("aud", JWKS_AUDIENCE1)
         .claim("iss", JWKS_ISSUER1)
         .claim("sub", SUB_VALUE)
+        .claim("family_name", FAMILY_NAME)
+        .claim("given_name", GIVEN_NAME)
         .claim("roles", ROLES_VALUE)
         .claim("customer_organisation_id", ORG_ID)
         .claim("cca", CENTRAL_COMPETENT_AUTHORITY)
@@ -82,6 +87,8 @@ public class MockJwks {
         .claim("aud", JWKS_AUDIENCE2)
         .claim("iss", JWKS_ISSUER2)
         .claim("sub", SUB_VALUE)
+        .claim("family_name", FAMILY_NAME)
+        .claim("given_name", GIVEN_NAME)
         .claim("roles", ROLES_VALUE)
         .claim("customer_organisation_id", ORG_ID)
         .signWith(KEY_PAIR2.getPrivate())
