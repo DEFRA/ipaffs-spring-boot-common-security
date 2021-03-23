@@ -12,6 +12,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.defra.tracesx.common.security.jwt.MockJwks.CENTRAL_COMPETENT_AUTHORITY;
+import static uk.gov.defra.tracesx.common.security.jwt.MockJwks.FAMILY_NAME;
+import static uk.gov.defra.tracesx.common.security.jwt.MockJwks.GIVEN_NAME;
 import static uk.gov.defra.tracesx.common.security.jwt.MockJwks.JWK1;
 import static uk.gov.defra.tracesx.common.security.jwt.MockJwks.JWK2;
 import static uk.gov.defra.tracesx.common.security.jwt.MockJwks.JWKS_AUDIENCE1;
@@ -160,7 +162,7 @@ public class JwtTokenFilterComponentTest {
     assertThat(authentication.getDetails()).isInstanceOf(IdTokenUserDetails.class);
     IdTokenUserDetails details = (IdTokenUserDetails) authentication.getDetails();
     assertThat(details.getUserObjectId()).isEqualTo(SUB_VALUE);
-    assertThat(details.getDisplayName()).isEqualTo(SUB_VALUE);
+    assertThat(details.getDisplayName()).isEqualTo(GIVEN_NAME + " " + FAMILY_NAME);
     assertThat(details.getUsername()).isEqualTo(SUB_VALUE);
     assertThat(details.getPassword()).isNull();
     assertThat(details.getAuthorities()).containsOnlyElementsOf((Iterable) EXPECTED_AUTHORITIES);

@@ -23,6 +23,8 @@ public class JwtUserMapper {
   private static final String CUSTOMER_ID = "customer_id";
   private static final String CUSTOMER_ORGANISATION_ID = "customer_organisation_id";
   private static final String CENTRAL_COMPETENT_AUTHORITY = "cca";
+  private static final String FAMILY_NAME = "family_name";
+  private static final String GIVEN_NAME = "given_name";
 
   private final RoleToAuthorityMapper roleToAuthorityMapper;
 
@@ -34,7 +36,8 @@ public class JwtUserMapper {
   public IdTokenUserDetails createUser(Map<String, Object> decoded, String idToken) {
     return IdTokenUserDetails.builder()
         .idToken(idToken)
-        .displayName(getClaim(SUB, decoded, true))
+        .displayName(getClaim(GIVEN_NAME, decoded, true) + " "
+            + getClaim(FAMILY_NAME, decoded, true))
         .username(getClaim(SUB, decoded, true))
         .userObjectId(getClaim(SUB, decoded, true))
         .customerId(getClaim(CUSTOMER_ID, decoded, false))
