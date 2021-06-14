@@ -10,7 +10,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-dependencies</artifactId>
-    <version>2.3.8.RELEASE</version>
+    <version>2.5.0</version>
   </parent>
 
   <properties>
@@ -25,11 +25,12 @@
     <checkstyle.version>3.0.0</checkstyle.version>
     <javax.el.version>3.0.0</javax.el.version>
     <jjwt.version>0.10.5</jjwt.version>
-    <jwks.rsa.version>0.9.0</jwks.rsa.version>
+    <jwks.rsa.version>0.13.0</jwks.rsa.version>
     <nimbus.version>6.8</nimbus.version>
     <rest-assured.version>4.3.3</rest-assured.version>
     <spring.security.jwt.version>1.1.1.RELEASE</spring.security.jwt.version>
     <jacoco.maven.plugin.version>0.8.4</jacoco.maven.plugin.version>
+    <owasp.version>6.0.5</owasp.version>
   </properties>
 
   <scm>
@@ -180,6 +181,28 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.owasp</groupId>
+        <artifactId>dependency-check-maven</artifactId>
+        <version>${owasp.version}</version>
+        <configuration>
+          <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>org.owasp</groupId>
+            <artifactId>dependency-check-maven</artifactId>
+            <version>${owasp.version}</version>
+          </dependency>
+        </dependencies>
       </plugin>
     </plugins>
   </build>
