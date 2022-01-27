@@ -25,7 +25,7 @@
     <jackson.version>2.10.1</jackson.version>
     <!-- End Spring Boot dependency version overrides -->
 
-    <applicationinsights.version>2.5.0</applicationinsights.version>
+    <applicationinsights.version>2.5.1</applicationinsights.version>
     <checkstyle.version>3.0.0</checkstyle.version>
     <javax.el.version>3.0.0</javax.el.version>
     <jjwt.version>0.10.5</jjwt.version>
