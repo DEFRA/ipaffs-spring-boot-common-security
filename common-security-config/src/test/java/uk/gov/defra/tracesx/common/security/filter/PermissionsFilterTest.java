@@ -2,8 +2,8 @@ package uk.gov.defra.tracesx.common.security.filter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,12 +27,13 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 import uk.gov.defra.tracesx.common.permissions.PermissionsCache;
 import uk.gov.defra.tracesx.common.security.IdTokenAuthentication;
 import uk.gov.defra.tracesx.common.security.IdTokenUserDetails;
@@ -69,6 +69,7 @@ public class PermissionsFilterTest {
 
   @After
   public void after() {
+    SecurityContextHolder.clearContext();
     verifyNoMoreInteractions(
         request,
         response,
@@ -202,5 +203,17 @@ public class PermissionsFilterTest {
     verify(userDetails, times(1)).getAuthorities();
     verify(request).getHeader(HttpHeaders.AUTHORIZATION);
     verify(permissionsCache, times(2)).permissionsList(eq(ROLE), eq(BEARER_TOKEN));
+  }
+
+  @Test
+  public void getAuthentication_ThrowsAuthenticationCredentialsNotFoundException_WhenAuthenticationIsNull() {
+    assertThatThrownBy(() -> permissionsFilter.getAuthentication()).isInstanceOf(AuthenticationCredentialsNotFoundException.class)
+        .hasMessageContaining("Authentication not found on security context.");
+  }
+
+  @Test
+  public void permissionsFilter_ReturnsSpecificInstance_WhenRequestMatcherIsDefined() {
+    permissionsFilter = new PermissionsFilter(AnyRequestMatcher.INSTANCE, permissionsCache);
+    assertThat(permissionsFilter).isNotNull();
   }
 }
