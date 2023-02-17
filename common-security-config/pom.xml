@@ -47,10 +47,10 @@
       <groupId>com.microsoft.azure</groupId>
       <artifactId>applicationinsights-web</artifactId>
     </dependency>
-    <!-- used to decode and validate jwt tokens -->
+    <!-- used to decode and validate jwt tokens / also used in component testing -->
     <dependency>
-      <groupId>org.springframework.security</groupId>
-      <artifactId>spring-security-jwt</artifactId>
+      <groupId>com.nimbusds</groupId>
+      <artifactId>nimbus-jose-jwt</artifactId>
     </dependency>
     <!-- used to fetch public signing keys from jwks urls -->
     <dependency>
@@ -107,12 +107,6 @@
     <dependency>
       <groupId>io.jsonwebtoken</groupId>
       <artifactId>jjwt-jackson</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <!-- nimbus is needed to create the jwks used for component testing -->
-    <dependency>
-      <groupId>com.nimbusds</groupId>
-      <artifactId>nimbus-jose-jwt</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
