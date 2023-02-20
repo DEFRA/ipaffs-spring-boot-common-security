@@ -26,9 +26,8 @@
     <javax.el.version>3.0.0</javax.el.version>
     <jjwt.version>0.10.5</jjwt.version>
     <jwks.rsa.version>0.13.0</jwks.rsa.version>
-    <nimbus.version>6.8</nimbus.version>
+    <nimbus.version>9.30.2</nimbus.version>
     <rest-assured.version>4.3.3</rest-assured.version>
-    <spring.security.jwt.version>1.1.1.RELEASE</spring.security.jwt.version>
     <jacoco.maven.plugin.version>0.8.4</jacoco.maven.plugin.version>
     <owasp.version>7.1.1</owasp.version>
   </properties>
@@ -57,12 +56,6 @@
         <groupId>com.microsoft.azure</groupId>
         <artifactId>applicationinsights-web</artifactId>
         <version>${applicationinsights.version}</version>
-      </dependency>
-      <!-- used to decode and validate jwt tokens -->
-      <dependency>
-        <groupId>org.springframework.security</groupId>
-        <artifactId>spring-security-jwt</artifactId>
-        <version>${spring.security.jwt.version}</version>
       </dependency>
       <!-- avoid OWASP guava version issue -->
       <dependency>

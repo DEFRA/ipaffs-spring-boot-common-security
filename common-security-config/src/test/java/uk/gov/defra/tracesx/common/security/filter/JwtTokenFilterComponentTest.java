@@ -72,7 +72,6 @@ public class JwtTokenFilterComponentTest {
   private JwksCache jwksCache;
   private List<JwksConfiguration> jwksConfigurations;
   private SpyableJwkProviderFactory jwkProviderFactory;
-  private ObjectMapper objectMapper = new ObjectMapper();
 
   private JwksConfiguration jwksConfiguration1;
   private JwksConfiguration jwksConfiguration2;
@@ -114,7 +113,7 @@ public class JwtTokenFilterComponentTest {
     doReturn(jwkProvider2).when(jwkProviderFactory).createUrlJwkProvider(eq(new URL(JWKS_URL2)));
 
     jwksCache = spy(new JwksCache(jwksConfigurations, jwkProviderFactory));
-    jwtTokenValidator = new JwtTokenValidator(jwtUserMapper, jwksCache, objectMapper);
+    jwtTokenValidator = new JwtTokenValidator(jwtUserMapper, jwksCache);
     jwtTokenFilter = new JwtTokenFilter("/url", jwtTokenValidator);
 
     request = mock(HttpServletRequest.class);

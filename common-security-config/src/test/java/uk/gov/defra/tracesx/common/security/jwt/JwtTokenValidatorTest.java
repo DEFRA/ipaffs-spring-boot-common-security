@@ -8,14 +8,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import java.security.KeyPair;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -49,15 +47,21 @@ public class JwtTokenValidatorTest {
 
   private JwtTokenValidator jwtTokenValidator;
 
-  private List<KeyAndClaims> keyAndClaims = Arrays.asList(KeyAndClaims.builder()
-      .key(KEY_PAIR.getPublic())
-      .aud(AUD)
-      .iss(ISS)
-      .build());
+  private final List<KeyAndClaims> keyAndClaims = List.of(
+      KeyAndClaims.builder()
+          .key(Keys.keyPairFor(SignatureAlgorithm.RS256).getPublic())
+          .aud(AUD)
+          .iss(ISS)
+          .build(),
+      KeyAndClaims.builder()
+          .key(KEY_PAIR.getPublic())
+          .aud(AUD)
+          .iss(ISS)
+          .build());
 
   @Before
   public void setUp() {
-    this.jwtTokenValidator = new JwtTokenValidator(jwtUserMapper, jwksCache, new ObjectMapper());
+    this.jwtTokenValidator = new JwtTokenValidator(jwtUserMapper, jwksCache);
   }
 
   @After
@@ -80,6 +84,26 @@ public class JwtTokenValidatorTest {
     assertThat(userDetails).isEqualTo(expectedUserDetails);
     verify(jwksCache).getPublicKeys(KID);
     verify(jwtUserMapper).createUser(any(), eq(token));
+  }
+
+  @Test
+  public void validateToken_invalid_throwsParseException() throws JwtAuthenticationException {
+    String token = "Bearer ";
+    assertThatExceptionOfType(JwtAuthenticationException.class)
+        .isThrownBy(() -> jwtTokenValidator.validateToken(token));
+  }
+
+  @Test
+  public void validateToken_invalidPayload_throwsParseException() throws JwtAuthenticationException {
+    String token =
+        Jwts.builder().setHeader(Collections.singletonMap("kid", KID))
+            .setPayload("")
+            .signWith(KEY_PAIR.getPrivate())
+            .compact();
+    when(jwksCache.getPublicKeys(KID)).thenReturn(keyAndClaims);
+    assertThatExceptionOfType(JwtAuthenticationException.class)
+        .isThrownBy(() -> jwtTokenValidator.validateToken(token));
+    verify(jwksCache).getPublicKeys(KID);
   }
 
   @Test
@@ -143,6 +167,19 @@ public class JwtTokenValidatorTest {
             .claim("aud", AUD)
             .claim("iss", ISS)
             .signWith(ALT_KEY_PAIR.getPrivate()).compact();
+    when(jwksCache.getPublicKeys(KID)).thenReturn(keyAndClaims);
+    assertThatExceptionOfType(JwtAuthenticationException.class)
+        .isThrownBy(() -> jwtTokenValidator.validateToken(token));
+    verify(jwksCache).getPublicKeys(KID);
+  }
+
+  @Test
+  public void validateToken_invalidSignatureKey_throwsException() {
+    String token =
+        Jwts.builder().setHeader(Collections.singletonMap("kid", KID))
+            .claim("iss", ISS)
+            .signWith(Keys.keyPairFor(SignatureAlgorithm.ES256).getPrivate())
+            .compact();
     when(jwksCache.getPublicKeys(KID)).thenReturn(keyAndClaims);
     assertThatExceptionOfType(JwtAuthenticationException.class)
         .isThrownBy(() -> jwtTokenValidator.validateToken(token));
