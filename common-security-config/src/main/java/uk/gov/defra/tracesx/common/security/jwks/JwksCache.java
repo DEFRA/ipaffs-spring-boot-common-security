@@ -2,18 +2,17 @@ package uk.gov.defra.tracesx.common.security.jwks;
 
 import com.auth0.jwk.Jwk;
 import com.auth0.jwk.JwkException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
-import uk.gov.defra.tracesx.common.exceptions.InsSecurityException;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+import uk.gov.defra.tracesx.common.exceptions.InsSecurityException;
 
 @Component
 public class JwksCache {

@@ -1,10 +1,9 @@
 package uk.gov.defra.tracesx.common.security.jwks;
 
+import java.security.Key;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-
-import java.security.Key;
 
 @Builder
 @Getter
