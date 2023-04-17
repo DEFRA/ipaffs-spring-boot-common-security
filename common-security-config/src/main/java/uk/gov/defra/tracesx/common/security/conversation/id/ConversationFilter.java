@@ -1,8 +1,5 @@
 package uk.gov.defra.tracesx.common.security.conversation.id;
 
-
-import org.springframework.beans.factory.annotation.Autowired;
-
 import java.io.IOException;
 import java.util.Optional;
 import javax.servlet.Filter;
@@ -11,6 +8,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class ConversationFilter implements Filter {
 

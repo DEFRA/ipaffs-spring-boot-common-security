@@ -2,10 +2,9 @@ package uk.gov.defra.tracesx.common.security;
 
 import static java.util.stream.Collectors.toList;
 
+import java.util.List;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 public class RoleToAuthorityMapper {

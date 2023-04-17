@@ -2,7 +2,6 @@ package uk.gov.defra.tracesx.common.security.jwks;
 
 import com.auth0.jwk.GuavaCachedJwkProvider;
 import com.auth0.jwk.JwkProvider;
-
 import java.util.concurrent.TimeUnit;
 
 /**

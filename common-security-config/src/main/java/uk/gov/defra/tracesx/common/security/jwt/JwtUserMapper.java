@@ -2,6 +2,8 @@ package uk.gov.defra.tracesx.common.security.jwt;
 
 import static uk.gov.defra.tracesx.common.security.jwt.JwtContants.ROLES;
 
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,9 +13,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.defra.tracesx.common.exceptions.InsSecurityException;
 import uk.gov.defra.tracesx.common.security.IdTokenUserDetails;
 import uk.gov.defra.tracesx.common.security.RoleToAuthorityMapper;
-
-import java.util.List;
-import java.util.Map;
 
 @Component
 public class JwtUserMapper {

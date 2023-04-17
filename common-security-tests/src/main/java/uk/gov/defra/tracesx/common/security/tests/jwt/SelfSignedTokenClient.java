@@ -10,7 +10,6 @@ import static uk.gov.defra.tracesx.common.security.tests.jwt.JwtConstants.EXP;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.response.Response;
-
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
