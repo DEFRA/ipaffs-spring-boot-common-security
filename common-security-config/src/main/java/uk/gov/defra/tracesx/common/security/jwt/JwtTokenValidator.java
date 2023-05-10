@@ -7,6 +7,11 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
+import java.security.Key;
+import java.security.interfaces.RSAPublicKey;
+import java.text.ParseException;
+import java.util.Map;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,12 +20,6 @@ import uk.gov.defra.tracesx.common.exceptions.JwtAuthenticationException;
 import uk.gov.defra.tracesx.common.security.IdTokenUserDetails;
 import uk.gov.defra.tracesx.common.security.jwks.JwksCache;
 import uk.gov.defra.tracesx.common.security.jwks.KeyAndClaims;
-
-import java.security.Key;
-import java.security.interfaces.RSAPublicKey;
-import java.text.ParseException;
-import java.util.Map;
-import java.util.Set;
 
 @Component
 public class JwtTokenValidator {

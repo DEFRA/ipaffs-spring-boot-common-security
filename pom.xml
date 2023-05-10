@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>uk.gov.defra.tracesx</groupId>
   <artifactId>TracesX-SpringBoot-CommonSecurity</artifactId>
-  <version>2.0.18</version>
+  <version>2.0.19</version>
   <packaging>pom</packaging>
   <name>common-security-parent</name>
   <description>Shared Spring Boot Web Security: Parent</description>
@@ -20,9 +20,8 @@
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
     <applicationinsights.version>2.5.0</applicationinsights.version>
-    <checkstyle.version>3.0.0</checkstyle.version>
+    <maven.checkstyle.version>3.2.1</maven.checkstyle.version>
     <javax.el.version>3.0.0</javax.el.version>
     <jjwt.version>0.10.5</jjwt.version>
     <jwks.rsa.version>0.13.0</jwks.rsa.version>
@@ -30,11 +29,16 @@
     <rest-assured.version>4.3.3</rest-assured.version>
     <jacoco.maven.plugin.version>0.8.4</jacoco.maven.plugin.version>
     <owasp.version>7.1.1</owasp.version>
+    <checkstyle.version>10.8.1</checkstyle.version>
+    <git-build-hook-maven-plugin.version>3.3.0</git-build-hook-maven-plugin.version>
+    <maven-remote-resources-plugin.version>3.0.0</maven-remote-resources-plugin.version>
+    <shared-resources.version>1.0.0</shared-resources.version>
+
   </properties>
 
   <scm>
     <connection>scm:git:https://giteux.azure.defra.cloud/imports/spring-boot-common-security.git</connection>
-    <tag>2.0.18-78</tag>
+    <tag>2.0.19-80</tag>
   </scm>
 
   <modules>
@@ -107,15 +111,20 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>${checkstyle.version}</version>
+        <version>${maven.checkstyle.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>com.puppycrawl.tools</groupId>
+            <artifactId>checkstyle</artifactId>
+            <version>${checkstyle.version}</version>
+          </dependency>
+        </dependencies>
         <configuration>
-          <configLocation>google_checks.xml</configLocation>
+          <configLocation>${project.build.directory}/maven-shared-archive-resources/google_checks_ipaffs.xml</configLocation>
           <logViolationsToConsole>true</logViolationsToConsole>
           <outputFile>${project.build.directory}/checkstyle-result.xml</outputFile>
           <violationSeverity>warning</violationSeverity>
           <failsOnError>true</failsOnError>
-          <suppressionsLocation>checkstyle-suppressions.xml</suppressionsLocation>
-          <suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>
         </configuration>
         <executions>
           <execution>
@@ -125,6 +134,42 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-remote-resources-plugin</artifactId>
+        <version>${maven-remote-resources-plugin.version}</version>
+        <configuration>
+          <resourceBundles>
+            <resourceBundle>uk.gov.defra.tracesx:shared-resources:${shared-resources.version}</resourceBundle>
+          </resourceBundles>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>process</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.rudikershaw.gitbuildhook</groupId>
+        <artifactId>git-build-hook-maven-plugin</artifactId>
+        <version>${git-build-hook-maven-plugin.version}</version>
+        <configuration>
+          <gitConfig>
+            <core.hooksPath>hooks</core.hooksPath>
+          </gitConfig>
+        </configuration>
+        <executions>
+          <execution>
+            <id>configure-git-hooks</id>
+            <goals>
+              <goal>configure</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
@@ -197,6 +242,33 @@
           </dependency>
         </dependencies>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-remote-resources-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>com.rudikershaw.gitbuildhook</groupId>
+        <artifactId>git-build-hook-maven-plugin</artifactId>
+      </plugin>
     </plugins>
   </build>
+  <profiles>
+    <profile>
+      <id>jenkins</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.rudikershaw.gitbuildhook</groupId>
+            <artifactId>git-build-hook-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>configure-git-hooks</id>
+                <phase>none</phase>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
