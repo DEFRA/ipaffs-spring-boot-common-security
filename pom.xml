@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>uk.gov.defra.tracesx</groupId>
   <artifactId>TracesX-SpringBoot-CommonSecurity</artifactId>
-  <version>2.0.19</version>
+  <version>2.0.20</version>
   <packaging>pom</packaging>
   <name>common-security-parent</name>
   <description>Shared Spring Boot Web Security: Parent</description>
@@ -28,7 +28,7 @@
     <nimbus.version>9.30.2</nimbus.version>
     <rest-assured.version>4.3.3</rest-assured.version>
     <jacoco.maven.plugin.version>0.8.4</jacoco.maven.plugin.version>
-    <owasp.version>7.1.1</owasp.version>
+    <owasp.version>8.2.1</owasp.version>
     <checkstyle.version>10.8.1</checkstyle.version>
     <git-build-hook-maven-plugin.version>3.3.0</git-build-hook-maven-plugin.version>
     <maven-remote-resources-plugin.version>3.0.0</maven-remote-resources-plugin.version>
@@ -38,7 +38,7 @@
 
   <scm>
     <connection>scm:git:https://giteux.azure.defra.cloud/imports/spring-boot-common-security.git</connection>
-    <tag>2.0.19-80</tag>
+    <tag>2.0.20-82</tag>
   </scm>
 
   <modules>
