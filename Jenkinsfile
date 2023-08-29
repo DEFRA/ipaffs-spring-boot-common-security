@@ -1,4 +1,4 @@
-@Library('pipeline-library') _
+@Library('pipeline-library@feature/IMTA-0000-upgrade-to-java-17') _
 
 javaLibraryPipeline {
    SERVICE_NAME = "spring-boot-common-security"
