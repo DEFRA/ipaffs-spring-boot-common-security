@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>uk.gov.defra.tracesx</groupId>
   <artifactId>TracesX-SpringBoot-CommonSecurity</artifactId>
-  <version>2.0.20</version>
+  <version>2.0.23</version>
   <packaging>pom</packaging>
   <name>common-security-parent</name>
   <description>Shared Spring Boot Web Security: Parent</description>
@@ -26,19 +26,24 @@
     <jjwt.version>0.10.5</jjwt.version>
     <jwks.rsa.version>0.13.0</jwks.rsa.version>
     <nimbus.version>9.30.2</nimbus.version>
+    <guava.version>32.1.2-jre</guava.version>
     <rest-assured.version>4.3.3</rest-assured.version>
     <jacoco.maven.plugin.version>0.8.4</jacoco.maven.plugin.version>
     <owasp.version>8.2.1</owasp.version>
     <checkstyle.version>10.8.1</checkstyle.version>
     <git-build-hook-maven-plugin.version>3.3.0</git-build-hook-maven-plugin.version>
+    <maven.deploy.plugin.version>3.1.1</maven.deploy.plugin.version>
+    <maven.help.plugin.version>3.4.0</maven.help.plugin.version>
+    <maven.jar.plugin.version>3.3.0</maven.jar.plugin.version>
     <maven-remote-resources-plugin.version>3.0.0</maven-remote-resources-plugin.version>
+    <maven.versions.plugin.version>2.16.0</maven.versions.plugin.version>
     <shared-resources.version>1.0.0</shared-resources.version>
 
   </properties>
 
   <scm>
     <connection>scm:git:https://giteux.REMOVED/imports/spring-boot-common-security.git</connection>
-    <tag>2.0.20-82</tag>
+    <tag>2.0.23-88</tag>
   </scm>
 
   <modules>
@@ -47,6 +52,11 @@
   </modules>
 
   <distributionManagement>
+    <snapshotRepository>
+      <id>release</id>
+      <name>Snapshots</name>
+      <url>https://artifactoryv2.REMOVED/artifactory/maven-snapshots-local</url>
+    </snapshotRepository>
     <repository>
       <id>release</id>
       <name>Releases</name>
@@ -65,7 +75,7 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>30.1-jre</version>
+        <version>${guava.version}</version>
       </dependency>
       <!-- used to fetch public signing keys from jwks urls -->
       <dependency>
@@ -78,6 +88,7 @@
         <artifactId>jjwt-api</artifactId>
         <version>${jjwt.version}</version>
       </dependency>
+
       <dependency>
         <groupId>io.jsonwebtoken</groupId>
         <artifactId>jjwt-impl</artifactId>
@@ -99,6 +110,26 @@
   <build>
     <pluginManagement>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <version>${maven.deploy.plugin.version}</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-help-plugin</artifactId>
+        <version>${maven.help.plugin.version}</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>${maven.jar.plugin.version}</version>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>${maven.versions.plugin.version}</version>
+      </plugin>
       <plugin>
         <artifactId>maven-release-plugin</artifactId>
         <version>2.5.3</version>
