@@ -15,16 +15,16 @@ import com.auth0.jwk.JwkException;
 import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.List;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.defra.tracesx.common.exceptions.InsSecurityException;
 
-@RunWith(MockitoJUnitRunner.class)
-public class JwksCacheTest {
+@ExtendWith(MockitoExtension.class)
+class JwksCacheTest {
 
   private static final String KID1 = "2d792919-3a36-4edd-9736-edd43b157067";
   private static final String AUD1 = "157f8269-0ca3-435e-83d3-407bfdfd7bb4";
@@ -51,12 +51,9 @@ public class JwksCacheTest {
 
   private JwksCache jwksCache;
 
-  @Before
+  @BeforeEach
   public void setUp() {
-    when(jwkProvider1.getAudience()).thenReturn(AUD1);
-    when(jwkProvider2.getAudience()).thenReturn(AUD2);
     when(jwkProvider1.getIssuer()).thenReturn(ISS1);
-    when(jwkProvider2.getIssuer()).thenReturn(ISS2);
     List<JwksConfiguration> configurationList =
         Arrays.asList(
             JwksConfiguration.builder().build(),
@@ -67,14 +64,16 @@ public class JwksCacheTest {
     jwksCache = new JwksCache(configurationList, jwkProviderFactory);
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     verify(jwkProviderFactory, times(2)).newInstance(any());
     verifyNoMoreInteractions(jwkProvider1, jwkProvider2);
   }
 
   @Test
-  public void getPublicKey_keyFoundAfterProviderScan_returnsKeyAndClaims() throws Exception {
+  void getPublicKey_keyFoundAfterProviderScan_returnsKeyAndClaims() throws Exception {
+    when(jwkProvider2.getAudience()).thenReturn(AUD2);
+    when(jwkProvider2.getIssuer()).thenReturn(ISS2);
     when(jwkProvider1.get(anyString())).thenThrow(new JwkException("not found"));
     when(jwk.getPublicKey()).thenReturn(publicKey);
     when(jwkProvider2.get(anyString())).thenReturn(jwk);
@@ -91,7 +90,10 @@ public class JwksCacheTest {
   }
 
   @Test
-  public void getPublicKey_keyFoundInCachedProvider_returnsKeyAndClaims() throws Exception {
+  void getPublicKey_keyFoundInCachedProvider_returnsKeyAndClaims() throws Exception {
+    when(jwkProvider1.getAudience()).thenReturn(AUD1);
+    when(jwkProvider2.getAudience()).thenReturn(AUD2);
+    when(jwkProvider2.getIssuer()).thenReturn(ISS2);
     when(jwk.getPublicKey()).thenReturn(publicKey);
     when(jwkProvider1.get(anyString())).thenReturn(jwk);
     when(jwkProvider2.get(anyString())).thenReturn(jwk);
@@ -118,7 +120,10 @@ public class JwksCacheTest {
   }
 
   @Test
-  public void getPublicKey__keyFoundAfterProviderScan_sameKidDifferentAUDs() throws JwkException {
+  void getPublicKey__keyFoundAfterProviderScan_sameKidDifferentAUDs() throws JwkException {
+    when(jwkProvider1.getAudience()).thenReturn(AUD1);
+    when(jwkProvider2.getAudience()).thenReturn(AUD2);
+    when(jwkProvider2.getIssuer()).thenReturn(ISS2);
     when(jwkProvider1.get(anyString())).thenReturn(jwk);
     when(jwkProvider2.get(anyString())).thenReturn(jwk);
     when(jwk.getPublicKey()).thenReturn(publicKey);
@@ -141,10 +146,11 @@ public class JwksCacheTest {
   }
 
   @Test
-  public void getPublicKey_keyNotFound_throwsException() throws Exception {
+  void getPublicKey_keyNotFound_throwsException() throws Exception {
     when(jwkProvider1.get(anyString())).thenThrow(new JwkException("not found"));
     when(jwkProvider2.get(anyString())).thenThrow(new JwkException("not found"));
-    assertThatExceptionOfType(InsSecurityException.class).isThrownBy(() -> jwksCache.getPublicKeys(KID2));
+    assertThatExceptionOfType(InsSecurityException.class).isThrownBy(
+        () -> jwksCache.getPublicKeys(KID2));
     verify(jwkProvider1).get(KID2);
     verify(jwkProvider2).get(KID2);
     verify(jwkProvider1).getIssuer(); // logging
@@ -152,8 +158,9 @@ public class JwksCacheTest {
   }
 
   @Test
-  public void getPublicKey_invalidSecurityException() throws JwkException {
-    when(jwk.getPublicKey()).thenThrow(new InvalidPublicKeyException("Exception from unit test", new Throwable()));
+  void getPublicKey_invalidSecurityException() throws JwkException {
+    when(jwk.getPublicKey()).thenThrow(
+        new InvalidPublicKeyException("Exception from unit test", new Throwable()));
     when(jwkProvider1.get(anyString())).thenReturn(jwk);
     assertThatExceptionOfType(InsSecurityException.class)
         .isThrownBy(() -> jwksCache.getPublicKeys(KID1));

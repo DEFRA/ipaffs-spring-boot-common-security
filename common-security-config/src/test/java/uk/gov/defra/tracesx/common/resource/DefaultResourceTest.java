@@ -2,14 +2,14 @@ package uk.gov.defra.tracesx.common.resource;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-public class DefaultResourceTest {
+class DefaultResourceTest {
 
   @Test
-  public void defaultResource_ReturnsHttpStatusOK() {
+  void defaultResource_ReturnsHttpStatusOK() {
     DefaultResource defaultResource = new DefaultResource();
     ResponseEntity responseEntity = defaultResource.defaultGet();
 

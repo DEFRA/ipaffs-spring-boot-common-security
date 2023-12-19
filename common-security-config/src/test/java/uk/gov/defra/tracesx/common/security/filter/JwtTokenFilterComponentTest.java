@@ -30,13 +30,12 @@ import static uk.gov.defra.tracesx.common.security.jwt.MockJwks.createToken2;
 
 import com.auth0.jwk.JwkProvider;
 import com.auth0.jwk.SigningKeyNotFoundException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import uk.gov.defra.tracesx.common.security.IdTokenAuthentication;
@@ -61,7 +60,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public class JwtTokenFilterComponentTest {
+class JwtTokenFilterComponentTest {
 
   private static final int KEY_EXPIRY_MILLIS = 250;
 
@@ -81,7 +80,7 @@ public class JwtTokenFilterComponentTest {
   private JwkProvider jwkProvider1;
   private JwkProvider jwkProvider2;
 
-  @Before
+  @BeforeEach
   public void before() throws Exception {
     roleToAuthorityMapper = new RoleToAuthorityMapper();
     jwtUserMapper = new JwtUserMapper(roleToAuthorityMapper);
@@ -120,13 +119,13 @@ public class JwtTokenFilterComponentTest {
     response = mock(HttpServletResponse.class);
   }
 
-  @After
+  @AfterEach
   public void after() {
     verifyNoMoreInteractions(response, jwkProvider1, jwkProvider2, jwksCache, jwkProviderFactory);
   }
 
   @Test
-  public void doFilter_validRequestsSingleProvider_eachProviderIsCalledOnce() throws Exception {
+  void doFilter_validRequestsSingleProvider_eachProviderIsCalledOnce() throws Exception {
     when(request.getHeader("Authorization"))
         .thenReturn("Bearer " + createToken1(expiresInTenMinutes()));
     Authentication authentication;
@@ -174,7 +173,7 @@ public class JwtTokenFilterComponentTest {
   }
 
   @Test
-  public void doFilter_validRequestsMultipleProviders_eachProviderIsCalledOnce() throws Exception {
+  void doFilter_validRequestsMultipleProviders_eachProviderIsCalledOnce() throws Exception {
     Authentication authentication;
     when(request.getHeader("Authorization"))
         .thenReturn("Bearer " + createToken1(expiresInTenMinutes()));
@@ -205,7 +204,7 @@ public class JwtTokenFilterComponentTest {
   }
 
   @Test
-  public void doFilter_keyExpiresBetweenRequests_keyIsFetchedAgain() throws Exception {
+  void doFilter_keyExpiresBetweenRequests_keyIsFetchedAgain() throws Exception {
     when(request.getHeader("Authorization"))
         .thenReturn("Bearer " + createToken1(expiresInTenMinutes()));
     Authentication authentication;
