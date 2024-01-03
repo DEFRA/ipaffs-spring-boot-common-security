@@ -5,9 +5,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.net.MalformedURLException;
 import java.net.URL;
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class JwkProviderFactoryTest {
+class JwkProviderFactoryTest {
 
   private static final URL JWKS_URL;
   static {
@@ -21,7 +21,7 @@ public class JwkProviderFactoryTest {
   private static final String ISSUER = "http://localhost/";
 
   @Test
-  public void newInstance_instanceCreateWithInjectedParameters() throws Exception {
+  void newInstance_instanceCreateWithInjectedParameters() throws Exception {
     JwkProviderFactory jwkProviderFactory = new JwkProviderFactory();
     JwksConfiguration jwksConfiguration = new JwksConfiguration(JWKS_URL, AUDIENCE, ISSUER);
     FieldUtils.writeField(jwkProviderFactory, "maxCachedKeysPerProvider", 2, true);
