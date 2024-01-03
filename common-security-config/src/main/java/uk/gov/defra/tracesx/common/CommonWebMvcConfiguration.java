@@ -3,7 +3,6 @@ package uk.gov.defra.tracesx.common;
 import static uk.gov.defra.tracesx.common.permissions.PermissionsCache.CACHE_KEY;
 
 import com.microsoft.applicationinsights.TelemetryClient;
-import com.microsoft.applicationinsights.TelemetryConfiguration;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -98,8 +97,7 @@ public class CommonWebMvcConfiguration implements WebMvcConfigurer {
 
   @Bean
   public TelemetryClient telemetryClient() {
-    TelemetryConfiguration configuration = TelemetryConfiguration.getActive();
-    return new TelemetryClient(configuration);
+    return new TelemetryClient();
   }
 
   @Bean

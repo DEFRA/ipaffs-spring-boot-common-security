@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>uk.gov.defra.tracesx</groupId>
   <artifactId>TracesX-SpringBoot-CommonSecurity</artifactId>
-  <version>4.0.0-SNAPSHOT</version>
+  <version>4.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>common-security-parent</name>
   <description>Shared Spring Boot Web Security: Parent</description>
@@ -39,7 +39,7 @@
     <owasp.version>8.4.0</owasp.version>
 
     <!--  Dependencies  -->
-    <applicationinsights.version>2.5.0</applicationinsights.version>
+    <applicationinsights.version>3.4.13</applicationinsights.version>
     <javax.el.version>3.0.0</javax.el.version>
     <jjwt.version>0.10.5</jjwt.version>
     <jwks.rsa.version>0.13.0</jwks.rsa.version>

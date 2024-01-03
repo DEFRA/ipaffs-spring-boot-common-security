@@ -4,9 +4,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
@@ -21,29 +23,12 @@ import uk.gov.defra.tracesx.common.security.jwt.JwtTokenValidator;
 
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity
 public class WebSecurityConfiguration {
 
-  private static final int ERROR_PATH_SECURITY_ORDER = 1;
-  private static final int ROOT_PATH_SECURITY_ORDER = 2;
-  private static final int ADMIN_PATH_SECURITY_ORDER = 3;
-  private static final int SERVICE_RESOURCES_SECURITY_ORDER = 4;
-
-  private void configureForUnsecuredAccess(HttpSecurity http, String pathPattern) throws Exception {
-    http.authorizeHttpRequests(authorize -> {
-      try {
-        authorize
-            .requestMatchers(pathPattern).authenticated()
-            .and()
-            .csrf()
-            .disable()
-            .sessionManagement()
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-    });
-  }
+  private static final int PUBLIC_PATH_SECURITY_ORDER = 1;
+  private static final int SERVICE_RESOURCES_SECURITY_ORDER = 2;
+  private static final int SERVICE_PATH_SECURITY_ORDER = 3;
 
   @Configuration
   @Order(SERVICE_RESOURCES_SECURITY_ORDER)
@@ -64,21 +49,30 @@ public class WebSecurityConfiguration {
     }
 
     @Bean
+    @Order(PUBLIC_PATH_SECURITY_ORDER)
+    public SecurityFilterChain publicFilterChain(HttpSecurity http) throws Exception {
+      http.securityMatcher("/error", "/", "/admin/**")
+          .authorizeHttpRequests(authorize ->
+              authorize.anyRequest().permitAll())
+          .csrf(AbstractHttpConfigurer::disable)
+          .sessionManagement(
+              sessionManagementConfigurer ->
+                sessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+          .httpBasic(Customizer.withDefaults());
+      return http.build();
+    }
+
+    @Bean
+    @Order(SERVICE_PATH_SECURITY_ORDER)
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-      http.csrf()
-          .disable()
-          .exceptionHandling()
-          .authenticationEntryPoint(unauthorizedEntryPoint())
-          .and()
-          .sessionManagement()
-          .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-          .and()
-          .authorizeRequests()
-          .anyRequest()
-          .fullyAuthenticated()
-          .and()
-          .addFilterBefore(conversationFilter(), UsernamePasswordAuthenticationFilter.class)
-          .addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class)
+      http.authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
+        .csrf(AbstractHttpConfigurer::disable)
+        .exceptionHandling(
+            exception -> exception.authenticationEntryPoint(unauthorizedEntryPoint()))
+        .sessionManagement(sessionManagementConfigurer ->
+            sessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .addFilterBefore(conversationFilter(), UsernamePasswordAuthenticationFilter.class)
+        .addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class)
           .addFilterBefore(permissionsFilter(), UsernamePasswordAuthenticationFilter.class);
       return http.build();
     }
@@ -99,39 +93,6 @@ public class WebSecurityConfiguration {
 
     private PermissionsFilter permissionsFilter() {
       return new PermissionsFilter(AnyRequestMatcher.INSTANCE, permissionsCache);
-    }
-  }
-
-  @Configuration
-  @Order(ERROR_PATH_SECURITY_ORDER)
-  public class ErrorSecurityConfiguration {
-
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-      configureForUnsecuredAccess(http, "/error");
-      return http.build();
-    }
-  }
-
-  @Configuration
-  @Order(ROOT_PATH_SECURITY_ORDER)
-  public class RootSecurityConfiguration {
-
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-      configureForUnsecuredAccess(http, "/");
-      return http.build();
-    }
-  }
-
-  @Configuration
-  @Order(ADMIN_PATH_SECURITY_ORDER)
-  public class AdminSecurityConfiguration {
-
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-      configureForUnsecuredAccess(http, "/admin/**");
-      return http.build();
     }
   }
 }

@@ -7,7 +7,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.microsoft.applicationinsights.TelemetryClient;
-import com.microsoft.applicationinsights.TelemetryConfiguration;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -80,8 +79,7 @@ class PermissionsCacheTest {
 
     @Bean
     public TelemetryClient getTelemetryClient() {
-      TelemetryConfiguration configuration = TelemetryConfiguration.getActive();
-      return spy(new TelemetryClient(configuration));
+      return spy(new TelemetryClient());
     }
   }
 }
