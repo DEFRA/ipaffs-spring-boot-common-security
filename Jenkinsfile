@@ -1,4 +1,4 @@
-@Library('pipeline-library') _
+@Library('pipeline-library@feature/IMTA-16541-more-jenkins-feedback-in-gitlab') _
 
 javaLibraryPipeline {
    SERVICE_NAME = "spring-boot-common-security"
