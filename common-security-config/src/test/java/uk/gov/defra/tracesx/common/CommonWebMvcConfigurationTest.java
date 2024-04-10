@@ -9,18 +9,18 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.util.List;
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.cache.CacheManager;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 import uk.gov.defra.tracesx.common.security.jwks.JwksConfiguration;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CommonWebMvcConfigurationTest {
+@ExtendWith(MockitoExtension.class)
+class CommonWebMvcConfigurationTest {
 
   private static final int CONNECTION_TIMEOUT = 1;
   private static final int READ_TIMEOUT = 2;
@@ -33,7 +33,7 @@ public class CommonWebMvcConfigurationTest {
 
   private final CommonWebMvcConfiguration testee = new CommonWebMvcConfiguration();
 
-  @Before
+  @BeforeEach
   public void setUp() throws IllegalAccessException {
     FieldUtils.writeField(testee, CONNECTION_TIMEOUT_FIELD, CONNECTION_TIMEOUT, true);
     FieldUtils.writeField(testee, READ_TIMEOUT_FIELD, READ_TIMEOUT, true);
@@ -41,7 +41,7 @@ public class CommonWebMvcConfigurationTest {
   }
 
   @Test
-  public void whenPermissionsRestTemplateCalledReturnsValidConfiguration() {
+  void whenPermissionsRestTemplateCalledReturnsValidConfiguration() {
     RestTemplate restTemplate = testee.permissionsRestTemplate();
     assertThat(restTemplate).isNotNull();
     // assert that Spring default message converters are registered
@@ -49,7 +49,7 @@ public class CommonWebMvcConfigurationTest {
   }
 
   @Test
-  public void addInterceptors_ReturnsInterceptors_WhenItemsAreAddedToRegistryAndAccessible()
+  void addInterceptors_ReturnsInterceptors_WhenItemsAreAddedToRegistryAndAccessible()
       throws InvocationTargetException, IllegalAccessException, NoSuchMethodException{
     InterceptorRegistry interceptorRegistry = new InterceptorRegistry();
     testee.addInterceptors(interceptorRegistry);
@@ -66,7 +66,7 @@ public class CommonWebMvcConfigurationTest {
   }
 
   @Test
-  public void jwksConfiguration_ThrowsMalformedURLException_WhenUrlIsInvalid() throws IllegalAccessException {
+  void jwksConfiguration_ThrowsMalformedURLException_WhenUrlIsInvalid() throws IllegalAccessException {
     FieldUtils.writeField(testee, "jwkUrl", MALFORMED_TEST_URL, true);
     FieldUtils.writeField(testee, "iss", MALFORMED_TEST_URL, true);
     FieldUtils.writeField(testee, "aud", MALFORMED_TEST_URL, true);
@@ -75,7 +75,7 @@ public class CommonWebMvcConfigurationTest {
   }
 
   @Test
-  public void jwksConfiguration_ReturnsJwksConfigurationsList_WhenVariablesAreValid()
+  void jwksConfiguration_ReturnsJwksConfigurationsList_WhenVariablesAreValid()
       throws MalformedURLException, IllegalAccessException {
     FieldUtils.writeField(testee, "jwkUrl", TEST_URL, true);
     FieldUtils.writeField(testee, "iss", TEST_URL, true);
@@ -87,7 +87,7 @@ public class CommonWebMvcConfigurationTest {
   }
 
   @Test
-  public void jwksConfiguration_ThrowsIllegalArgumentException_WhenVariableListsAreDifferentLengths()
+  void jwksConfiguration_ThrowsIllegalArgumentException_WhenVariableListsAreDifferentLengths()
       throws IllegalAccessException {
     FieldUtils.writeField(testee, "aud", MALFORMED_TEST_URL, true);
     FieldUtils.writeField(testee, "jwkUrl", TEST_URL, true);
@@ -98,7 +98,7 @@ public class CommonWebMvcConfigurationTest {
   }
 
   @Test
-  public void telemetryClient_ReturnsInstance_WhenCalled() {
+  void telemetryClient_ReturnsInstance_WhenCalled() {
     //When
     TelemetryClient telemetryClient = testee.telemetryClient();
 
@@ -107,7 +107,7 @@ public class CommonWebMvcConfigurationTest {
   }
 
   @Test
-  public void cacheManager_ReturnsInstance_WhenCalled() {
+  void cacheManager_ReturnsInstance_WhenCalled() {
     //When
     CacheManager cacheManager = testee.cacheManager();
 

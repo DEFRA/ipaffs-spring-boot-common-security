@@ -1,15 +1,17 @@
 package uk.gov.defra.tracesx.common.security;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 import uk.gov.defra.tracesx.common.permissions.PermissionsCache;
@@ -21,58 +23,17 @@ import uk.gov.defra.tracesx.common.security.jwt.JwtTokenValidator;
 
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity
 public class WebSecurityConfiguration {
-  private static final int ERROR_PATH_SECURITY_ORDER = 1;
-  private static final int ROOT_PATH_SECURITY_ORDER = 2;
-  private static final int ADMIN_PATH_SECURITY_ORDER = 3;
-  private static final int SERVICE_RESOURCES_SECURITY_ORDER = 4;
 
-  private void configureForUnsecuredAccess(HttpSecurity http, String pathPattern) throws Exception {
-    http.antMatcher(pathPattern)
-        .authorizeRequests()
-        .anyRequest()
-        .permitAll()
-        .and()
-        .csrf()
-        .disable()
-        .sessionManagement()
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-  }
-
-  @Configuration
-  @Order(ERROR_PATH_SECURITY_ORDER)
-  public class ErrorSecurityConfiguration extends WebSecurityConfigurerAdapter {
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-      configureForUnsecuredAccess(http, "/error");
-    }
-  }
-
-  @Configuration
-  @Order(ROOT_PATH_SECURITY_ORDER)
-  public class RootSecurityConfiguration extends WebSecurityConfigurerAdapter {
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-      configureForUnsecuredAccess(http, "/");
-    }
-  }
-
-  @Configuration
-  @Order(ADMIN_PATH_SECURITY_ORDER)
-  public class AdminSecurityConfiguration extends WebSecurityConfigurerAdapter {
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-      configureForUnsecuredAccess(http, "/admin/**");
-    }
-  }
+  private static final int PUBLIC_PATH_SECURITY_ORDER = 1;
+  private static final int SERVICE_RESOURCES_SECURITY_ORDER = 2;
+  private static final int SERVICE_PATH_SECURITY_ORDER = 3;
 
   @Configuration
   @Order(SERVICE_RESOURCES_SECURITY_ORDER)
-  public static class ServiceResourcesSecurityConfiguration extends WebSecurityConfigurerAdapter {
+  public static class ServiceResourcesSecurityConfiguration {
+
     private final JwtTokenValidator jwtTokenValidator;
     private final PermissionsCache permissionsCache;
     private final ConversationStore conversationStore;
@@ -87,23 +48,33 @@ public class WebSecurityConfiguration {
       this.conversationStore = conversationStore;
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-      http.csrf()
-          .disable()
-          .exceptionHandling()
-          .authenticationEntryPoint(unauthorizedEntryPoint())
-          .and()
-          .sessionManagement()
-          .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-          .and()
-          .authorizeRequests()
-          .anyRequest()
-          .fullyAuthenticated()
-          .and()
-          .addFilterBefore(conversationFilter(), UsernamePasswordAuthenticationFilter.class)
-          .addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class)
+    @Bean
+    @Order(PUBLIC_PATH_SECURITY_ORDER)
+    public SecurityFilterChain publicFilterChain(HttpSecurity http) throws Exception {
+      http.securityMatcher("/error", "/", "/admin/**")
+          .authorizeHttpRequests(authorize ->
+              authorize.anyRequest().permitAll())
+          .csrf(AbstractHttpConfigurer::disable)
+          .sessionManagement(
+              sessionManagementConfigurer ->
+                sessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+          .httpBasic(Customizer.withDefaults());
+      return http.build();
+    }
+
+    @Bean
+    @Order(SERVICE_PATH_SECURITY_ORDER)
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+      http.authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
+        .csrf(AbstractHttpConfigurer::disable)
+        .exceptionHandling(
+            exception -> exception.authenticationEntryPoint(unauthorizedEntryPoint()))
+        .sessionManagement(sessionManagementConfigurer ->
+            sessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .addFilterBefore(conversationFilter(), UsernamePasswordAuthenticationFilter.class)
+        .addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class)
           .addFilterBefore(permissionsFilter(), UsernamePasswordAuthenticationFilter.class);
+      return http.build();
     }
 
     @Bean

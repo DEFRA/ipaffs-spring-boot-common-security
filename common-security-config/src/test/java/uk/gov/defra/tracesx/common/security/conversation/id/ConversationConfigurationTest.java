@@ -1,48 +1,47 @@
 package uk.gov.defra.tracesx.common.security.conversation.id;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.aop.target.ThreadLocalTargetSource;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ConversationConfigurationTest {
+@ExtendWith(MockitoExtension.class)
+class ConversationConfigurationTest {
 
   @Mock
   private ThreadLocalTargetSource threadLocalTargetSource;
 
   private ConversationConfiguration conversationConfiguration;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     conversationConfiguration = new ConversationConfiguration();
   }
 
   @Test
-  public void threadLocalConversationStore_ReturnsCorrectTargetSource() {
+  void threadLocalConversationStore_ReturnsCorrectTargetSource() {
     ThreadLocalTargetSource result = conversationConfiguration.threadLocalConversationStore();
 
-    assertEquals("conversationStore", result.getTargetBeanName());
+    assertThat(result.getTargetBeanName()).isEqualTo("conversationStore");
   }
 
   @Test
-  public void proxiedThreadLocalTargetSource_ReturnsCorrectProxyFactoryBean() {
-    ProxyFactoryBean result = conversationConfiguration.proxiedThreadLocalTargetSource(threadLocalTargetSource);
+  void proxiedThreadLocalTargetSource_ReturnsCorrectProxyFactoryBean() {
+    ProxyFactoryBean result = conversationConfiguration.proxiedThreadLocalTargetSource(
+        threadLocalTargetSource);
 
-    assertEquals(threadLocalTargetSource, result.getTargetSource());
+    assertThat(result.getTargetSource()).isEqualTo(threadLocalTargetSource);
   }
 
   @Test
-  public void conversationStore_ReturnsNewConversationStore() {
+  void conversationStore_ReturnsNewConversationStore() {
     ConversationStore result = conversationConfiguration.conversationStore();
 
-    assertThat(result, instanceOf(ConversationStore.class));
+    assertThat(result).isInstanceOf(ConversationStore.class);
   }
 }

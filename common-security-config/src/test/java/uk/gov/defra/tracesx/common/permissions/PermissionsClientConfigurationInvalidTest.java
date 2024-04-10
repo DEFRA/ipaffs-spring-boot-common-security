@@ -1,29 +1,35 @@
 package uk.gov.defra.tracesx.common.permissions;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static uk.gov.defra.tracesx.common.CommonWebMvcConfiguration.PERMISSIONS_REST_TEMPLATE_QUALIFIER;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import static uk.gov.defra.tracesx.common.CommonWebMvcConfiguration.PERMISSIONS_REST_TEMPLATE_QUALIFIER;
-
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = PermissionsClient.class)
-public class PermissionsClientConfigurationInvalidTest {
-    @Autowired
-    private PermissionsClient permissionsClient;
+class PermissionsClientConfigurationInvalidTest {
 
-    @MockBean
-    @Qualifier(PERMISSIONS_REST_TEMPLATE_QUALIFIER)
-    RestTemplate restTemplate;
+  @MockBean
+  @Qualifier(PERMISSIONS_REST_TEMPLATE_QUALIFIER)
+  RestTemplate restTemplate;
+  @Autowired
+  private PermissionsClient permissionsClient;
 
-    @Test(expected = IllegalArgumentException.class)
-    public void should_generate_path () {
+  @Test
+  void should_generate_path() {
+    try {
         permissionsClient.getPath("test").build();
+    } catch (IllegalArgumentException illegalArgumentException) {
+
+      Assertions.assertEquals(
+          "Could not resolve permission client placeholder 'permissions.service.port'",
+          illegalArgumentException.getMessage());
     }
+  }
 }

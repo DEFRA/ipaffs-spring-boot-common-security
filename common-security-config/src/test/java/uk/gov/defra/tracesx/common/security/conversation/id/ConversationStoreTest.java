@@ -2,12 +2,12 @@ package uk.gov.defra.tracesx.common.security.conversation.id;
 
 import static org.junit.Assert.assertNull;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class ConversationStoreTest {
+class ConversationStoreTest {
 
   @Test
-  public void clear_SetsValuesNull() {
+  void clear_SetsValuesNull() {
     ConversationStore conversationStore = new ConversationStore("id", "ip");
     conversationStore.clear();
 
