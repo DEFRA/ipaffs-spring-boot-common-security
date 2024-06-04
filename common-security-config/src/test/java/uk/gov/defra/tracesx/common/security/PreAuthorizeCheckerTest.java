@@ -3,16 +3,17 @@ package uk.gov.defra.tracesx.common.security;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.junit.Before;
-import org.junit.Test;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.method.HandlerMethod;
 
-public class PreAuthorizeCheckerTest {
+class PreAuthorizeCheckerTest {
 
   private static final String PRE_AUTHORIZE_CHECKER_METHOD = "preAuthorizeCheckerMethod";
   private static final String PRE_AUTHORIZE_CHECKER_METHOD_WITH_ANNOTATION = "preAuthorizeCheckerMethodWithAnnotation";
@@ -25,7 +26,7 @@ public class PreAuthorizeCheckerTest {
   @InjectMocks
   PreAuthorizeChecker testee;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     initMocks(this);
   }
@@ -38,16 +39,19 @@ public class PreAuthorizeCheckerTest {
 
   }
 
-  @Test(expected = RuntimeException.class)
-  public void whenPreAuthorizeIsNotDefinedThenThrowError() throws Exception {
-
+  @Test
+  void whenPreAuthorizeIsNotDefinedThenThrowError() throws Exception {
     HandlerMethod handlerMethod = new HandlerMethod(this, this.getClass().getMethod(
         PRE_AUTHORIZE_CHECKER_METHOD));
-    testee.preHandle(requestMock, responseMock, handlerMethod);
+    RuntimeException runtimeException = Assertions.assertThrows(RuntimeException.class, () -> {
+      testee.preHandle(requestMock, responseMock, handlerMethod);
+    });
+
+    Assertions.assertEquals("Rights are not defined for this handler", runtimeException.getMessage());
   }
 
   @Test
-  public void whenPreAuthorizeIsDefinedThenReturnTrue() throws Exception {
+  void whenPreAuthorizeIsDefinedThenReturnTrue() throws Exception {
 
     HandlerMethod handlerMethod = new HandlerMethod(this, this.getClass().getMethod(
         PRE_AUTHORIZE_CHECKER_METHOD_WITH_ANNOTATION));
