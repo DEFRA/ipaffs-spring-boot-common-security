@@ -3,15 +3,12 @@ package uk.gov.defra.tracesx.common;
 import static uk.gov.defra.tracesx.common.permissions.PermissionsCache.CACHE_KEY;
 
 import com.microsoft.applicationinsights.TelemetryClient;
+import com.microsoft.applicationinsights.TelemetryConfiguration;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import org.apache.hc.client5.http.config.RequestConfig;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -97,7 +94,8 @@ public class CommonWebMvcConfiguration implements WebMvcConfigurer {
 
   @Bean
   public TelemetryClient telemetryClient() {
-    return new TelemetryClient();
+    TelemetryConfiguration configuration = TelemetryConfiguration.getActive();
+    return new TelemetryClient(configuration);
   }
 
   @Bean
@@ -108,19 +106,11 @@ public class CommonWebMvcConfiguration implements WebMvcConfigurer {
   }
 
   private RestTemplate createRestTemplate(int connectionTimeout, int readTimeout) {
-    RequestConfig requestConfig = RequestConfig.custom()
-            .setConnectionRequestTimeout(connectionTimeout, TimeUnit.MILLISECONDS)
-            .setResponseTimeout(readTimeout, TimeUnit.MILLISECONDS)
-            .build();
-
-    CloseableHttpClient httpClient = HttpClients.custom()
-            .setDefaultRequestConfig(requestConfig).build();
-
-    final HttpComponentsClientHttpRequestFactory clientHttpRequestFactory =
+    HttpComponentsClientHttpRequestFactory clientHttpRequestFactory =
         new HttpComponentsClientHttpRequestFactory();
-    clientHttpRequestFactory.setHttpClient(httpClient);
-
-    final RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory);
+    clientHttpRequestFactory.setConnectTimeout(connectionTimeout);
+    clientHttpRequestFactory.setReadTimeout(readTimeout);
+    RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory);
     restTemplate.getMessageConverters().add(new StringHttpMessageConverter());
     return restTemplate;
   }

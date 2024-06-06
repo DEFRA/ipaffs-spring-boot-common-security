@@ -3,17 +3,16 @@ package uk.gov.defra.tracesx.common.security;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.method.HandlerMethod;
 
-class PreAuthorizeCheckerTest {
+public class PreAuthorizeCheckerTest {
 
   private static final String PRE_AUTHORIZE_CHECKER_METHOD = "preAuthorizeCheckerMethod";
   private static final String PRE_AUTHORIZE_CHECKER_METHOD_WITH_ANNOTATION = "preAuthorizeCheckerMethodWithAnnotation";
@@ -26,7 +25,7 @@ class PreAuthorizeCheckerTest {
   @InjectMocks
   PreAuthorizeChecker testee;
 
-  @BeforeEach
+  @Before
   public void setUp() {
     initMocks(this);
   }
@@ -39,19 +38,16 @@ class PreAuthorizeCheckerTest {
 
   }
 
-  @Test
-  void whenPreAuthorizeIsNotDefinedThenThrowError() throws Exception {
+  @Test(expected = RuntimeException.class)
+  public void whenPreAuthorizeIsNotDefinedThenThrowError() throws Exception {
+
     HandlerMethod handlerMethod = new HandlerMethod(this, this.getClass().getMethod(
         PRE_AUTHORIZE_CHECKER_METHOD));
-    RuntimeException runtimeException = Assertions.assertThrows(RuntimeException.class, () -> {
-      testee.preHandle(requestMock, responseMock, handlerMethod);
-    });
-
-    Assertions.assertEquals("Rights are not defined for this handler", runtimeException.getMessage());
+    testee.preHandle(requestMock, responseMock, handlerMethod);
   }
 
   @Test
-  void whenPreAuthorizeIsDefinedThenReturnTrue() throws Exception {
+  public void whenPreAuthorizeIsDefinedThenReturnTrue() throws Exception {
 
     HandlerMethod handlerMethod = new HandlerMethod(this, this.getClass().getMethod(
         PRE_AUTHORIZE_CHECKER_METHOD_WITH_ANNOTATION));

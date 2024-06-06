@@ -2,7 +2,6 @@ package uk.gov.defra.tracesx.common.security.jwt;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertNotNull;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,17 +9,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import static org.junit.Assert.assertNotNull;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
+import org.junit.runner.RunWith;
 import org.springframework.security.core.GrantedAuthority;
 import uk.gov.defra.tracesx.common.exceptions.InsSecurityException;
 import uk.gov.defra.tracesx.common.security.IdTokenUserDetails;
 import uk.gov.defra.tracesx.common.security.OrganisationGrantedAuthority;
 import uk.gov.defra.tracesx.common.security.RoleToAuthorityMapper;
 
-class JwtUserMapperTest {
+@RunWith(Theories.class)
+public class JwtUserMapperTest {
+
+  private Map<String, Object> decoded;
+  private RoleToAuthorityMapper roleToAuthorityMapper = new RoleToAuthorityMapper();
+  private JwtUserMapper jwtUserMapper = new JwtUserMapper(roleToAuthorityMapper);
 
   private static final String USER_OBJECT_ID = "e9f6447d-2979-4322-8e52-307dafdef649";
   private static final String FAMILY_NAME = "Token";
@@ -34,11 +41,8 @@ class JwtUserMapperTest {
   private static final List<String> ORG_IDS = Arrays.asList(ORG_ID);
   private static final List<GrantedAuthority> AUTHORITIES = Collections.unmodifiableList(
       ROLES.stream().map(OrganisationGrantedAuthority::new).collect(Collectors.toList()));
-  private Map<String, Object> decoded;
-  private RoleToAuthorityMapper roleToAuthorityMapper = new RoleToAuthorityMapper();
-  private JwtUserMapper jwtUserMapper = new JwtUserMapper(roleToAuthorityMapper);
 
-  @BeforeEach
+  @Before
   public void before() {
     decoded = new HashMap<>();
     decoded.put("sub", SUB);
@@ -52,7 +56,7 @@ class JwtUserMapperTest {
   }
 
   @Test
-  void createUser_allows_personal_account_with_no_org() {
+  public void createUser_allows_personal_account_with_no_org() {
 
     IdTokenUserDetails userDetails = IdTokenUserDetails.builder()
         .idToken(ID_TOKEN)
@@ -68,7 +72,7 @@ class JwtUserMapperTest {
   }
 
   @Test
-  void createUser_fromCompleteClaims_isFullyPopulated() {
+  public void createUser_fromCompleteClaims_isFullyPopulated() {
     IdTokenUserDetails user = jwtUserMapper.createUser(decoded, ID_TOKEN);
     IdTokenUserDetails expected = IdTokenUserDetails.builder()
         .idToken(ID_TOKEN)
@@ -83,24 +87,29 @@ class JwtUserMapperTest {
   }
 
   @Test
-  void createUser_rolesIsNotAList_isFullyPopulated() {
+  public void createUser_rolesIsNotAList_isFullyPopulated() {
     decoded.put("roles", "NotAList");
     assertThatExceptionOfType(InsSecurityException.class)
         .isThrownBy(() -> jwtUserMapper.createUser(decoded, ID_TOKEN));
   }
 
   @Test
-  void createUser_BodyDoesntContainRoles_ThrowsException() {
+  public void createUser_BodyDoesntContainRoles_ThrowsException() {
     decoded.remove("roles");
     assertThatExceptionOfType(InsSecurityException.class)
         .isThrownBy(() -> jwtUserMapper.createUser(decoded, ID_TOKEN));
   }
 
-  @ParameterizedTest
-  @ValueSource(strings = {"sub"})
-  void createUser_fromIncompleteClaims_throwsException(String missingClaim) {
+  @DataPoints("API Methods")
+  public static final String[] missingClaims = new String[]{
+      "sub"
+  };
+
+  @Theory
+  public void createUser_fromIncompleteClaims_throwsException(String missingClaim) {
     decoded.remove(missingClaim);
     assertThatExceptionOfType(InsSecurityException.class)
         .isThrownBy(() -> jwtUserMapper.createUser(decoded, ID_TOKEN));
   }
+
 }

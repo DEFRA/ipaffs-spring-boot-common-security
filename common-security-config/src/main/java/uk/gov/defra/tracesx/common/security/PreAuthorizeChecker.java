@@ -2,13 +2,13 @@ package uk.gov.defra.tracesx.common.security;
 
 import static org.springframework.core.annotation.AnnotationUtils.findAnnotation;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-public class PreAuthorizeChecker implements HandlerInterceptor {
+public class PreAuthorizeChecker extends HandlerInterceptorAdapter {
 
   private static final String MESSAGE = "Rights are not defined for this handler";
 

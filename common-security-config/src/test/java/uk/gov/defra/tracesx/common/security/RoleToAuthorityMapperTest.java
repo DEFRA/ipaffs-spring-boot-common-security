@@ -4,15 +4,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
 import java.util.List;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-class RoleToAuthorityMapperTest {
+public class RoleToAuthorityMapperTest {
 
   private RoleToAuthorityMapper mapper = new RoleToAuthorityMapper();
 
   @Test
-  void mapRole_inIdentityFormat_createOrganisationGrantedAuthority() {
+  public void mapRole_inIdentityFormat_createOrganisationGrantedAuthority() {
     List<String> roles = Arrays.asList("AD_ROLE");
     List<GrantedAuthority> authorities = mapper.mapRoles(roles);
     assertThat(authorities).hasSize(1);

@@ -2,22 +2,20 @@ package uk.gov.defra.tracesx.common.permissions;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpStatus.OK;
 
-import java.util.Collections;
-import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
@@ -25,8 +23,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
-@ExtendWith(MockitoExtension.class)
-class PermissionsClientTest{
+import java.util.Collections;
+import java.util.List;
+
+@RunWith(MockitoJUnitRunner.class)
+public class PermissionsClientTest {
 
   private static final String USER = "testUser";
   private static final String PASSWORD = "testPassword";
@@ -45,15 +46,14 @@ class PermissionsClientTest{
   @InjectMocks
   private PermissionsClient permissionsService;
 
-  @BeforeEach
+  @Before
   public void setup() {
     ReflectionTestUtils.setField(permissionsService, PERMISSIONS_USER, USER);
     ReflectionTestUtils.setField(permissionsService, PERMISSIONS_PASSWORD, PASSWORD);
     ReflectionTestUtils.setField(permissionsService, PERMISSIONS_URL, URL);
 
     final ResponseEntity<List<String>> responseEntity = createResponseEntity();
-
-    lenient().when(restTemplate.exchange(
+    when(restTemplate.exchange(
         any(),
         eq(GET),
         any(HttpEntity.class),
@@ -63,7 +63,7 @@ class PermissionsClientTest{
   }
 
   @Test
-   void testWhenPermissionsListIsCalledThenReturnListOfPermissions() {
+  public void testWhenPermissionsListIsCalledThenReturnListOfPermissions() {
 
     final List<String> permissionsList = permissionsService.permissionsList(ROLE, TOKEN);
 
@@ -72,7 +72,7 @@ class PermissionsClientTest{
   }
 
   @Test
-   void testWhenPermissionsCalledWithInvalidRoleThenReturnEmptyList() {
+  public void testWhenPermissionsCalledWithInvalidRoleThenReturnEmptyList() {
 
     when(restTemplate.exchange(
         any(),
@@ -84,11 +84,11 @@ class PermissionsClientTest{
 
     final List<String> permissionsList = permissionsService.permissionsList(INVALID_ROLE, TOKEN);
 
-    assertThat(permissionsList).isEmpty();
+    assertThat(permissionsList).hasSize(0);
   }
 
   @Test
-   void testGetPermissions_ThrowsCustomException_WhenResourceAccessExceptionThrown() {
+  public void testGetPermissions_ThrowsCustomException_WhenResourceAccessExceptionThrown() {
 
     when(restTemplate.exchange(
         any(),
