@@ -5,19 +5,18 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.UUID;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ConversationFilterTest {
+@ExtendWith(MockitoExtension.class)
+class ConversationFilterTest {
 
   private static final String CONVERSATION_ID = UUID.randomUUID().toString();
   private static final String CONVERSATION_IP_HEADER = "1.1.1.1:1111";
@@ -38,13 +37,13 @@ public class ConversationFilterTest {
 
   private ConversationFilter conversationFilter;
 
-  @Before
+  @BeforeEach
   public void before() {
     conversationFilter = new ConversationFilter(conversationStore);
   }
 
   @Test
-  public void doFilter_withCorrectHeader_setsConversationId() throws Exception {
+  void doFilter_withCorrectHeader_setsConversationId() throws Exception {
     when(servletRequest.getHeader("INS-ConversationId")).thenReturn(CONVERSATION_ID);
     when(servletRequest.getHeader("INS-ConversationIp")).thenReturn(CONVERSATION_IP_HEADER);
     conversationFilter.doFilter(servletRequest, servletResponse, filterChain);
@@ -54,7 +53,8 @@ public class ConversationFilterTest {
   }
 
   @Test
-  public void doFilter_withCorrectHeader_setsConversationIp() throws Exception {
+  void doFilter_withCorrectHeader_setsConversationIp() throws Exception {
+    when(servletRequest.getHeader("INS-ConversationId")).thenReturn(CONVERSATION_ID);
     when(servletRequest.getHeader("INS-ConversationIp")).thenReturn(CONVERSATION_IP_HEADER);
     conversationFilter.doFilter(servletRequest, servletResponse, filterChain);
 
@@ -63,10 +63,11 @@ public class ConversationFilterTest {
   }
 
   @Test
-  public void doFilter_withNoConversationIpHeader_doesNotThrowException() {
-    when(servletRequest.getHeader("INS-ConversationIp")).thenReturn(null);
+  void doFilter_withNoConversationIpHeader_doesNotThrowException() {
+    when(servletRequest.getHeader("INS-ConversationId")).thenReturn(CONVERSATION_ID);
 
-    assertThatCode(() -> conversationFilter.doFilter(servletRequest, servletResponse, filterChain)).doesNotThrowAnyException();
+    assertThatCode(() -> conversationFilter.doFilter(servletRequest, servletResponse,
+        filterChain)).doesNotThrowAnyException();
     verify(conversationStore, times(1)).setConversationIp(DEFAULT_CONVERSATION_IP);
   }
 }
