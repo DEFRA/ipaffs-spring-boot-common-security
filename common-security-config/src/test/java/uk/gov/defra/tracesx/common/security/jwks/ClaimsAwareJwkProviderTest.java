@@ -1,12 +1,14 @@
 package uk.gov.defra.tracesx.common.security.jwks;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.auth0.jwk.Jwk;
 import com.auth0.jwk.JwkProvider;
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +29,7 @@ class ClaimsAwareJwkProviderTest {
   private ClaimsAwareJwkProvider claimsAwareJwkProvider;
 
   @BeforeEach
-  public void before() throws Exception {
+  public void before() {
     claimsAwareJwkProvider = new ClaimsAwareJwkProvider(jwkProvider, 5, 500, TimeUnit.MILLISECONDS,
         ISSUER, AUDIENCE);
   }
@@ -54,7 +56,7 @@ class ClaimsAwareJwkProviderTest {
   void get_calledTwiceAfterExpiresIn_keyIsFetchedTwice() throws Exception {
     when(jwkProvider.get(KEY_ID)).thenReturn(jwk);
     Jwk result1 = claimsAwareJwkProvider.get("OGZiYTNmNGUtYTM5Zi00NGRhLTgxYjYtMDNiNDc0MDAzMDBk");
-    Thread.sleep(750);
+    await().pollDelay(Duration.ofMillis(750)).until(() -> true);
     Jwk result2 = claimsAwareJwkProvider.get("OGZiYTNmNGUtYTM5Zi00NGRhLTgxYjYtMDNiNDc0MDAzMDBk");
     assertThat(result1).isSameAs(jwk);
     assertThat(result2).isSameAs(jwk);

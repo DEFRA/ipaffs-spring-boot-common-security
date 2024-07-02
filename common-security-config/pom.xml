@@ -50,7 +50,7 @@
     </dependency>
     <dependency>
       <groupId>com.microsoft.azure</groupId>
-      <artifactId>applicationinsights-web</artifactId>
+      <artifactId>applicationinsights-core</artifactId>
     </dependency>
     <!-- used to decode and validate jwt tokens / also used in component testing -->
     <dependency>

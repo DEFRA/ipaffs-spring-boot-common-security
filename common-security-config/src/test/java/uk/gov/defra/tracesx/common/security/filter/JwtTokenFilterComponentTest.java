@@ -1,6 +1,7 @@
 package uk.gov.defra.tracesx.common.security.filter;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -32,6 +33,14 @@ import com.auth0.jwk.JwkProvider;
 import com.auth0.jwk.SigningKeyNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.net.URL;
+import java.time.Duration;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,31 +58,13 @@ import uk.gov.defra.tracesx.common.security.jwt.JwtTokenValidator;
 import uk.gov.defra.tracesx.common.security.jwt.JwtUserMapper;
 import uk.gov.defra.tracesx.common.security.jwt.MockJwks;
 
-import java.net.URL;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
 class JwtTokenFilterComponentTest {
 
   private static final int KEY_EXPIRY_MILLIS = 250;
 
   private JwtTokenFilter jwtTokenFilter;
-  private JwtTokenValidator jwtTokenValidator;
-  private JwtUserMapper jwtUserMapper;
-  private RoleToAuthorityMapper roleToAuthorityMapper;
   private JwksCache jwksCache;
-  private List<JwksConfiguration> jwksConfigurations;
   private SpyableJwkProviderFactory jwkProviderFactory;
-
-  private JwksConfiguration jwksConfiguration1;
-  private JwksConfiguration jwksConfiguration2;
 
   private HttpServletRequest request;
   private HttpServletResponse response;
@@ -82,14 +73,15 @@ class JwtTokenFilterComponentTest {
 
   @BeforeEach
   public void before() throws Exception {
-    roleToAuthorityMapper = new RoleToAuthorityMapper();
-    jwtUserMapper = new JwtUserMapper(roleToAuthorityMapper);
+    RoleToAuthorityMapper roleToAuthorityMapper = new RoleToAuthorityMapper();
+    JwtUserMapper jwtUserMapper = new JwtUserMapper(roleToAuthorityMapper);
 
-    jwksConfiguration1 = JwksConfiguration.builder().jwksUrl(new URL(JWKS_URL1))
+    JwksConfiguration jwksConfiguration1 = JwksConfiguration.builder().jwksUrl(new URL(JWKS_URL1))
         .audience(JWKS_AUDIENCE1).issuer(JWKS_ISSUER1).build();
-    jwksConfiguration2 = JwksConfiguration.builder().jwksUrl(new URL(JWKS_URL2))
+    JwksConfiguration jwksConfiguration2 = JwksConfiguration.builder().jwksUrl(new URL(JWKS_URL2))
         .audience(JWKS_AUDIENCE2).issuer(JWKS_ISSUER2).build();
-    jwksConfigurations = Arrays.asList(jwksConfiguration1, jwksConfiguration2);
+    List<JwksConfiguration> jwksConfigurations = Arrays.asList(jwksConfiguration1,
+        jwksConfiguration2);
 
     // expire the key in milliseconds instead of seconds
     jwkProviderFactory = spy(new SpyableJwkProviderFactory());
@@ -100,7 +92,7 @@ class JwtTokenFilterComponentTest {
 
     // providers should return the jwk for their respective kids else throw a not found exception
     jwkProvider1 = mock(JwkProvider.class, "jwkProvider1");
-    when(jwkProvider1.get(eq(JWK_ELEMENT1.getKid()))).thenReturn(JWK1);
+    when(jwkProvider1.get(JWK_ELEMENT1.getKid())).thenReturn(JWK1);
     when(jwkProvider1.get(not(eq(JWK_ELEMENT1.getKid()))))
         .thenThrow(new SigningKeyNotFoundException("not found", null));
     jwkProvider2 = mock(JwkProvider.class, "jwkProvider2");
@@ -108,11 +100,11 @@ class JwtTokenFilterComponentTest {
     when(jwkProvider2.get(not(eq(JWK_ELEMENT2.getKid()))))
         .thenThrow(new SigningKeyNotFoundException("not found", null));
     // return the correct mock for the jwk url
-    doReturn(jwkProvider1).when(jwkProviderFactory).createUrlJwkProvider(eq(new URL(JWKS_URL1)));
-    doReturn(jwkProvider2).when(jwkProviderFactory).createUrlJwkProvider(eq(new URL(JWKS_URL2)));
+    doReturn(jwkProvider1).when(jwkProviderFactory).createUrlJwkProvider(new URL(JWKS_URL1));
+    doReturn(jwkProvider2).when(jwkProviderFactory).createUrlJwkProvider(new URL(JWKS_URL2));
 
     jwksCache = spy(new JwksCache(jwksConfigurations, jwkProviderFactory));
-    jwtTokenValidator = new JwtTokenValidator(jwtUserMapper, jwksCache);
+    JwtTokenValidator jwtTokenValidator = new JwtTokenValidator(jwtUserMapper, jwksCache);
     jwtTokenFilter = new JwtTokenFilter("/url", jwtTokenValidator);
 
     request = mock(HttpServletRequest.class);
@@ -138,8 +130,8 @@ class JwtTokenFilterComponentTest {
     assertThatAuthenticationIsValid(authentication, true);
 
     verify(jwkProviderFactory, times(2)).newInstance(any(JwksConfiguration.class));
-    verify(jwkProviderFactory).createUrlJwkProvider(eq(new URL(JWKS_URL1)));
-    verify(jwkProviderFactory).createUrlJwkProvider(eq(new URL(JWKS_URL2)));
+    verify(jwkProviderFactory).createUrlJwkProvider(new URL(JWKS_URL1));
+    verify(jwkProviderFactory).createUrlJwkProvider(new URL(JWKS_URL2));
 
     verify(jwkProvider1).get(JWK_ELEMENT1.getKid());
     verify(jwkProvider2).get(JWK_ELEMENT1.getKid());
@@ -147,15 +139,14 @@ class JwtTokenFilterComponentTest {
     verify(jwksCache, times(3)).getPublicKeys(JWK_ELEMENT1.getKid());
   }
 
-  private static final List<GrantedAuthority> EXPECTED_AUTHORITIES = Collections
-      .unmodifiableList(MockJwks.ROLES_VALUE.stream().map(
-          OrganisationGrantedAuthority::new).collect(Collectors.toList()));
+  private static final List<GrantedAuthority> EXPECTED_AUTHORITIES = MockJwks.ROLES_VALUE.stream()
+      .<GrantedAuthority>map(OrganisationGrantedAuthority::new)
+      .toList();
 
   private void assertThatAuthenticationIsValid(Authentication authentication, boolean ccaRequired) {
     assertThat(authentication).isInstanceOf(IdTokenAuthentication.class);
     assertThat(authentication.isAuthenticated()).isTrue();
-    assertThat(authentication.getAuthorities())
-        .containsOnlyElementsOf((Iterable) EXPECTED_AUTHORITIES);
+    assertThat(authentication.getAuthorities()).isEqualTo(EXPECTED_AUTHORITIES);
     assertThat(authentication.getPrincipal()).isEqualTo(SUB_VALUE);
     assertThat(authentication.getDetails()).isInstanceOf(IdTokenUserDetails.class);
     IdTokenUserDetails details = (IdTokenUserDetails) authentication.getDetails();
@@ -163,7 +154,7 @@ class JwtTokenFilterComponentTest {
     assertThat(details.getDisplayName()).isEqualTo(GIVEN_NAME + " " + FAMILY_NAME);
     assertThat(details.getUsername()).isEqualTo(SUB_VALUE);
     assertThat(details.getPassword()).isNull();
-    assertThat(details.getAuthorities()).containsOnlyElementsOf((Iterable) EXPECTED_AUTHORITIES);
+    assertThat(details.getAuthorities()).isEqualTo(EXPECTED_AUTHORITIES);
     assertThat(details.getIdToken()).isNotBlank();
     if (ccaRequired) {
       assertThat(details.getCentralCompetentAuthority()).isEqualTo(CENTRAL_COMPETENT_AUTHORITY);
@@ -191,8 +182,8 @@ class JwtTokenFilterComponentTest {
     assertThatAuthenticationIsValid(authentication, true);
 
     verify(jwkProviderFactory, times(2)).newInstance(any(JwksConfiguration.class));
-    verify(jwkProviderFactory).createUrlJwkProvider(eq(new URL(JWKS_URL1)));
-    verify(jwkProviderFactory).createUrlJwkProvider(eq(new URL(JWKS_URL2)));
+    verify(jwkProviderFactory).createUrlJwkProvider(new URL(JWKS_URL1));
+    verify(jwkProviderFactory).createUrlJwkProvider(new URL(JWKS_URL2));
 
     verify(jwkProvider1).get(JWK_ELEMENT1.getKid());
     verify(jwkProvider2).get(JWK_ELEMENT1.getKid());
@@ -212,14 +203,14 @@ class JwtTokenFilterComponentTest {
     authentication = jwtTokenFilter.attemptAuthentication(request, response);
     assertThatAuthenticationIsValid(authentication, true);
 
-    Thread.sleep(KEY_EXPIRY_MILLIS * 2);
+    await().pollDelay(Duration.ofMillis(KEY_EXPIRY_MILLIS * 2)).until(() -> true);
 
     authentication = jwtTokenFilter.attemptAuthentication(request, response);
     assertThatAuthenticationIsValid(authentication, true);
 
     verify(jwkProviderFactory, times(2)).newInstance(any(JwksConfiguration.class));
-    verify(jwkProviderFactory).createUrlJwkProvider(eq(new URL(JWKS_URL1)));
-    verify(jwkProviderFactory).createUrlJwkProvider(eq(new URL(JWKS_URL2)));
+    verify(jwkProviderFactory).createUrlJwkProvider(new URL(JWKS_URL1));
+    verify(jwkProviderFactory).createUrlJwkProvider(new URL(JWKS_URL2));
 
     verify(jwkProvider1, times(2)).get(JWK_ELEMENT1.getKid());
     verify(jwkProvider2).get(JWK_ELEMENT1.getKid());
@@ -228,7 +219,7 @@ class JwtTokenFilterComponentTest {
   }
 
   private Date expiresInTenMinutes() {
-    return Date.from(OffsetDateTime.now(ZoneId.of("UTC")).plus(10, ChronoUnit.MINUTES).toInstant());
+    return Date.from(OffsetDateTime.now(ZoneId.of("UTC")).plusMinutes(10).toInstant());
   }
 
   static class SpyableJwkProviderFactory extends JwkProviderFactory {
