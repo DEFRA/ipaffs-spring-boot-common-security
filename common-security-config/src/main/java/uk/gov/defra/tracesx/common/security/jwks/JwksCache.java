@@ -3,11 +3,9 @@ package uk.gov.defra.tracesx.common.security.jwks;
 import com.auth0.jwk.Jwk;
 import com.auth0.jwk.JwkException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -25,11 +23,9 @@ public class JwksCache {
   public JwksCache(
       @Qualifier("jwksConfiguration") List<JwksConfiguration> jwksConfiguration,
       JwkProviderFactory jwkProviderFactory) {
-    allJwkProviders =
-        Collections.unmodifiableList(
-            jwksConfiguration.stream()
-                .map(jwkProviderFactory::newInstance)
-                .collect(Collectors.toList()));
+    allJwkProviders = jwksConfiguration.stream()
+        .map(jwkProviderFactory::newInstance)
+        .toList();
     cachedJwkProviders = new ArrayList<>();
   }
 
@@ -59,7 +55,7 @@ public class JwksCache {
         cachedJwkProviders.stream()
             .filter(j -> j.containsKey(kid))
             .map(j -> j.get(kid))
-            .collect(Collectors.toList());
+            .toList();
 
     return claimsAwareJwkProviders.isEmpty() ? scanProviders(kid) : claimsAwareJwkProviders;
   }

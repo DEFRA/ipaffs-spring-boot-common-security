@@ -2,6 +2,7 @@ package uk.gov.defra.tracesx.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.InstanceOfAssertFactories.ARRAY;
 
 import com.microsoft.applicationinsights.TelemetryClient;
 import java.lang.reflect.InvocationTargetException;
@@ -30,7 +31,6 @@ class CommonWebMvcConfigurationTest {
   private static final String MALFORMED_TEST_URL = "test,next";
   private static final String TEST_URL = "http://www.example.com:1080/docs/resource1.html";
 
-
   private final CommonWebMvcConfiguration testee = new CommonWebMvcConfiguration();
 
   @BeforeEach
@@ -53,15 +53,14 @@ class CommonWebMvcConfigurationTest {
       throws InvocationTargetException, IllegalAccessException, NoSuchMethodException{
     InterceptorRegistry interceptorRegistry = new InterceptorRegistry();
     testee.addInterceptors(interceptorRegistry);
-    interceptorRegistry.getClass().getDeclaredMethod("getInterceptors");
     Method retrieveItems = interceptorRegistry.getClass().getDeclaredMethod("getInterceptors");
     retrieveItems.setAccessible(true);
     List<MappedInterceptor> interceptorList =
         (List<MappedInterceptor>) retrieveItems.invoke(interceptorRegistry);
 
-    assertThat(interceptorList).isNotNull();
-    assertThat(interceptorList).isNotEmpty();
-    assertThat(interceptorList.get(0).getPathPatterns())
+    assertThat(interceptorList).first()
+        .extracting(MappedInterceptor::getIncludePathPatterns)
+        .asInstanceOf(ARRAY)
         .containsExactlyInAnyOrderElementsOf(MockServiceUrlPatterns.PATTERNS);
   }
 
