@@ -15,9 +15,8 @@ public class PreAuthorizeChecker implements HandlerInterceptor {
   @Override
   public boolean preHandle(
       HttpServletRequest request, HttpServletResponse response, Object handler) {
-    if (handler instanceof HandlerMethod) {
-      HandlerMethod hm = (HandlerMethod) handler;
-      PreAuthorize annotation = findAnnotation(hm.getMethod(), PreAuthorize.class);
+    if (handler instanceof HandlerMethod proxy) {
+      PreAuthorize annotation = findAnnotation(proxy.getMethod(), PreAuthorize.class);
       if (annotation == null) {
         // prevent access to method without security restrictions
         throw new NullPointerException(MESSAGE);

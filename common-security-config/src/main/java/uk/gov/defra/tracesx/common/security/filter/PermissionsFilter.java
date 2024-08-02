@@ -1,6 +1,5 @@
 package uk.gov.defra.tracesx.common.security.filter;
 
-import static java.util.stream.Collectors.toList;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -68,7 +67,7 @@ public class PermissionsFilter extends StatelessAuthenticationProcessingFilter {
     if (userDetails != null) {
       return userDetails.getAuthorities().stream()
           .map(GrantedAuthority::getAuthority)
-          .collect(toList());
+          .toList();
     }
     return Collections.emptyList();
   }
@@ -79,14 +78,14 @@ public class PermissionsFilter extends StatelessAuthenticationProcessingFilter {
         .map(role -> permissionsCache.permissionsList(role, authorisationToken))
         .flatMap(List::stream)
         .distinct()
-        .map(SimpleGrantedAuthority::new)
-        .collect(toList());
+        .<GrantedAuthority>map(SimpleGrantedAuthority::new)
+        .toList();
   }
 
   public IdTokenAuthentication getAuthentication() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    if (authentication instanceof IdTokenAuthentication) {
-      return (IdTokenAuthentication) authentication;
+    if (authentication instanceof IdTokenAuthentication idToken) {
+      return idToken;
     }
     LOGGER.error(
         "Could not find an instance of {} on the Spring Security Context. Actual: {}",
@@ -100,17 +99,16 @@ public class PermissionsFilter extends StatelessAuthenticationProcessingFilter {
     IdTokenUserDetails originalUserDetails =
         (IdTokenUserDetails) originalAuthentication.getDetails();
 
-    IdTokenUserDetails newUserDetails =
-        IdTokenUserDetails.builder()
-            .userObjectId(originalUserDetails.getUserObjectId())
-            .displayName(originalUserDetails.getDisplayName())
-            .idToken(originalUserDetails.getIdToken())
-            .username(originalUserDetails.getUsername())
-            .authorities(permissions)
-            .customerId(originalUserDetails.getCustomerId())
-            .customerOrganisationId(originalUserDetails.getCustomerOrganisationId())
-            .centralCompetentAuthority(originalUserDetails.getCentralCompetentAuthority())
-            .build();
+    IdTokenUserDetails newUserDetails = IdTokenUserDetails.builder()
+        .userObjectId(originalUserDetails.getUserObjectId())
+        .displayName(originalUserDetails.getDisplayName())
+        .idToken(originalUserDetails.getIdToken())
+        .username(originalUserDetails.getUsername())
+        .authorities(permissions)
+        .customerId(originalUserDetails.getCustomerId())
+        .customerOrganisationId(originalUserDetails.getCustomerOrganisationId())
+        .centralCompetentAuthority(originalUserDetails.getCentralCompetentAuthority())
+        .build();
     return new IdTokenAuthentication(newUserDetails);
   }
 }

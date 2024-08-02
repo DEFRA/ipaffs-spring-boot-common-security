@@ -1,10 +1,7 @@
 package uk.gov.defra.tracesx.common.security.filter;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -14,11 +11,9 @@ import static uk.gov.defra.tracesx.common.security.filter.PermissionsFilter.ROLE
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -91,9 +86,9 @@ class PermissionsFilterTest {
     when(authentication.getDetails()).thenReturn(null);
     SecurityContextHolder.getContext().setAuthentication(authentication);
 
-    assertThatExceptionOfType(AuthenticationException.class)
-        .isThrownBy(() -> permissionsFilter.attemptAuthentication(request, response))
-        .withMessageContaining(ROLES_ARE_EMPTY);
+    assertThatThrownBy(() -> permissionsFilter.attemptAuthentication(request, response))
+        .isInstanceOf(AuthenticationException.class)
+        .hasMessageContaining(ROLES_ARE_EMPTY);
 
     verify(authentication, times(1)).getDetails();
   }
@@ -102,9 +97,9 @@ class PermissionsFilterTest {
   void doFilter_userHasNoRoles_throwsAuthenticationException() {
     mockAuthenticationSingleton(Collections.emptyList());
 
-    assertThatExceptionOfType(AuthenticationException.class)
-        .isThrownBy(() -> permissionsFilter.attemptAuthentication(request, response))
-        .withMessageContaining(ROLES_ARE_EMPTY);
+    assertThatThrownBy(() -> permissionsFilter.attemptAuthentication(request, response))
+        .isInstanceOf(AuthenticationException.class)
+        .hasMessageContaining(ROLES_ARE_EMPTY);
 
     verify(authentication, times(1)).getDetails();
     verify(userDetails, times(1)).getAuthorities();
@@ -112,27 +107,27 @@ class PermissionsFilterTest {
 
   @Test
   void doFilter_userHasNoPermissions_throwsAuthenticationException() {
-    mockAuthenticationSingleton(Collections.singletonList(new SimpleGrantedAuthority(ROLE)));
+    mockAuthenticationSingleton(List.of(new SimpleGrantedAuthority(ROLE)));
     when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn(BEARER_TOKEN);
-    when(permissionsCache.permissionsList(eq(ROLE), eq(BEARER_TOKEN)))
+    when(permissionsCache.permissionsList(ROLE, BEARER_TOKEN))
         .thenReturn(Collections.emptyList());
 
-    assertThatExceptionOfType(AuthenticationException.class)
-        .isThrownBy(() -> permissionsFilter.attemptAuthentication(request, response))
-        .withMessageContaining(PERMISSIONS_ARE_EMPTY);
+    assertThatThrownBy(() -> permissionsFilter.attemptAuthentication(request, response))
+        .isInstanceOf(AuthenticationException.class)
+        .hasMessageContaining(PERMISSIONS_ARE_EMPTY);
 
     verify(authentication, times(1)).getDetails();
     verify(userDetails, times(1)).getAuthorities();
     verify(request).getHeader(HttpHeaders.AUTHORIZATION);
-    verify(permissionsCache).permissionsList(eq(ROLE), eq(BEARER_TOKEN));
+    verify(permissionsCache).permissionsList(ROLE, BEARER_TOKEN);
   }
 
   @Test
   void doFilter_userHasSingleRoleAndPermission_amendsAuthentication() {
-    mockAuthenticationSingleton(Collections.singletonList(new SimpleGrantedAuthority(ROLE)));
+    mockAuthenticationSingleton(List.of(new SimpleGrantedAuthority(ROLE)));
     when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn(BEARER_TOKEN);
-    when(permissionsCache.permissionsList(eq(ROLE), eq(BEARER_TOKEN)))
-        .thenReturn(Collections.singletonList(PERMISSION));
+    when(permissionsCache.permissionsList(ROLE, BEARER_TOKEN))
+        .thenReturn(List.of(PERMISSION));
 
     Authentication amendedAuthentication = permissionsFilter.attemptAuthentication(request,
         response);
@@ -144,42 +139,41 @@ class PermissionsFilterTest {
     verify(userDetails, times(1)).getAuthorities();
     verify(userDetails, times(1)).getCustomerOrganisationId();
     verify(request).getHeader(HttpHeaders.AUTHORIZATION);
-    verify(permissionsCache).permissionsList(eq(ROLE), eq(BEARER_TOKEN));
+    verify(permissionsCache).permissionsList(ROLE, BEARER_TOKEN);
   }
 
   @Test
   void doFilter_userHasMultipleRolesAndPermissions_amendsAuthentication() {
     final String role1 = "ROLE1";
     final String role2 = "ROLE2";
-    List<String> ROLES = Arrays.asList(role1, role2);
-    List<String> PERMISSIONS_ROLE1 = Arrays.asList("role1.permission1", "role1.permission2");
-    List<String> PERMISSIONS_ROLE2 = Arrays.asList("role2.permission1", "role2.permission2");
+    List<String> ROLES = List.of(role1, role2);
+    List<String> PERMISSIONS_ROLE1 = List.of("role1.permission1", "role1.permission2");
+    List<String> PERMISSIONS_ROLE2 = List.of("role2.permission1", "role2.permission2");
     mockAuthenticationSingleton(
-        ROLES.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()));
+        ROLES.stream().<GrantedAuthority>map(SimpleGrantedAuthority::new).toList()
+    );
     when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn(BEARER_TOKEN);
-    when(permissionsCache.permissionsList(eq(role1), eq(BEARER_TOKEN)))
+    when(permissionsCache.permissionsList(role1, BEARER_TOKEN))
         .thenReturn(PERMISSIONS_ROLE1);
-    when(permissionsCache.permissionsList(eq(role2), eq(BEARER_TOKEN)))
+    when(permissionsCache.permissionsList(role2, BEARER_TOKEN))
         .thenReturn(PERMISSIONS_ROLE2);
 
     Authentication amendedAuthentication = permissionsFilter.attemptAuthentication(request,
         response);
 
-    List<GrantedAuthority> expectedAuthorities =
-        Stream.of(PERMISSIONS_ROLE1, PERMISSIONS_ROLE2)
+    List<GrantedAuthority> expectedAuthorities = Stream.of(PERMISSIONS_ROLE1, PERMISSIONS_ROLE2)
             .flatMap(List::stream)
-            .map(SimpleGrantedAuthority::new)
-            .collect(Collectors.toList());
+            .<GrantedAuthority>map(SimpleGrantedAuthority::new)
+            .toList();
 
-    assertThat(amendedAuthentication.getAuthorities()).containsOnlyElementsOf(
-        (Iterable) expectedAuthorities);
+    assertThat(amendedAuthentication.getAuthorities()).isEqualTo(expectedAuthorities);
 
     verify(authentication, times(2)).getDetails();
     verify(userDetails, times(1)).getAuthorities();
     verify(userDetails, times(1)).getCustomerOrganisationId();
     verify(request).getHeader(HttpHeaders.AUTHORIZATION);
-    verify(permissionsCache).permissionsList(eq(role1), eq(BEARER_TOKEN));
-    verify(permissionsCache).permissionsList(eq(role2), eq(BEARER_TOKEN));
+    verify(permissionsCache).permissionsList(role1, BEARER_TOKEN);
+    verify(permissionsCache).permissionsList(role2, BEARER_TOKEN);
   }
 
   @Test
@@ -187,29 +181,28 @@ class PermissionsFilterTest {
     mockAuthenticationSingleton(Collections.emptyList());
     OrganisationGrantedAuthority organisationGrantedAuthority =
         OrganisationGrantedAuthority.builder().authority(ROLE).build();
-    List<String> organisations = Arrays.asList("Organisation1");
 
     SecurityContextHolder.getContext().setAuthentication(authentication);
     when(authentication.getDetails()).thenReturn(userDetails);
     when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn(BEARER_TOKEN);
     when(userDetails.getAuthorities())
-        .thenReturn(Arrays.asList(new SimpleGrantedAuthority(ROLE), organisationGrantedAuthority));
+        .thenReturn(List.of(new SimpleGrantedAuthority(ROLE), organisationGrantedAuthority));
     when(userDetails.getCustomerOrganisationId())
         .thenReturn(CUSTOMER_ORGANISATION_ID);
     when(userDetails.getCustomerId())
         .thenReturn(CUSTOMER_ID);
-    when(permissionsCache.permissionsList(eq(ROLE), eq(BEARER_TOKEN)))
-        .thenReturn(Collections.singletonList(PERMISSION));
+    when(permissionsCache.permissionsList(ROLE, BEARER_TOKEN))
+        .thenReturn(List.of(PERMISSION));
 
     permissionsFilter.attemptAuthentication(request, response);
 
-    assertEquals(userDetails.getCustomerOrganisationId(), CUSTOMER_ORGANISATION_ID);
-    assertEquals(userDetails.getCustomerId(), CUSTOMER_ID);
+    assertThat(userDetails.getCustomerOrganisationId()).isEqualTo(CUSTOMER_ORGANISATION_ID);
+    assertThat(userDetails.getCustomerId()).isEqualTo(CUSTOMER_ID);
 
     verify(authentication, times(2)).getDetails();
     verify(userDetails, times(1)).getAuthorities();
     verify(request).getHeader(HttpHeaders.AUTHORIZATION);
-    verify(permissionsCache, times(2)).permissionsList(eq(ROLE), eq(BEARER_TOKEN));
+    verify(permissionsCache, times(2)).permissionsList(ROLE, BEARER_TOKEN);
   }
 
   @Test

@@ -1,15 +1,12 @@
 package uk.gov.defra.tracesx.common.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.Mockito.mock;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.method.HandlerMethod;
 
@@ -18,18 +15,10 @@ class PreAuthorizeCheckerTest {
   private static final String PRE_AUTHORIZE_CHECKER_METHOD = "preAuthorizeCheckerMethod";
   private static final String PRE_AUTHORIZE_CHECKER_METHOD_WITH_ANNOTATION = "preAuthorizeCheckerMethodWithAnnotation";
 
-  @Mock
-  private HttpServletRequest requestMock;
-  @Mock
-  private HttpServletResponse responseMock;
+  private final HttpServletRequest requestMock = mock();
+  private final HttpServletResponse responseMock = mock();
 
-  @InjectMocks
-  PreAuthorizeChecker testee;
-
-  @BeforeEach
-  public void setUp() {
-    initMocks(this);
-  }
+  private final PreAuthorizeChecker testee = new PreAuthorizeChecker();
 
   public void preAuthorizeCheckerMethod() {
 

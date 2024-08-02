@@ -35,16 +35,16 @@ class PermissionsCacheTest {
 
   @Test
    void permissionsList_calledTwice_remoteServiceCalledOnce() {
-    List<String> firstList = Collections.singletonList("permissions1");
-    List<String> secondList = Collections.singletonList("permissions2");
+    List<String> firstList = List.of("permissions1");
+    List<String> secondList = List.of("permissions2");
     when(permissionsService.permissionsList(anyString(), anyString())).thenReturn(firstList,
         secondList);
 
     List<String> result1 = permissionsCache.permissionsList("importer", "token");
     List<String> result2 = permissionsCache.permissionsList("importer", "token");
 
-    assertThat(result1).containsOnlyElementsOf(firstList);
-    assertThat(result2).containsOnlyElementsOf(firstList);
+    assertThat(result1).isEqualTo(firstList);
+    assertThat(result2).isEqualTo(firstList);
 
     verify(permissionsService).permissionsList("importer", "token");
   }

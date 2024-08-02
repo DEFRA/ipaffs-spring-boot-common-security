@@ -3,20 +3,20 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>uk.gov.defra.tracesx</groupId>
   <artifactId>TracesX-SpringBoot-CommonSecurity-Config</artifactId>
-  <version>4.0.4</version>
+  <version>4.0.5</version>
   <name>common-security-config</name>
   <description>Shared Spring Boot Web Security configuration</description>
 
   <parent>
     <groupId>uk.gov.defra.tracesx</groupId>
     <artifactId>TracesX-SpringBoot-CommonSecurity</artifactId>
-    <version>4.0.4</version>
+    <version>4.0.5</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <scm>
     <connection>${parent.scm.connection}</connection>
-    <tag>4.0.4-94</tag>
+    <tag>4.0.5-96</tag>
   </scm>
 
   <dependencies>
@@ -50,7 +50,7 @@
     </dependency>
     <dependency>
       <groupId>com.microsoft.azure</groupId>
-      <artifactId>applicationinsights-web</artifactId>
+      <artifactId>applicationinsights-core</artifactId>
     </dependency>
     <!-- used to decode and validate jwt tokens / also used in component testing -->
     <dependency>

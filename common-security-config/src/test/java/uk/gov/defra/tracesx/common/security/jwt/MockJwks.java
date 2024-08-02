@@ -1,15 +1,13 @@
 package uk.gov.defra.tracesx.common.security.jwt;
 
 import com.auth0.jwk.Jwk;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import io.jsonwebtoken.Jwts;
-import lombok.Builder;
-import lombok.Getter;
-
 import java.lang.reflect.Method;
 import java.security.KeyPair;
 import java.util.Collections;
@@ -17,6 +15,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import lombok.Builder;
+import lombok.Getter;
 
 public class MockJwks {
 
@@ -100,7 +100,7 @@ public class MockJwks {
       ObjectMapper objectMapper = new ObjectMapper();
       JwkElement element = createJwkElement(key);
       String elementString = objectMapper.writeValueAsString(element);
-      Map<String, Object> values = objectMapper.readValue(elementString, Map.class);
+      Map<String, Object> values = objectMapper.readValue(elementString, new TypeReference<>() {});
       Method fromValuesMethod = Jwk.class.getDeclaredMethod("fromValues", Map.class);
       fromValuesMethod.setAccessible(true);
       return (Jwk) fromValuesMethod.invoke(null, values);
