@@ -75,7 +75,7 @@ public class PermissionsClient {
                 permissionsUser.concat(":").concat(permissionsPassword).getBytes(UTF_8));
 
     HttpHeaders headers = new HttpHeaders();
-    headers.set(X_AUTH_HEADER_BASIC, encodedBasicAuth);
+    //    headers.set(X_AUTH_HEADER_BASIC, encodedBasicAuth);
     headers.add(AUTHORIZATION, authorisationToken);
     return headers;
   }
