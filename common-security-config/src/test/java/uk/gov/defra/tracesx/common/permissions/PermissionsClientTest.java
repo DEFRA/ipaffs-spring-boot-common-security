@@ -28,16 +28,12 @@ import org.springframework.web.client.RestTemplate;
 @ExtendWith(MockitoExtension.class)
 class PermissionsClientTest{
 
-  private static final String USER = "testUser";
-  private static final String PASSWORD = "testPassword";
   private static final String READ = "read";
   private static final String ROLE = "importer";
   private static final String TOKEN = "dummyToken";
   private static final String INVALID_ROLE = "invalid.role";
   private static final String URL = "https://permissions-local";
   private static final String PERMISSIONS_URL = "permissionsUrl";
-  private static final String PERMISSIONS_USER = "permissionsUser";
-  private static final String PERMISSIONS_PASSWORD = "permissionsPassword";
   private final List<String> perms = singletonList(READ);
 
   @Mock
@@ -47,8 +43,6 @@ class PermissionsClientTest{
 
   @BeforeEach
   public void setup() {
-    ReflectionTestUtils.setField(permissionsService, PERMISSIONS_USER, USER);
-    ReflectionTestUtils.setField(permissionsService, PERMISSIONS_PASSWORD, PASSWORD);
     ReflectionTestUtils.setField(permissionsService, PERMISSIONS_URL, URL);
 
     final ResponseEntity<List<String>> responseEntity = createResponseEntity();
