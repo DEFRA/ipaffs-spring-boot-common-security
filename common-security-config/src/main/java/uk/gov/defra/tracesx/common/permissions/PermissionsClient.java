@@ -6,8 +6,6 @@ import static uk.gov.defra.tracesx.common.CommonWebMvcConfiguration.PERMISSIONS_
 
 import java.util.List;
 import java.util.Optional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,12 +20,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Component
 public class PermissionsClient {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(PermissionsClient.class);
-
   @Value("${permissions.service.url:#{null}}")
   private String permissionsUrl;
 
-  private RestTemplate permissionsRestTemplate;
+  private final RestTemplate permissionsRestTemplate;
 
   @Autowired
   public PermissionsClient(
@@ -73,7 +69,6 @@ public class PermissionsClient {
               })
           .getBody();
     } catch (ResourceAccessException exception) {
-      LOGGER.warn("Unable to get permissions", exception);
       throw new ResourceAccessException("Unable to get permissions due to exception: " + exception);
     }
   }

@@ -29,6 +29,14 @@ public class JwtTokenValidator {
   private final JwtUserMapper jwtUserMapper;
   private final JwksCache jwksCache;
 
+  private enum VerificationResult {
+    SUCCESS,
+    INVALID_ISSUER,
+    INVALID_AUDIENCE,
+    EXPIRED,
+    GENERAL_ERROR
+  }
+
   public JwtTokenValidator(JwtUserMapper jwtUserMapper, JwksCache jwksCache) {
     this.jwtUserMapper = jwtUserMapper;
     this.jwksCache = jwksCache;
@@ -47,8 +55,12 @@ public class JwtTokenValidator {
       for (KeyAndClaims keyAndClaim : jwksCache.getPublicKeys(kid)) {
         if (verifySignature(jwt, keyAndClaim.getKey())) {
           JWTClaimsSet claimsSet = jwt.getJWTClaimsSet();
-          if (verifyClaims(claimsSet, keyAndClaim)) {
+          VerificationResult result = verifyClaims(claimsSet, keyAndClaim);
+
+          if (result == VerificationResult.SUCCESS) {
             return claimsSet.getClaims();
+          } else {
+            LOGGER.error("JWT verification failed: {}", result);
           }
         } else {
           LOGGER.error("Could not verify signature of JWT.");
@@ -80,7 +92,7 @@ public class JwtTokenValidator {
     }
   }
 
-  private boolean verifyClaims(JWTClaimsSet claims, KeyAndClaims keyAndClaims) {
+  private VerificationResult verifyClaims(JWTClaimsSet claims, KeyAndClaims keyAndClaims) {
     try {
       new DefaultJWTClaimsVerifier<>(
           new JWTClaimsSet.Builder()
@@ -89,10 +101,23 @@ public class JwtTokenValidator {
               .build(),
           Set.of("exp"))
           .verify(claims, null);
-      return true;
+
+      LOGGER.info("JWT claims verified successfully.");
+      return VerificationResult.SUCCESS;
     } catch (BadJWTException exception) {
-      LOGGER.error("Required JWT exp/iss/aud claims do not match.", exception);
-      return false;
+      if (exception.getMessage().contains("issuer")) {
+        LOGGER.error("Invalid issuer claim in JWT.", exception);
+        return VerificationResult.INVALID_ISSUER;
+      } else if (exception.getMessage().contains("audience")) {
+        LOGGER.error("Invalid audience claim in JWT.", exception);
+        return VerificationResult.INVALID_AUDIENCE;
+      } else if (exception.getMessage().contains("exp")) {
+        LOGGER.error("JWT has expired.", exception);
+        return VerificationResult.EXPIRED;
+      } else {
+        LOGGER.error("JWT verification failed due to unknown error.", exception);
+        return VerificationResult.GENERAL_ERROR;
+      }
     }
   }
 
