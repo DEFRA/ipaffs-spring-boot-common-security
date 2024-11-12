@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>uk.gov.defra.tracesx</groupId>
   <artifactId>TracesX-SpringBoot-CommonSecurity</artifactId>
-  <version>4.0.7-SNAPSHOT</version>
+  <version>4.0.7</version>
   <packaging>pom</packaging>
   <name>common-security-parent</name>
   <description>Shared Spring Boot Web Security: Parent</description>
@@ -49,7 +49,7 @@
 
   <scm>
     <connection>scm:git:https://giteux.azure.defra.cloud/imports/spring-boot-common-security.git</connection>
-    <tag>HEAD</tag>
+    <tag>4.0.7-101</tag>
   </scm>
 
   <modules>
