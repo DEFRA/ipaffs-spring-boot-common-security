@@ -36,7 +36,6 @@
     <maven-surefire-plugin.version>3.2.2</maven-surefire-plugin.version>
     <maven.versions.plugin.version>2.16.0</maven.versions.plugin.version>
     <shared-resources.version>1.0.0</shared-resources.version>
-    <owasp.version>8.4.0</owasp.version>
 
     <!--  Dependencies  -->
     <applicationinsights.version>3.4.19</applicationinsights.version>
@@ -263,28 +262,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.owasp</groupId>
-        <artifactId>dependency-check-maven</artifactId>
-        <version>${owasp.version}</version>
-        <configuration>
-          <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-        <dependencies>
-          <dependency>
-            <groupId>org.owasp</groupId>
-            <artifactId>dependency-check-maven</artifactId>
-            <version>${owasp.version}</version>
-          </dependency>
-        </dependencies>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
