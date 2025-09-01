@@ -1,5 +1,9 @@
 # Spring Boot Common Security
 
+| :warning: DEPRECATED           |
+|:----------------------------|
+| This library is no longer used - it is replaced by  the `security` and `security-tests` modules in the `spring-boot-common` repo |
+
 ## common-security-config
 
 This module should be included as a dependency for Spring projects that use JWT Tokens and Permissions for
